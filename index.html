@@ -1364,83 +1364,31 @@
   body.sleep-mode { overflow: hidden; }
   .cta-wrap.sleeping { opacity: 0 !important; pointer-events: none !important; }
 
-  /* ---- NEW SLEEP MODE SPACE SCENE ---- */
   .sleep-overlay {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at 50% 100%, #1a153a 0%, #05030a 100%);
+    background: radial-gradient(ellipse at 50% 32%, #1a1530 0%, #0a0818 55%, #050410 100%);
     z-index: 85;
     opacity: 0;
     visibility: hidden;
     overflow: hidden;
     transition: opacity .7s ease;
   }
-  
   .sleep-overlay.active {
     opacity: 1;
     visibility: visible;
   }
-
-  /* 3D Starfield */
-  .space-stars-container {
+  .static-stars {
     position: absolute;
     inset: 0;
-    perspective: 500px;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    animation: twinkle 3.6s ease-in-out infinite;
   }
-  .space-star {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    animation: twinkleStar var(--twinkle-dur, 3s) ease-in-out infinite alternate;
-  }
-  @keyframes twinkleStar {
-    0% { opacity: 0.1; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
-    100% { opacity: 0.2; transform: scale(0.8); }
-  }
-
-  /* The Moon */
-  /* The Cute Moon */
-  .space-moon-container {
-    position: absolute;
-    top: 8%;
-    right: 8%;
-    width: 140px;
-    height: 140px;
-    z-index: 2;
-    animation: floatCuteMoon 8s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 20px rgba(246, 196, 83, 0.4));
-  }
-  
-  .cute-moon-svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  @keyframes floatCuteMoon {
-    0% { transform: translateY(0) rotate(-3deg); }
-    100% { transform: translateY(-15px) rotate(3deg); }
-  }
-
-  /* Floating Astronaut */
-  .space-astronaut {
-    position: absolute;
-    bottom: 15%;
-    left: 10%;
-    font-size: 50px;
-    z-index: 2;
-    animation: floatAstronaut 8s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 15px rgba(157,124,245,0.4));
-  }
-  @keyframes floatAstronaut {
-    0% { transform: translateY(0) rotate(-10deg); }
-    100% { transform: translateY(-30px) rotate(10deg); }
-  }
-
-  .sleep-overlay.active {
-    opacity: 1;
-    visibility: visible;
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
   }
 
   .drift-item {
@@ -1632,20 +1580,7 @@
   .insight-row-sub { font-size: 10.5px; color: var(--text-faint); margin-top: 2px; line-height: 1.35; }
   .insight-row-delta { font-size: 13px; font-weight: 700; text-align: right; white-space: nowrap; }
   .insight-row-delta .delta-lbl { display: block; font-size: 9px; color: var(--text-faint); font-weight: 600; margin-top: 2px; }
-  /* Premium Average Badge */
-  .chart-avg-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: all 0.3s ease;
-  }
+
   .duo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
   .duo-card {
     background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg-elev-2) 100%);
@@ -3634,20 +3569,16 @@
     </div>
     <div class="line-chart-wrap" id="lineChartWrap"></div>
     <div class="stage-axis" id="lineChartAxis"></div>
-    <div style="text-align:right; margin-top:10px;">
-      <div class="chart-avg-badge" id="lineChartDelta" style="color:#f6c453; border-color:rgba(246,196,83,0.3); background:rgba(246,196,83,0.1);">Average: —</div>
-    </div>
+    <div class="duo-delta" id="lineChartDelta" style="text-align:right; margin-top:10px;">↑ +6 vs last week</div>
   </div>
 
   <div class="card">
     <div class="chart-head">
       <div class="card-title" style="margin:0;">RECOVERY TREND</div>
+      <div class="duo-delta" id="recoveryTrendDelta" style="margin:0;">—</div>
     </div>
-<div class="line-chart-wrap" id="recoveryChartWrap"></div>
-<div class="stage-axis" id="recoveryChartAxis"></div>
-<div style="text-align:right; margin-top:10px;">
-  <div class="chart-avg-badge" id="recoveryTrendDelta" style="color:#35c9b0; border-color:rgba(53,201,176,0.3); background:rgba(53,201,176,0.1);">Average: —</div>
-</div>
+    <div class="line-chart-wrap" id="recoveryChartWrap"></div>
+    <div class="stage-axis" id="recoveryChartAxis"></div>
   </div>
 
   <div class="card">
@@ -4178,100 +4109,7 @@
 </div>
 <div class="toast" id="toast">Saved</div>
 
-<div class="sleep-overlay" id="sleepOverlay">
-<div class="space-stars-container" id="spaceStarsContainer"></div>
-<div class="space-moon-container">
-<svg viewBox="0 0 200 200" class="cute-moon-svg">
-  <defs>
-    <!-- Moon Body Gradient -->
-    <linearGradient id="moonGrad" x1="20%" y1="20%" x2="80%" y2="80%">
-      <stop offset="0%" stop-color="#fff9d6"/>
-      <stop offset="60%" stop-color="#ffe699"/>
-      <stop offset="100%" stop-color="#f6c453"/>
-    </linearGradient>
-
-    <!-- Cloud Gradient -->
-    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#d9c8ff"/>
-      <stop offset="50%" stop-color="#a98cff"/>
-      <stop offset="100%" stop-color="#7c5ce6"/>
-    </linearGradient>
-
-    <!-- Nightcap Gradient -->
-    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6f4ce6"/>
-      <stop offset="100%" stop-color="#3a1e80"/>
-    </linearGradient>
-
-    <!-- Glow effect -->
-    <filter id="moonGlow">
-      <feGaussianBlur stdDeviation="3" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-
-    <!-- Perfect Crescent Mask -->
-    <mask id="moonMask">
-      <circle cx="100" cy="100" r="60" fill="white" />
-      <circle cx="130" cy="60" r="55" fill="black" />
-    </mask>
-  </defs>
-
-  <!-- == 1. FLUFFY CLOUD (Centered) == -->
-  <g fill="url(#cloudGrad)">
-    <circle cx="150" cy="150" r="28"/>
-    <circle cx="115" cy="135" r="32"/>
-    <circle cx="80" cy="145" r="30"/>
-    <circle cx="45" cy="150" r="28"/>
-    <circle cx="130" cy="175" r="24"/>
-    <circle cx="100" cy="180" r="30"/>
-    <circle cx="65" cy="175" r="26"/>
-    <circle cx="35" cy="170" r="20"/>
-    <circle cx="165" cy="170" r="20"/>
-  </g>
-  
-  <!-- Cloud Highlights -->
-  <path d="M 45 150 Q 65 130 85 140" fill="none" stroke="#e8dfff" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-  <path d="M 105 135 Q 125 115 145 135" fill="none" stroke="#e8dfff" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-
-  <!-- == 2. THE PERFECT CRESCENT MOON (Centered on cloud) == -->
-  <circle cx="100" cy="100" r="60" fill="url(#moonGrad)" mask="url(#moonMask)" filter="url(#moonGlow)"/>
-<!-- == 3. THE NIGHTCAP (on the forehead) == -->
-<g transform="translate(65,70) rotate(25)">
-<!-- cone with a drooping tip -->
-<path d="M -18,0 C -21,-26 -4,-46 18,-43 C 29,-41 36,-34 34,-25 C 26,-31 21,-27 18,0 Z" fill="url(#capGrad)"/>
-<!-- fold detail -->
-<path d="M -13,-13 C -4,-28 9,-32 20,-28" fill="none" stroke="#a98cff" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-<!-- fluffy brim hugging the head -->
-<rect x="-22" y="-4" width="44" height="13" rx="6.5" fill="#d4bbff"/>
-<!-- pompom -->
-<circle cx="34" cy="-23" r="8" fill="#d4bbff"/>
-</g>
-
-      <!-- == 4. THE FACE (Adjusted to fit under the hat) == -->
-      <!-- Blush -->
-      <ellipse cx="80" cy="120" rx="10" ry="6" fill="#ff8fa3" opacity="0.6"/>
-      <ellipse cx="115" cy="130" rx="10" ry="6" fill="#ff8fa3" opacity="0.6"/>
-      
-      <!-- Closed Eyes -->
-      <path d="M 65 105 Q 75 115 85 105" fill="none" stroke="#3a2a4a" stroke-width="4" stroke-linecap="round"/>
-      <path d="M 100 115 Q 110 125 120 115" fill="none" stroke="#3a2a4a" stroke-width="4" stroke-linecap="round"/>
-      
-      <!-- Smile -->
-      <path d="M 85 120 Q 92 128 99 120" fill="none" stroke="#3a2a4a" stroke-width="3" stroke-linecap="round"/>
-
-  <!-- == 5. STARS == -->
-  <polygon points="20,95 22,100 27,100 23,103 24,108 20,105 16,108 17,103 13,100 18,100" fill="#f6c453" />
-  <polygon points="110,35 112,40 117,40 113,43 114,48 110,45 106,48 107,43 103,40 108,40" fill="#f6c453" />
-  <polygon points="130,60 131,63 134,63 132,65 133,68 130,66 127,68 128,65 126,63 129,63" fill="#f6c453" />
-  
-  <polygon points="170,80 172,85 177,85 173,88 174,93 170,90 166,93 167,88 163,85 168,85" fill="#fff" opacity="0.8" />
-  <polygon points="30,120 31,123 34,123 32,125 33,128 30,126 27,128 28,125 26,123 29,123" fill="#fff" opacity="0.8" />
-</svg>
-</div>
-<div class="space-astronaut">👨‍🚀</div>
-</div>
-<div class="sleep-glow-orb"></div>
-</div>
+<div class="sleep-overlay" id="sleepOverlay"></div>
 
 <!-- NEW: Floating Live Mic Widget -->
 <div class="live-mic-container" id="liveMicContainer">
@@ -5051,8 +4889,17 @@
 
   let staticStarsEl = null;
   function ensureStaticStars() {
-    // Disabled: We now use the new 3D space stars generated in enterSleepMode()
-    return; 
+    if (staticStarsEl) return;
+    staticStarsEl = document.createElement('div');
+    staticStarsEl.className = 'static-stars';
+    const dots = [];
+    for (let i = 0; i < 70; i++) {
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      dots.push(`${x}vw ${y}vh 0 ${Math.random() > 0.85 ? '2px' : '1px'} rgba(255,255,255,${0.4 + Math.random() * 0.6})`);
+    }
+    staticStarsEl.style.boxShadow = dots.join(',');
+    sleepOverlay.appendChild(staticStarsEl);
   }
 
   const driftEmojis = ['🌙', '⭐', '✨', '🐑', '☁️'];
@@ -5061,18 +4908,15 @@
     const el = document.createElement('div');
     el.className = 'drift-item';
     el.textContent = driftEmojis[Math.floor(Math.random() * driftEmojis.length)];
-    
-    const top = Math.random() * 80 + 10;
-    const size = 16 + Math.random() * 20;
-    const dur = 25 + Math.random() * 15; // Very slow drift
-    const bob = (Math.random() * 40 - 20) + 'px';
-    
+    const top = Math.random() * 80 + 4;
+    const size = 16 + Math.random() * 22;
+    const dur = 16 + Math.random() * 14;
+    const bob = (Math.random() * 46 - 23) + 'px';
     el.style.top = top + 'vh';
     el.style.fontSize = size + 'px';
     el.style.setProperty('--dur', dur.toFixed(1) + 's');
     el.style.setProperty('--bob', bob);
-    el.style.setProperty('--op', (0.4 + Math.random() * 0.4).toFixed(2));
-    
+    el.style.setProperty('--op', (0.35 + Math.random() * 0.45).toFixed(2));
     el.addEventListener('animationend', () => el.remove());
     sleepOverlay.appendChild(el);
   }
@@ -5095,7 +4939,8 @@
 
   let sessionTimerInterval = null;
 let sessionSeconds = 0;
-  
+let wakeLock = null;
+
 // Audio API Variables
 let audioContext = null;
 let analyser = null;
@@ -5379,22 +5224,41 @@ function stopMovementDetection() {
   }
 }
 
-  function enterSleepMode() {
-        // Generate 3D Stars
-        const starsContainer = document.getElementById('spaceStarsContainer');
-    starsContainer.innerHTML = ''; // Clear old stars
-    for (let i = 0; i < 80; i++) {
-      const star = document.createElement('div');
-      star.className = 'space-star';
-      const size = Math.random() * 2 + 1; // 1px to 3px
-      star.style.width = size + 'px';
-      star.style.height = size + 'px';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.setProperty('--twinkle-dur', (Math.random() * 2 + 1.5) + 's');
-      star.style.animationDelay = (Math.random() * 3) + 's';
-      starsContainer.appendChild(star);
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake Lock is active');
+      
+      // If the user switches apps and comes back, the lock is dropped. 
+      // This listener re-requests it.
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock was released');
+      });
+    } else {
+      console.warn('Wake Lock API not supported on this browser.');
     }
+  } catch (err) {
+    console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock !== null) {
+    wakeLock.release();
+    wakeLock = null;
+    console.log('Wake Lock released manually');
+  }
+}
+
+// Re-acquire the wake lock if the user returns to the app
+document.addEventListener('visibilitychange', async () => {
+  if (wakeLock !== null && document.visibilityState === 'visible') {
+    await requestWakeLock();
+  }
+});
+
+  function enterSleepMode() {
      // ---- RESET SESSION DATA ----
      sessionData = {
       startTime: null,
@@ -5437,6 +5301,23 @@ function stopMovementDetection() {
     document.getElementById('liveTimer').textContent = '00:00:00';
     clearInterval(sessionTimerInterval);
     sessionTimerInterval = setInterval(() => {
+          // Start the session timer
+    sessionSeconds = 0;
+    document.getElementById('liveTimer').textContent = '00:00:00';
+    clearInterval(sessionTimerInterval);
+    sessionTimerInterval = setInterval(() => {
+      sessionSeconds++;
+      const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(sessionSeconds % 60).padStart(2, '0');
+      document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
+    }, 1000);
+    
+    // START WAKE LOCK HERE
+    requestWakeLock(); 
+
+    // Start the mic
+    startMicrophone();
       sessionSeconds++;
       const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
@@ -5563,13 +5444,6 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   document.getElementById('deepRatioVal').textContent = state.baseline.deepRatio + '%';
   
   renderHomeBreakdown();
-  
-  // Keep the sleep-score trend chart in sync with the live score
-  if (typeof renderLineChart === 'function' && typeof activeChartRange !== 'undefined') {
-    renderLineChart(activeChartRange);
-  if (typeof renderRecoveryTrendChart === 'function') 
-  renderRecoveryTrendChart();
-  }
 
   document.getElementById('bedtimeVal').textContent = state.baseline.bedtime;
   document.getElementById('waketimeVal').textContent = state.baseline.waketime;
@@ -5801,6 +5675,18 @@ function formatDuration(seconds) {
   document.getElementById('liveMicContainer').classList.remove('active');
   stopDrifting();
   clearInterval(sessionTimerInterval);
+    // Stop all tracking
+    document.body.classList.remove('sleep-mode');
+  ctaWrap.classList.remove('sleeping');
+  sleepOverlay.classList.remove('active');
+  sleepSliderWrap.classList.remove('active');
+  document.getElementById('liveMicContainer').classList.remove('active');
+  stopDrifting();
+  clearInterval(sessionTimerInterval);
+  
+  // RELEASE WAKE LOCK HERE
+  releaseWakeLock(); 
+
   stopMicrophone();
   stopMovementDetection();
   
@@ -6047,21 +5933,6 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     const scores = [];
     const durations = [];
     const today = new Date();
-    const todayStr = today.toDateString();
-
-    // Helper: gets live score for today, saved score for past days
-    function getScoreForDate(dateStr) {
-      if (dateStr === todayStr) return computeScore();
-      const found = history.find(h => h.date === dateStr);
-      return found ? found.score : 0; 
-    }
-
-    // Helper: gets live duration for today, saved duration for past days
-    function getDurForDate(dateStr) {
-      if (dateStr === todayStr) return state.baseline.totalSleep;
-      const found = history.find(h => h.date === dateStr);
-      return found ? found.duration : 0;
-    }
 
     if (range === '7d') {
       // Look back exactly 7 days
@@ -6070,12 +5941,24 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
         d.setDate(d.getDate() - i);
         labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
         
-        const dateStr = d.toDateString();
-        scores.push(getScoreForDate(dateStr));
-        durations.push(getDurForDate(dateStr));
+        // Find this specific day in the history array
+        const foundDay = history.find(h => h.date === d.toDateString());
+        
+        if (foundDay) {
+          scores.push(foundDay.score);
+          durations.push(foundDay.duration);
+        } else if (i === 0) {
+          // If it's today and not in history yet, use current score
+          scores.push(computeScore());
+          durations.push(state.baseline.totalSleep);
+        } else {
+          // If this day has no data, put a 0 so the line dips
+          scores.push(0);
+          durations.push(0);
+        }
       }
     } else {
-      // Grouped (30D, 3M, 6M)
+      // Grouped (Weekly or Monthly)
       const isMonthly = range === '3m' || range === '6m';
       const steps = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
       const stepDays = isMonthly ? 30 : 7;
@@ -6093,18 +5976,13 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
         // Collect all valid scores for this period
         let periodScores = [];
         let periodDurs = [];
-        
         for (let j = 0; j < stepDays; j++) {
             const checkDate = new Date(d);
             checkDate.setDate(checkDate.getDate() - j);
-            const dateStr = checkDate.toDateString();
-            
-            const dayScore = getScoreForDate(dateStr);
-            const dayDur = getDurForDate(dateStr);
-            
-            if (dayScore > 0) {
-                periodScores.push(dayScore);
-                periodDurs.push(dayDur);
+            const found = history.find(h => h.date === checkDate.toDateString());
+            if (found && found.score > 0) {
+                periodScores.push(found.score);
+                periodDurs.push(found.duration);
             }
         }
 
@@ -6113,6 +5991,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
             scores.push(Math.round(periodScores.reduce((a,b)=>a+b,0)/periodScores.length));
             durations.push(periodDurs.reduce((a,b)=>a+b,0)/periodDurs.length);
         } else {
+            // If no history for that period, put 0
             scores.push(0);
             durations.push(0);
         }
@@ -6179,28 +6058,16 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     const deltaEl = document.getElementById('lineChartDelta');
     if (deltaEl) {
       deltaEl.textContent = 'Average: ' + data.score + ' pts';
-      if (data.score >= 70) {
-        deltaEl.style.color = 'var(--green)';
-        deltaEl.style.borderColor = 'rgba(79,209,139,0.3)';
-        deltaEl.style.background = 'rgba(79,209,139,0.1)';
-        deltaEl.style.boxShadow = '0 0 10px rgba(79,209,139,0.15)';
-      } else {
-        deltaEl.style.color = 'var(--gold-1)';
-        deltaEl.style.borderColor = 'rgba(246,196,83,0.3)';
-        deltaEl.style.background = 'rgba(246,196,83,0.1)';
-        deltaEl.style.boxShadow = '0 0 10px rgba(246,196,83,0.15)';
-      }
+      deltaEl.style.color = data.score >= 70 ? 'var(--green)' : 'var(--gold-1)';
     }
     
     bindChartTooltips('lineChartWrap', (value, label) => `${label}<span class="tt-stage">Score ${value}</span>`);
   }
-  let activeChartRange = '7d';
   document.querySelectorAll('.chart-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      activeChartRange = btn.dataset.range;
-      renderLineChart(activeChartRange);
+      renderLineChart(btn.dataset.range);
     });
   });
   renderLineChart('7d');
@@ -6218,51 +6085,34 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
   function getRecoveryData() {
     let history = state.sleepHistory || [];
     
+    // If we don't have history, just use today's recovery
     if (history.length === 0) {
-      history = [{ score: computeRecovery(), duration: state.baseline.totalSleep, date: new Date().toDateString() }];
+      history = [{ score: computeRecovery(), duration: state.baseline.totalSleep }];
     }
 
     const labels = [];
     const values = [];
     const today = new Date();
-    const todayStr = today.toDateString();
 
-    function getRecoveryForDate(dateStr) {
-      if (dateStr === todayStr) {
-        return computeRecovery(); // Live score for today
-      }
-      
-      const found = history.find(h => h.date === dateStr);
-      if (!found) return null; // Return null instead of 0 for missing days
-
-      const durationPct = Math.min(1, found.duration / 8);
-      let pastScore = durationPct * 70;
-      if (found.duration > 1) {
-         pastScore += Math.min(1, (found.deepRatio || 22) / 25) * 15;
-      }
-      if (found.duration > 0.5) {
-         pastScore += 15; 
-      }
-      return Math.max(5, Math.min(100, Math.round(pastScore)));
-    }
-
+    // Generate the last 7 days of labels
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
       
-      const dateStr = d.toDateString();
-      values.push(getRecoveryForDate(dateStr));
+      let dayRecovery = computeRecovery();
+      
+      // If there's real history for this day, calculate what their recovery would have been
+      if (i > 0 && history.length > i) {
+         const pastNight = history[history.length - 1 - i];
+         // We roughly estimate past recovery based on their past sleep duration
+         const durationPct = Math.min(1, pastNight.duration / 8);
+         dayRecovery = Math.round((durationPct * 70) + (Math.min(1, pastNight.deepRatio / 25) * 15) + 15);
+      }
+      values.push(dayRecovery);
     }
 
-    // Filter out null values for the average calculation
-    const validValues = values.filter(v => v !== null);
-    const avg = validValues.length > 0 ? Math.round(validValues.reduce((a, b) => a + b, 0) / validValues.length) : 0;
-
-    // Map null to 0 just for rendering the line chart dots
-    const renderValues = values.map(v => v === null ? 0 : v);
-
-    return { labels, values: renderValues, avg };
+    return { labels, values };
   }
   function renderRecoveryTrendChart() {
     const wrap = document.getElementById('recoveryChartWrap');
@@ -6302,20 +6152,11 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
       ${dots}
     </svg>`;
     axis.innerHTML = labels.map(l => `<span>${l}</span>`).join('');
+    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
     const deltaEl = document.getElementById('recoveryTrendDelta');
     if (deltaEl) {
-      deltaEl.textContent = 'Average: ' + recoveryData.avg + '%';
-      if (recoveryData.avg >= 65) {
-        deltaEl.style.color = 'var(--green)';
-        deltaEl.style.borderColor = 'rgba(79,209,139,0.3)';
-        deltaEl.style.background = 'rgba(79,209,139,0.1)';
-        deltaEl.style.boxShadow = '0 0 10px rgba(79,209,139,0.15)';
-      } else {
-        deltaEl.style.color = 'var(--gold-1)';
-        deltaEl.style.borderColor = 'rgba(246,196,83,0.3)';
-        deltaEl.style.background = 'rgba(246,196,83,0.1)';
-        deltaEl.style.boxShadow = '0 0 10px rgba(246,196,83,0.15)';
-      }
+      deltaEl.textContent = 'Avg: ' + avg + '%';
+      deltaEl.style.color = avg >= 65 ? 'var(--green)' : 'var(--gold-1)';
     }
     bindChartTooltips('recoveryChartWrap', (value, label) => `${label}<span class="tt-stage">Recovery ${value}%</span>`);
   }
