@@ -10,6 +10,11 @@
 
 <style>
 
+@keyframes pulseRing {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.3); opacity: 0.1; }
+}
+
 /* ---- NEBULA / AURORA (sleep mode background) ---- */
 .nebula-layer {
   position: absolute;
@@ -896,12 +901,14 @@
   }
   .stage-tooltip.show { opacity: 1; }
   .stage-axis {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: var(--text-faint);
-    font-weight: 600;
-  }
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-faint);
+  font-weight: 600;
+  opacity: 0.8; /* Slightly softer text */
+  padding: 0 4px; /* Align with the new padding */
+}
 
   .night-timeline { margin-bottom: 18px; }
   .night-timeline-track {
@@ -1711,6 +1718,10 @@
     0%, 100% { opacity: 0.4; }
     50% { opacity: 1; }
   }
+  @keyframes pulseRing {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
 
   .drift-item {
     position: absolute;
@@ -1943,6 +1954,16 @@
     transform: translateY(-2px);
     background: rgba(255,255,255,0.04);
   }
+  .pattern-stat.pattern-stat-clickable {
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .pattern-stat.pattern-stat-clickable:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(157,124,245,0.4);
+    transform: translateY(-2px);
+  }
 
   /* Upgraded Icon styles */
   .pattern-stat-icon {
@@ -2026,34 +2047,52 @@
   .duo-lbl { font-size: 9.5px; letter-spacing: 0.06em; color: var(--text-faint); font-weight: 700; margin-bottom: 4px; }
   .duo-val { font-size: 19px; font-weight: 700; }
   .duo-delta { font-size: 10.5px; font-weight: 700; color: var(--green); margin-top: 4px; }
-    /* --- TRENDS AVERAGES CUSTOM STYLING --- */
+/* --- TRENDS AVERAGES CUSTOM STYLING --- */
   
-  /* Sleep Score Average (Gold) */
-  #lineChartDelta {
-    font-family: 'Manrope', -apple-system, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #f6c453 !important; 
-  }
+/* Base styling for all three average badges */
+#lineChartDelta, 
+#recoveryTrendDelta, 
+#moodTrendDelta {
+  font-family: 'Manrope', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Subtle glassy background */
+  background: rgba(255,255,255,0.04); 
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
+  margin: 0 !important; /* Forces it to align properly next to the title */
+}
 
-  /* Recovery Average (Teal) */
-  #recoveryTrendDelta {
-    font-family: 'Manrope', -apple-system, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #35c9b0 !important; 
-  }
+/* Sleep Score Average (Gold/Amber glow) */
+#lineChartDelta {
+  color: #f6c453 !important;
+  border-color: rgba(246,196,83,0.25);
+  background: rgba(246,196,83,0.08);
+  box-shadow: 0 0 12px rgba(246,196,83,0.08), inset 0 1px 0 rgba(246,196,83,0.1);
+}
 
-  /* Mood Average (Pink) */
-  #moodTrendDelta {
-    font-family: 'Manrope', -apple-system, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #ef6fa1 !important; 
-  }
+/* Recovery Average (Teal glow) */
+#recoveryTrendDelta {
+  color: #35c9b0 !important;
+  border-color: rgba(53,201,176,0.25);
+  background: rgba(53,201,176,0.08);
+  box-shadow: 0 0 12px rgba(53,201,176,0.08), inset 0 1px 0 rgba(53,201,176,0.1);
+}
+
+/* Mood Average (Pink glow) */
+#moodTrendDelta {
+  color: #ef6fa1 !important;
+  border-color: rgba(239,111,161,0.25);
+  background: rgba(239,111,161,0.08);
+  box-shadow: 0 0 12px rgba(239,111,161,0.08), inset 0 1px 0 rgba(239,111,161,0.1);
+}
 
   /* Upgraded Duo Cards Text */
   .duo-val { 
@@ -2081,20 +2120,49 @@
     cursor: pointer;
   }
   .chart-tab.active { background: linear-gradient(90deg, #8a6ef2, #c874e8); color: white; }
-  .line-chart-wrap { width: 100%; position: relative; }
-  .line-chart-wrap svg { width: 100%; height: auto; display: block; }
+  .line-chart-wrap {
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 12px 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+.stage-tooltip {
+  z-index: 100 !important;
+}
+/* --- CHART UPGRADES --- */
+.line-chart-wrap svg {
+  width: 100%; 
+  height: 120px; 
+  display: block; 
+  overflow: visible;
+}
+
+/* Make all chart paths slightly thicker and rounder */
+.line-chart-wrap svg path {
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+
   .chart-point { cursor: pointer; }
   .chart-dot {
-    transition: transform .15s ease, filter .15s ease;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  .chart-point:hover .chart-dot,
-  .chart-point.active .chart-dot {
-    transform: scale(1.45);
-    filter: drop-shadow(0 0 5px currentColor);
-  }
-
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), filter .2s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+  /* Creates an inner dark center with a glowing colored ring */
+  stroke-width: 3;
+}
+.chart-point:hover .chart-dot,
+.chart-point.active .chart-dot {
+  transform: scale(1.6);
+  /* This creates the glowing hollow ring effect on hover */
+  filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 12px currentColor);
+}
   .mood-card { display: flex; flex-direction: column; align-items: center; }
   .mood-picker {
     display: flex;
@@ -3990,6 +4058,42 @@
     transform: translateX(3px);
     border-color: rgba(255,255,255,0.1);
   }
+    /* ---- NEW SLEEP PATTERN DETAILS MODAL CSS ---- */
+    .details-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100; /* Highest priority */
+    background: rgba(8,6,18,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility 0s linear .3s;
+  }
+  .details-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .3s ease, visibility 0s linear 0s;
+  }
+  .details-modal {
+    width: 100%;
+    max-width: 380px;
+    background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg-elev-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 20px 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    transform: scale(0.88) translateY(12px);
+    opacity: 0;
+    transition: transform .4s cubic-bezier(.22,1.4,.36,1), opacity .3s ease;
+  }
+  .details-overlay.active .details-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
@@ -4182,10 +4286,10 @@
 
   <div class="card-title" style="margin: 4px 0 10px 4px;">TODAY'S FACTORS</div>
 
-  <div class="stress-card" id="stressCard" style="margin-bottom: 14px;">
+  <div class="stress-card" style="margin-bottom: 14px;">
     <div class="stress-top">
       <div class="stress-left">
-        <div class="factor-icon" id="stressIcon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
+        <div class="factor-icon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
         <div>
           <div class="factor-name">Stress level</div>
         </div>
@@ -4361,23 +4465,23 @@
     </div>
     
     <div class="pattern-stats">
-      <div class="pattern-stat">
+      <div class="pattern-stat pattern-stat-clickable" id="statAvgBedtime">
         <div class="pattern-stat-icon icon-bed">🛏️</div>
         <div class="lbl">AVG BEDTIME</div>
-        <div class="val">11:42 PM</div>
-        <div class="sub">±18m variation</div>
+        <div class="val" id="displayAvgBedtime">11:42 PM</div>
+        <div class="sub" id="displayAvgBedtimeSub">±18m variation</div>
       </div>
-      <div class="pattern-stat">
+      <div class="pattern-stat pattern-stat-clickable" id="statAvgWake">
         <div class="pattern-stat-icon icon-sun">☀️</div>
         <div class="lbl">AVG WAKE TIME</div>
-        <div class="val">6:48 AM</div>
-        <div class="sub">±24m variation</div>
+        <div class="val" id="displayAvgWake">6:48 AM</div>
+        <div class="sub" id="displayAvgWakeSub">±24m variation</div>
       </div>
-      <div class="pattern-stat">
+      <div class="pattern-stat pattern-stat-clickable" id="statConsistency">
         <div class="pattern-stat-icon icon-moon">🌙</div>
         <div class="lbl">CONSISTENCY</div>
-        <div class="val">84%</div>
-        <div class="sub">(5/7 nights)</div>
+        <div class="val" id="displayConsistency">84%</div>
+        <div class="sub" id="displayConsistencySub">(5/7 nights)</div>
       </div>
     </div>
   </div>
@@ -4510,6 +4614,22 @@
     <button class="customize-btn" id="customizeBtn" type="button">🎨 Customize character</button>
   </div>
 
+  <div class="card chest-card">
+    <div class="chest-wrap">
+      <div class="chest-icon" id="chestIcon">🎁</div>
+      <div class="chest-status" id="chestStatus">Ready to open!</div>
+      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
+    </div>
+    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
+    <div class="chest-odds">
+      <span class="chest-odd-chip"><b>10</b> XP</span>
+      <span class="chest-odd-chip"><b>20</b> XP</span>
+      <span class="chest-odd-chip"><b>50</b> XP</span>
+      <span class="chest-odd-chip"><b>75</b> XP</span>
+      <span class="chest-odd-chip"><b>150</b> XP</span>
+    </div>
+  </div>
+
   <div class="card" id="avatarEditor" style="display:none;">
     <div class="card-title">CUSTOMIZE YOUR CHARACTER</div>
     <div class="editor-section">
@@ -4531,22 +4651,6 @@
     <div class="editor-section">
       <div class="editor-label">ACCESSORY</div>
       <div class="chip-row" id="accessoryChips"></div>
-    </div>
-  </div>
-
-  <div class="card chest-card">
-    <div class="chest-wrap">
-      <div class="chest-icon" id="chestIcon">🎁</div>
-      <div class="chest-status" id="chestStatus">Ready to open!</div>
-      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
-    </div>
-    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
-    <div class="chest-odds">
-      <span class="chest-odd-chip"><b>10</b> XP</span>
-      <span class="chest-odd-chip"><b>20</b> XP</span>
-      <span class="chest-odd-chip"><b>50</b> XP</span>
-      <span class="chest-odd-chip"><b>75</b> XP</span>
-      <span class="chest-odd-chip"><b>150</b> XP</span>
     </div>
   </div>
 
@@ -4701,24 +4805,16 @@
     <div class="factor-left">
       <div class="factor-icon" style="background:rgba(255,255,255,0.08); color:var(--text-dim);">ℹ️</div>
       <div>
-        <div class="factor-name">About Restia</div>
-        <div class="factor-sub">Version 1.0</div>
-      </div>
+      <div class="factor-name">About Restia</div>
+      <div class="factor-sub">Version 1.0</div>
     </div>
-  </div>
-  <div class="factor-card" id="settingResetData" style="cursor:pointer; border-color:rgba(239,90,111,0.25); background:rgba(239,90,111,0.06);">
-    <div class="factor-left">
-      <div class="factor-icon" style="background:rgba(239,90,111,0.18); color:var(--red);">🗑️</div>
-      <div>
-        <div class="factor-name" style="color:var(--red);">Reset all data</div>
-        <div class="factor-sub">Clear history &amp; restore defaults</div>
-      </div>
     </div>
   </div>
 
 </div>
 
 </div>
+<button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:100px; left:20px; z-index:9999; padding:15px; background:red; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">RESET APP</button>
 
 <div class="app-footer" id="appFooter">
   <div class="cta-wrap" id="ctaWrap">
@@ -4785,6 +4881,34 @@
     <div class="pattern-modal-chart" id="patternModalChart"></div>
     <div class="pattern-modal-axis" id="patternModalAxis"></div>
     <button class="pattern-modal-done" id="patternModalDone" type="button">Done</button>
+  </div>
+</div>
+<!-- NEW: Sleep Pattern Details Modal -->
+<div class="details-overlay" id="patternDetailsOverlay">
+  <div class="details-modal">
+    <div class="pattern-modal-head">
+      <div class="pattern-modal-title" id="patternDetailsTitle">Details</div>
+      <button class="pattern-modal-close" id="patternDetailsClose" type="button">✕</button>
+    </div>
+    
+    <!-- Content for Bedtime / Waking up -->
+    <div id="patternDetailsChartView">
+      <div class="pattern-modal-chart-title" id="patternDetailsChartSubtitle">LAST 7 DAYS</div>
+      <div class="pattern-modal-chart" id="patternDetailsChart"></div>
+      <div class="pattern-modal-axis" id="patternDetailsAxis"></div>
+    </div>
+
+    <!-- Content for Consistency Calendar -->
+    <div id="patternDetailsCalendarView" style="display: none;">
+      <div class="pattern-modal-chart-title">LAST 4 WEEKS</div>
+      <div id="patternDetailsCalendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px;"></div>
+      <div style="display: flex; justify-content: center; gap: 16px; font-size: 11px; color: var(--text-faint); font-weight: 600;">
+        <span style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; border-radius: 4px; background: rgba(79,209,139,0.2); border: 1px solid rgba(79,209,139,0.5);"></div> Tracked</span>
+        <span style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; border-radius: 4px; background: rgba(239,90,111,0.2); border: 1px solid rgba(239,90,111,0.5);"></div> Missed</span>
+      </div>
+    </div>
+
+    <button class="pattern-modal-done" id="patternDetailsDone" type="button">Done</button>
   </div>
 </div>
 <div class="toast" id="toast">Saved</div>
@@ -5075,10 +5199,6 @@
     steps: 0,
     stepsEnabled: true,
     redlightOn: false,
-    bedtimeReminderEnabled: true,
-    notificationsEnabled: true,
-    stepsHistory: [4200, 5600, 7100, 6800, 8200, 7500],
-    moodHistory: [4, 2, 5, 3, 4, 2],
     baseline: {
       totalSleep: 6.1,
       deepRatio: 22,
@@ -5086,6 +5206,7 @@
       waketime: '5:49 AM',
       hr: 78,
       bp: '129/85',
+      // ADD THESE:
       awakeCount: 3,
       awakeTime: 0.4,
       deepSleep: 1.3,
@@ -5093,23 +5214,25 @@
       remSleep: 1.5
     },
     sleepHistory: [ 
-      { score: 68, duration: 6.8, deepRatio: 24, bedtime: '11:30 PM', waketime: '6:18 AM', date: new Date(Date.now() - 6 * 86400000).toDateString() },
-      { score: 78, duration: 7.4, deepRatio: 26, bedtime: '11:15 PM', waketime: '6:39 AM', date: new Date(Date.now() - 5 * 86400000).toDateString() },
-      { score: 58, duration: 5.9, deepRatio: 18, bedtime: '11:55 PM', waketime: '5:49 AM', date: new Date(Date.now() - 4 * 86400000).toDateString() },
-      { score: 74, duration: 7.1, deepRatio: 23, bedtime: '11:20 PM', waketime: '6:26 AM', date: new Date(Date.now() - 3 * 86400000).toDateString() },
-      { score: 82, duration: 7.6, deepRatio: 28, bedtime: '11:05 PM', waketime: '6:41 AM', date: new Date(Date.now() - 2 * 86400000).toDateString() },
-      { score: 63, duration: 6.3, deepRatio: 21, bedtime: '11:40 PM', waketime: '5:58 AM', date: new Date(Date.now() - 1 * 86400000).toDateString() },
-      { score: 61, duration: 6.1, deepRatio: 22, bedtime: '11:42 PM', waketime: '5:49 AM', date: new Date().toDateString() }
+      { 
+        score: 61, 
+        duration: 6.1, 
+        deepRatio: 22, 
+        bedtime: '11:42 PM', 
+        waketime: '5:49 AM',
+        date: new Date().toDateString(),
+        recoveryScore: 82 // <-- ADD THIS
+      }
     ],
     xp: 0,
-    xpAwardedForDate: new Date().toDateString(),
+    xpAwardedForDate: null,
     stepsGoalXpAwardedDate: null,
     interactionClicks: 0,
     lastChestOpenedAt: 0,
     stats: {
-      currentStreak: 5,
-      bestScore: 82,
-      nightsTracked: 7,
+      currentStreak: 1,
+      bestScore: 61,
+      nightsTracked: 1,
       lastTrackedDate: new Date().toDateString()
     },
     avatar: {
@@ -5126,44 +5249,23 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return { ...defaultState };
       const parsed = JSON.parse(raw);
-      const mergedBaseline = { ...defaultState.baseline, ...(parsed.baseline || {}) };
-      const mergedAvatar = { ...defaultState.avatar, ...(parsed.avatar || {}) };
-      const mergedStats = { ...defaultState.stats, ...(parsed.stats || {}) };
-      const isNewDay = parsed.date !== new Date().toDateString();
-
-      if (isNewDay) {
+      if (parsed.date !== new Date().toDateString()) {
         return {
           ...defaultState,
           stepsGoal: parsed.stepsGoal || defaultState.stepsGoal,
           stepsEnabled: parsed.stepsEnabled !== undefined ? parsed.stepsEnabled : true,
           redlightOn: parsed.redlightOn || false,
-          bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
-          notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
           xp: parsed.xp || 0,
           xpAwardedForDate: parsed.xpAwardedForDate || null,
           stepsGoalXpAwardedDate: parsed.stepsGoalXpAwardedDate || null,
           interactionClicks: parsed.interactionClicks || 0,
           lastChestOpenedAt: parsed.lastChestOpenedAt || 0,
-          baseline: mergedBaseline,
-          stats: mergedStats,
-          avatar: mergedAvatar,
-          sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
-          stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
-          moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
+          stats: parsed.stats || defaultState.stats,
+          avatar: parsed.avatar || defaultState.avatar,
+          sleepHistory: parsed.sleepHistory || defaultState.sleepHistory
         };
       }
-      return {
-        ...defaultState,
-        ...parsed,
-        baseline: mergedBaseline,
-        avatar: mergedAvatar,
-        stats: mergedStats,
-        bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
-        notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
-        sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
-        stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
-        moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
-      };
+      return { ...defaultState, ...parsed, avatar: { ...defaultState.avatar, ...(parsed.avatar || {}) }, stats: { ...defaultState.stats, ...(parsed.stats || {}) } };
     } catch (e) {
       return { ...defaultState };
     }
@@ -5231,18 +5333,30 @@
   const RECOVERY_CIRC = 2 * Math.PI * 30;
 
   function computeRecovery() {
-    const durationPct = Math.min(1, state.baseline.totalSleep / RECOVERY_GOAL_HOURS);
-    let score = durationPct * 70;
-    if (state.baseline.totalSleep > 1) {
-      score += Math.min(1, state.baseline.deepRatio / 25) * 15;
-    }
-    if (state.baseline.totalSleep > 0.5) {
-      score += 15 - (state.stress - 1) * 3.5;
-    }
-    if (state.caffeine) score -= 5;
-    if (state.screenTime) score -= 4;
-    return Math.max(5, Math.min(100, Math.round(score)));
+  // Ensure RECOVERY_GOAL_HOURS is defined
+  const RECOVERY_GOAL_HOURS = 8;
+  
+  // Duration component (0-70 points)
+  const durationPct = Math.min(1, state.baseline.totalSleep / RECOVERY_GOAL_HOURS);
+  let score = durationPct * 70;
+  
+  // Deep sleep component (0-15 points)
+  if (state.baseline.totalSleep > 1) {
+    score += Math.min(1, state.baseline.deepRatio / 25) * 15;
   }
+  
+  // Stress component (0-15 points, minus stress penalty)
+  if (state.baseline.totalSleep > 0.5) {
+    score += 15 - (state.stress - 1) * 3.5;
+  }
+  
+  // Caffeine/screen penalties
+  if (state.caffeine) score -= 5;
+  if (state.screenTime) score -= 4;
+  
+  // Clamp to 5-100
+  return Math.max(5, Math.min(100, Math.round(score)));
+}
 
   function computeSleepDebt() {
     return +(RECOVERY_GOAL_HOURS - state.baseline.totalSleep).toFixed(1);
@@ -5354,6 +5468,8 @@
   });
   document.addEventListener('click', hideStageTooltip);
 
+
+
   function renderInsight() {
     const diff = (7 - state.baseline.totalSleep).toFixed(1);
     document.getElementById('insightText').innerHTML =
@@ -5396,6 +5512,17 @@
   const timeOptionsEl = document.getElementById('timeOptions');
   let activeTimePickerType = null; // 'caffeine' or 'screen'
 
+  function updateUI() {
+    saveState(state);
+    
+    // Recalculate and redraw everything in order
+    renderFactors();
+    renderHomeDashboard(); // Updates Home Ring & Breakdown
+    renderLineChart('7d'); // Updates the Trend line & Duo cards
+    renderRecoveryTrendChart(); // <-- THIS WAS MISSING
+    renderStress();
+  }
+
   function openTimePicker(type) {
     activeTimePickerType = type;
     timePickerTitle.textContent = type === 'caffeine' ? 'Caffeine' : 'Screen Time';
@@ -5434,13 +5561,7 @@
         }
         
         timePickerOverlay.classList.remove('active');
-        saveState(state);
-        renderFactors();
-        renderScore();
-        renderRecovery();
-        renderHomeBreakdown();
-        renderLineChart('7d');
-        renderRecoveryTrendChart();
+        updateUI(); // <-- Updates everything perfectly without the glitch
         showToast(type === 'caffeine' ? 'Caffeine logged' : 'Screen time logged');
         registerInteraction();
       });
@@ -5462,8 +5583,7 @@
     saveState(state);
     renderFactors();
     renderScore();
-    renderLineChart('7d');
-    renderRecoveryTrendChart();
+    renderLineChart('7d')
     renderRecovery();
     renderHomeBreakdown();
     showToast('Cleared');
@@ -5481,8 +5601,7 @@
       saveState(state);
       renderFactors();
       renderScore();
-      renderLineChart('7d');
-      renderRecoveryTrendChart();
+      renderLineChart('7d')
       renderRecovery();
       renderHomeBreakdown();
       showToast('Caffeine removed');
@@ -5497,8 +5616,6 @@
       saveState(state);
       renderFactors();
       renderScore();
-      renderLineChart('7d');
-      renderRecoveryTrendChart();
       renderRecovery();
       renderHomeBreakdown();
       showToast('Screen time removed');
@@ -5545,10 +5662,10 @@
       state.stress = i;
       saveState(state);
       renderStress();
-      renderScore();
-      renderLineChart('7d');
-      renderRecovery();
-      renderHomeBreakdown();
+      
+      // UPDATE: Use updateUI so it refreshes EVERYTHING, including the chart
+      updateUI(); 
+      
       showToast('Stress level updated');
       registerInteraction();
     });
@@ -5720,13 +5837,8 @@
       window.addEventListener('devicemotion', handleMotion);
       isStepCounterActive = true;
       showToast('Step counter activated!');
-      renderSteps();
+      updateStepsUI();
     }
-  }
-
-  const stepsClickArea = document.getElementById('stepsClickArea');
-  if (stepsClickArea) {
-    stepsClickArea.addEventListener('click', enableStepCounter);
   }
 
 
@@ -5814,24 +5926,29 @@
     sleepOverlay.appendChild(el);
   }
   function startDrifting() {
-    stopDrifting();
     for (let i = 0; i < 3; i++) setTimeout(spawnDriftItem, i * 400);
     driftInterval = setInterval(spawnDriftItem, 1150);
   }
   function stopDrifting() {
-    if (driftInterval) {
-      clearInterval(driftInterval);
-      driftInterval = null;
-    }
-    document.querySelectorAll('.drift-item').forEach(el => el.remove());
+    clearInterval(driftInterval);
+    driftInterval = null;
   }
 
   function resetSlider(instant) {
-    if (instant) sleepKnob.style.transition = 'none';
+    if (instant) {
+      sleepKnob.style.transition = 'none';
+      sleepFill.style.transition = 'none';
+    }
     sleepKnob.style.left = '4px';
     sleepFill.style.width = '0%';
     sleepHint.style.opacity = '1';
-    if (instant) requestAnimationFrame(() => { sleepKnob.style.transition = ''; });
+    
+    if (instant) {
+      requestAnimationFrame(() => { 
+        sleepKnob.style.transition = ''; 
+        sleepFill.style.transition = 'width 0.1s ease-out'; // Restore smooth fill
+      });
+    }
   }
 
   let sessionTimerInterval = null;
@@ -5874,7 +5991,6 @@ let motionHandler = null;
 let lastMotion = { x: 0, y: 0, z: 0 };
 
 async function startMicrophone() {
-  stopMicrophone(); // Clean up any existing stream/context first
   sessionData.startTime = Date.now();
   sessionData.micActive = false;
   sessionData.micDenied = false;
@@ -5889,9 +6005,6 @@ async function startMicrophone() {
     });
     
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioContext.state === 'suspended') {
-      try { await audioContext.resume(); } catch (e) {}
-    }
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.3;
@@ -5900,8 +6013,7 @@ async function startMicrophone() {
     microphone.connect(analyser);
     
     sessionData.micActive = true;
-    const radarIcon = document.getElementById('radarCenterIcon');
-    if (radarIcon) radarIcon.textContent = '🎙️';
+    document.getElementById('radarCenterIcon').textContent = '🎙️';
     document.querySelectorAll('.radar-ring').forEach(r => r.style.borderColor = 'rgba(157,124,245,0.6)');
     
     startAudioAnalysis();
@@ -6025,7 +6137,6 @@ function recordAudioEvent(type, confidence) {
     const bars = document.querySelectorAll('.audio-wave span');
     
     function draw() {
-      if (!analyser) return; // Prevent null pointer exception on teardown
       analyser.getByteFrequencyData(dataArray);
       
       // Calculate average volume
@@ -6038,14 +6149,15 @@ function recordAudioEvent(type, confidence) {
       // Animate the 7 visualizer bars based on real audio data
       if (bars.length > 0) {
         bars.forEach((bar, index) => {
+          // Map different frequency bands to different bars for a dynamic look
           const freqValue = dataArray[index * 4] || average; 
           const height = Math.max(10, (freqValue / 255) * 100);
           bar.style.height = height + '%';
-          bar.style.animation = 'none';
+          bar.style.animation = 'none'; // Turn off CSS animation to use real-time JS
         });
       }
       
-      // Make the radar pulse based on sound
+      // Make the radar pulse faster or slower based on sound
       const radar = document.querySelector('.radar-center');
       if (radar) {
         const scale = 1 + (average / 255) * 0.2;
@@ -6059,49 +6171,33 @@ function recordAudioEvent(type, confidence) {
   }
 
   function startFakeAudio() {
-    const bars = document.querySelectorAll('.audio-wave span');
-    bars.forEach((bar, index) => {
-      bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
-    });
-    const icon = document.getElementById('radarCenterIcon');
-    if (icon) icon.textContent = '🚫';
-  }
+  const bars = document.querySelectorAll('.audio-wave span');
+  bars.forEach((bar, index) => {
+    bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
+  });
+  document.getElementById('radarCenterIcon').textContent = '🚫';
+}
 
   function stopMicrophone() {
-    if (audioAnalysisInterval) {
-      clearInterval(audioAnalysisInterval);
-      audioAnalysisInterval = null;
-    }
-    if (micStream) {
-      try {
-        micStream.getTracks().forEach(track => track.stop());
-      } catch (e) {}
-      micStream = null;
-    }
-    if (audioContext && audioContext.state !== 'closed') {
-      try {
-        audioContext.close();
-      } catch (e) {}
-      audioContext = null;
-    }
-    if (audioAnimationFrame) {
-      cancelAnimationFrame(audioAnimationFrame);
-      audioAnimationFrame = null;
-    }
-    analyser = null;
-    microphone = null;
-
-    // Reset visualizer bars and radar center smoothly
-    const bars = document.querySelectorAll('.audio-wave span');
-    bars.forEach(bar => {
-      bar.style.height = '';
-      bar.style.animation = '';
-    });
-    const radar = document.querySelector('.radar-center');
-    if (radar) {
-      radar.style.transform = '';
-    }
+  if (audioAnalysisInterval) {
+    clearInterval(audioAnalysisInterval);
+    audioAnalysisInterval = null;
   }
+  if (micStream) {
+    micStream.getTracks().forEach(track => track.stop());
+  }
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
+  if (audioAnimationFrame) {
+    cancelAnimationFrame(audioAnimationFrame);
+    audioAnimationFrame = null;
+  }
+  analyser = null;
+  microphone = null;
+  micStream = null;
+}
 
 // ---- MOVEMENT DETECTION ----
 function startMovementDetection() {
@@ -6145,36 +6241,33 @@ function stopMovementDetection() {
 async function requestWakeLock() {
   try {
     if ('wakeLock' in navigator) {
-      if (wakeLock !== null) return;
       wakeLock = await navigator.wakeLock.request('screen');
       console.log('Wake Lock is active');
       
+      // If the user switches apps and comes back, the lock is dropped. 
+      // This listener re-requests it.
       wakeLock.addEventListener('release', () => {
         console.log('Wake Lock was released');
-        wakeLock = null;
       });
     } else {
       console.warn('Wake Lock API not supported on this browser.');
     }
   } catch (err) {
-    console.warn(`Wake Lock Error: ${err.name}, ${err.message}`);
-    wakeLock = null;
+    console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
   }
 }
 
 function releaseWakeLock() {
   if (wakeLock !== null) {
-    try {
-      wakeLock.release();
-    } catch (e) {}
+    wakeLock.release();
     wakeLock = null;
     console.log('Wake Lock released manually');
   }
 }
 
-// Re-acquire the wake lock ONLY if sleep mode is still active
+// Re-acquire the wake lock if the user returns to the app
 document.addEventListener('visibilitychange', async () => {
-  if (document.body.classList.contains('sleep-mode') && document.visibilityState === 'visible') {
+  if (wakeLock !== null && document.visibilityState === 'visible') {
     await requestWakeLock();
   }
 });
@@ -6232,10 +6325,6 @@ function createSpaceParticle(randomizeOpacity = false) {
 }
 
 function animateSpace() {
-  if (!document.body.classList.contains('sleep-mode')) {
-    spaceAnimationFrame = null;
-    return;
-  }
   if (!canvasCtx) return;
   const ctx = canvasCtx;
   
@@ -6418,9 +6507,10 @@ window.addEventListener('resize', () => {
 });
 
   function enterSleepMode() {
-    // ---- RESET SESSION DATA ----
-    sessionData = {
-      startTime: Date.now(),
+    
+     // ---- RESET SESSION DATA ----
+     sessionData = {
+      startTime: null,
       endTime: null,
       totalSeconds: 0,
       audioEvents: {
@@ -6446,59 +6536,58 @@ window.addEventListener('resize', () => {
     document.body.classList.add('sleep-mode');
     ctaWrap.classList.add('sleeping');
     
-    // Start the space engine
+    // Start the new space engine
     initSpaceEngine(); 
     
     sleepOverlay.classList.add('active');
     sleepSliderWrap.classList.add('active');
     
     // Show the floating live mic widget
-    const liveMic = document.getElementById('liveMicContainer');
-    if (liveMic) liveMic.classList.add('active');
+    document.getElementById('liveMicContainer').classList.add('active');
     
     resetSlider(true);
     startDrifting();
     
-    // Start the session timer ONCE cleanly
+    // Start the session timer
     sessionSeconds = 0;
-    const liveTimerEl = document.getElementById('liveTimer');
-    if (liveTimerEl) liveTimerEl.textContent = '00:00:00';
-    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+    document.getElementById('liveTimer').textContent = '00:00:00';
+    clearInterval(sessionTimerInterval);
     sessionTimerInterval = setInterval(() => {
       sessionSeconds++;
       const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(sessionSeconds % 60).padStart(2, '0');
-      if (liveTimerEl) liveTimerEl.textContent = `${h}:${m}:${s}`;
+      document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
     }, 1000);
-    
+
+    // START WAKE LOCK HERE
     requestWakeLock();
+
+    // Start the mic
     startMicrophone();
+
+    // Start movement tracking
+    startMovementDetection();
+    
+    // Start the mic
+    startMicrophone();
+    // Start movement tracking
     startMovementDetection();
   }
 
   function exitSleepMode() {
-    document.body.classList.remove('sleep-mode');
-    ctaWrap.classList.remove('sleeping');
-    sleepOverlay.classList.remove('active');
-    sleepSliderWrap.classList.remove('active');
-    const sessionPage = document.getElementById('sessionPage');
-    if (sessionPage) sessionPage.classList.remove('active');
-    const liveMic = document.getElementById('liveMicContainer');
-    if (liveMic) liveMic.classList.remove('active');
-    stopDrifting();
-    if (spaceAnimationFrame) {
-      cancelAnimationFrame(spaceAnimationFrame);
-      spaceAnimationFrame = null;
-    }
-    if (sessionTimerInterval) {
-      clearInterval(sessionTimerInterval);
-      sessionTimerInterval = null;
-    }
-    releaseWakeLock();
-    stopMicrophone();
-    stopMovementDetection();
-  }
+  document.body.classList.remove('sleep-mode');
+  ctaWrap.classList.remove('sleeping');
+  sleepOverlay.classList.remove('active');
+  sleepSliderWrap.classList.remove('active');
+  document.getElementById('sessionPage').classList.remove('active');
+  document.getElementById('liveMicContainer').classList.remove('active');
+  stopDrifting();
+  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
+  clearInterval(sessionTimerInterval);
+  stopMicrophone();
+  stopMovementDetection();
+}
 function qualityTag(pct) {
   if (pct >= 75) return { label: 'Excellent', color: 'var(--green)' };
   if (pct >= 55) return { label: 'Good', color: 'var(--gold-1)' };
@@ -6514,15 +6603,15 @@ function renderHomeBreakdown() {
   const totalPenalty = cPenalty + sPenalty + stPenalty;
 
   // 2. Duration (Caps at 100, drops by the exact penalty points)
-  const baseDurationPct = Math.min(100, Math.round(((parseFloat(state.baseline.totalSleep) || 6.1) / 8) * 100));
+  const baseDurationPct = Math.min(100, Math.round((state.baseline.totalSleep / 8) * 100));
   const durationPct = Math.max(0, Math.round(baseDurationPct - totalPenalty));
 
   // 3. Deep Sleep (Drops by half the penalty)
-  const baseDeepPct = Math.min(100, Math.round(((parseFloat(state.baseline.deepSleep) || 1.3) / 2) * 100));
+  const baseDeepPct = Math.min(100, Math.round((state.baseline.deepSleep / 2) * 100));
   const deepPct = Math.max(0, Math.round(baseDeepPct - (totalPenalty * 0.5)));
 
   // 4. REM (Drops by half the penalty)
-  const baseRemPct = Math.min(100, Math.round(((parseFloat(state.baseline.remSleep) || 1.5) / 2) * 100));
+  const baseRemPct = Math.min(100, Math.round((state.baseline.remSleep / 2) * 100));
   const remPct = Math.max(0, Math.round(baseRemPct - (totalPenalty * 0.5)));
   
   // 5. Consistency (Drops by the full penalty)
@@ -6593,12 +6682,46 @@ function renderHomeDashboard() {
   const circ = 2 * Math.PI * 92;
   const scoreArc = document.getElementById('scoreArc');
 scoreArc.style.strokeDashoffset = circ - (score / 100) * circ;
-// Hide the arc completely only if the score is 0 to prevent the glowing dot glitch
-scoreArc.style.opacity = score <= 0 ? '0' : '1';
+// Hide the arc completely if the score is 0 to prevent the glowing dot glitch
+scoreArc.style.opacity = score <= 10 ? '0' : '1';
   
-  document.getElementById('totalSleepVal').textContent = state.baseline.totalSleep + 'h';
+document.getElementById('totalSleepVal').textContent = state.baseline.totalSleep + 'h';
   document.getElementById('deepRatioVal').textContent = state.baseline.deepRatio + '%';
   
+  // --- NEW: Update the Recovery Ring on the Home Tab ---
+  const recScore = computeRecovery();
+  const recValEl = document.getElementById('recoveryVal');
+  const recArc = document.getElementById('recoveryArc');
+  
+  if (recValEl) recValEl.textContent = recScore + '%';
+  if (recArc) {
+    const circ = 2 * Math.PI * 30; // The radius of the recovery ring is 30
+    const offset = circ - (recScore / 100) * circ;
+    recArc.style.strokeDashoffset = offset;
+  }
+
+  // CRITICAL FIX: Always update today's history with the exact live score
+  const todayStr = new Date().toDateString();
+  let todayEntry = state.sleepHistory.find(h => h.date === todayStr);
+  
+  if (!todayEntry) {
+    // If today isn't in history yet, create it
+    todayEntry = {
+      score: computeScore(),
+      duration: state.baseline.totalSleep,
+      deepRatio: state.baseline.deepRatio,
+      bedtime: state.baseline.bedtime,
+      waketime: state.baseline.waketime,
+      date: todayStr,
+      recoveryScore: recScore
+    };
+    state.sleepHistory.push(todayEntry);
+  } else {
+    // If today IS in history, just update its recovery score to the live one
+    todayEntry.recoveryScore = recScore;
+  }
+  // -----------------------------------------------------
+
   renderHomeBreakdown();
 
   document.getElementById('bedtimeVal').textContent = state.baseline.bedtime;
@@ -6683,200 +6806,181 @@ scoreArc.style.opacity = score <= 0 ? '0' : '1';
         <span>${tip.text}</span>
       </div>
     `).join('');
-    wireIconWiggles();
   }
   
   if (state.sleepHistory.length > 1) {
-    const avgHistory = state.sleepHistory.reduce((sum, n) => sum + (parseFloat(n.duration) || 0), 0) / state.sleepHistory.length;
+    const avgHistory = state.sleepHistory.reduce((sum, n) => sum + n.duration, 0) / state.sleepHistory.length;
     const diff = Math.abs(avgHistory - state.baseline.totalSleep).toFixed(1);
     const isLess = state.baseline.totalSleep < avgHistory;
     document.getElementById('insightText').innerHTML = `You slept <b>${diff} hrs ${isLess ? 'less' : 'more'}</b> than your recent average.`;
   }
-  wireIconWiggles();
 }
   // Render the 100-point breakdown based on actual time slept
   function renderScoreBreakdown() {
-    sessionData.endTime = Date.now();
-    sessionData.totalSeconds = sessionSeconds;
-    
-    const hoursSlept = sessionSeconds / 3600;
-    const isShortSession = sessionSeconds < 180; // under 3 min is a quick preview/test
-
-    // === 1. DURATION (30 pts) ===
-    const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
-    
-    // === 2. CONTINUITY (25 pts) ===
-    const eventCount = Object.values(sessionData.audioEvents).reduce((sum, e) => sum + e.count, 0);
-    const loudNoiseEvents = sessionData.noiseSamples.filter(
-      n => n.volume > (noiseBaseline || 25) * 2.5
-    ).length;
-    
-    const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
-    sessionData.awakenings = estimatedAwakenings;
-    sessionData.timeAwake = estimatedAwakenings * 3 * 60;
-    
-    let continuityScore = 25 - (estimatedAwakenings * 2);
-    continuityScore -= Math.min(8, Math.floor(eventCount / 10));
-    continuityScore = Math.max(0, Math.min(25, continuityScore));
-    
-    // === 3. CONSISTENCY (20 pts) ===
-    const startHour = sessionData.startTime ? new Date(sessionData.startTime).getHours() : 23;
-    const baselineHour = 23;
-    const hourDiff = Math.abs(startHour - baselineHour);
-    const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
-    const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
-    
-    // === 4. RESTLESSNESS (15 pts) ===
-    const movementCount = sessionData.movementSamples.length;
-    const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
-    let restlessnessScore;
-    if (movementPerHour === 0) {
-      restlessnessScore = 12;
-    } else if (movementPerHour < 5) {
-      restlessnessScore = 15;
-    } else if (movementPerHour < 15) {
-      restlessnessScore = 12;
-    } else if (movementPerHour < 30) {
-      restlessnessScore = 8;
-    } else {
-      restlessnessScore = 4;
-    }
-    
-    // === 5. ENVIRONMENT (10 pts) ===
-    const avgNoise = sessionData.noiseSamples.length > 0
-      ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
-      : (noiseBaseline || 20);
-    const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
-    let environmentScore;
-    if (noiseRatio < 1.2) environmentScore = 10;
-    else if (noiseRatio < 1.8) environmentScore = 8;
-    else if (noiseRatio < 2.5) environmentScore = 5;
-    else environmentScore = 3;
-
-    let compDur = durationScore;
-    let compCont = continuityScore;
-    let compCons = consistencyScore;
-    let compRest = restlessnessScore;
-    let compEnv = environmentScore;
-    let totalScore;
-
-    if (isShortSession) {
-      // In quick tests (< 3m), scale components gracefully so the breakdown renders meaningful data
-      const scale = Math.min(1, Math.max(0.12, sessionSeconds / 180));
-      compDur = Math.max(1, Math.round(durationScore * scale));
-      compCont = Math.max(2, Math.round(continuityScore * scale));
-      compCons = Math.max(2, Math.round(consistencyScore * scale));
-      compRest = Math.max(1, Math.round(restlessnessScore * scale));
-      compEnv = Math.max(1, Math.round(environmentScore * scale));
-      totalScore = compDur + compCont + compCons + compRest + compEnv;
-    } else {
-      totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
-      if (hoursSlept < 1) {
-        totalScore = Math.round(totalScore * (hoursSlept / 1));
-      } else if (hoursSlept < 3) {
-        totalScore = Math.min(totalScore, 45);
-      } else if (hoursSlept < 5) {
-        totalScore = Math.min(totalScore, 70);
-      }
-    }
-    totalScore = Math.max(5, Math.min(100, Math.round(totalScore)));
-    
-    // === RENDER BREAKDOWN ALWAYS ===
-    const breakdown = [
-      { name: 'Sleep Duration', max: 30, score: compDur, color: 'var(--gold-1)' },
-      { name: 'Sleep Continuity', max: 25, score: compCont, color: 'var(--violet)' },
-      { name: 'Schedule Consistency', max: 20, score: compCons, color: 'var(--blue)' },
-      { name: 'Restlessness', max: 15, score: compRest, color: 'var(--pink)' },
-      { name: 'Environment', max: 10, score: compEnv, color: 'var(--green)' }
-    ];
-    
-    const list = document.getElementById('scoreBreakdownList');
-    if (list) {
-      list.innerHTML = '';
-      breakdown.forEach(b => {
-        const pct = b.max > 0 ? Math.min(100, Math.round((b.score / b.max) * 100)) : 0;
-        const row = document.createElement('div');
-        row.className = 'score-component';
-        row.innerHTML = `
-          <div class="score-comp-head">
-            <span>${b.name}</span>
-            <span>${b.score} / ${b.max}</span>
-          </div>
-          <div class="score-comp-bar">
-            <div class="score-comp-fill" style="width: ${Math.max(3, pct)}%; background: ${b.color};"></div>
-          </div>
-        `;
-        list.appendChild(row);
-      });
-    }
-    
-    const sessVal = document.getElementById('sessionScoreVal');
-    if (sessVal) sessVal.textContent = totalScore + ' / 100';
-    
-    renderRealSoundEvents(hoursSlept);
-
-    // If it is a brief test session, show preview breakdown but preserve home baseline
-    if (isShortSession) {
-      showToast('Quick test (< 3 min) — Home baseline preserved');
-      return;
-    }
-
-    // Persist score to home
-    state.baseScore = totalScore;
-    
-    // ---- UPDATE HOME TAB STATS ----
-    const sessionEnd = new Date();
-    const start = sessionData.startTime ? new Date(sessionData.startTime) : new Date(Date.now() - sessionSeconds * 1000);
-    const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
-    // Calculate estimated sleep stages based on total hours
-    const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
-    const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
-    const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
-    
-    // Calculate the percentage
-    const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
-
-    // Update baseline state
-    state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
-    state.baseline.bedtime = formatTime(start);
-    state.baseline.waketime = formatTime(sessionEnd);
-    state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
-    state.baseline.remSleep = parseFloat(remHours.toFixed(1));
-    state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
-    state.baseline.deepRatio = newDeepRatio;
-    state.baseline.awakeCount = sessionData.awakenings;
-    state.baseline.awakeTime = parseFloat((sessionData.timeAwake / 3600).toFixed(1));
-    
-    const todayStr = new Date().toDateString();
-
-    // Remove any existing entry for today first (prevents duplicates)
-    state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
-
-    const liveHomeScore = computeScore(); 
-
-    state.sleepHistory.push({
-      score: liveHomeScore,
-      duration: parseFloat(state.baseline.totalSleep),
-      deepRatio: state.baseline.deepRatio,
-      bedtime: state.baseline.bedtime,
-      waketime: state.baseline.waketime,
-      date: todayStr
-    });
-
-    // Keep only the last 30 nights
-    if (state.sleepHistory.length > 30) state.sleepHistory.shift();
-    
-    state.stats.bestScore = Math.max(state.stats.bestScore, liveHomeScore);
-
-    saveState(state);
-    
-    renderHomeBreakdown();
-    renderHomeDashboard();
-    renderLineChart('7d');
-    renderRecoveryTrendChart();
-    wireIconWiggles();
+  sessionData.endTime = Date.now();
+  sessionData.totalSeconds = sessionSeconds;
+  
+  const hoursSlept = sessionSeconds / 3600;
+  
+  // === 1. DURATION (30 pts) ===
+  const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
+  
+  // === 2. CONTINUITY (25 pts) ===
+  const eventCount = Object.values(sessionData.audioEvents)
+    .reduce((sum, e) => sum + e.count, 0);
+  const loudNoiseEvents = sessionData.noiseSamples.filter(
+    n => n.volume > noiseBaseline * 2.5
+  ).length;
+  
+  const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
+  sessionData.awakenings = estimatedAwakenings;
+  sessionData.timeAwake = estimatedAwakenings * 3 * 60;
+  
+  let continuityScore = 25 - (estimatedAwakenings * 2);
+  continuityScore -= Math.min(8, Math.floor(eventCount / 10));
+  continuityScore = Math.max(0, Math.min(25, continuityScore));
+  
+  // === 3. CONSISTENCY (20 pts) ===
+  const startHour = new Date(sessionData.startTime).getHours();
+  const baselineHour = 23;
+  const hourDiff = Math.abs(startHour - baselineHour);
+  const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
+  const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
+  
+  // === 4. RESTLESSNESS (15 pts) ===
+  const movementCount = sessionData.movementSamples.length;
+  const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
+  let restlessnessScore;
+  if (movementPerHour === 0) {
+    restlessnessScore = 10;
+  } else if (movementPerHour < 5) {
+    restlessnessScore = 15;
+  } else if (movementPerHour < 15) {
+    restlessnessScore = 12;
+  } else if (movementPerHour < 30) {
+    restlessnessScore = 8;
+  } else {
+    restlessnessScore = 4;
   }
+  
+  // === 5. ENVIRONMENT (10 pts) ===
+  const avgNoise = sessionData.noiseSamples.length > 0
+    ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
+    : 0;
+  const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
+  let environmentScore;
+  if (noiseRatio < 1.2) environmentScore = 10;
+  else if (noiseRatio < 1.8) environmentScore = 8;
+  else if (noiseRatio < 2.5) environmentScore = 5;
+  else environmentScore = 3;
+  
+  // === TOTAL with short-sleep caps ===
+  let totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
+  
+  if (hoursSlept < 1) {
+    totalScore = Math.round(hoursSlept * 15);
+  } else if (hoursSlept < 3) {
+    totalScore = Math.min(totalScore, 35);
+  } else if (hoursSlept < 5) {
+    totalScore = Math.min(totalScore, 65);
+  }
+  totalScore = Math.max(0, Math.min(100, Math.round(totalScore)));
+  
+  // === RENDER BREAKDOWN ===
+  const breakdown = [
+    { name: 'Sleep Duration', max: 30, score: durationScore, color: 'var(--gold-1)' },
+    { name: 'Sleep Continuity', max: 25, score: continuityScore, color: 'var(--violet)' },
+    { name: 'Schedule Consistency', max: 20, score: consistencyScore, color: 'var(--blue)' },
+    { name: 'Restlessness', max: 15, score: restlessnessScore, color: 'var(--pink)' },
+    { name: 'Environment', max: 10, score: environmentScore, color: 'var(--green)' }
+  ];
+  
+  const list = document.getElementById('scoreBreakdownList');
+  list.innerHTML = '';
+  
+  breakdown.forEach(b => {
+    const pct = b.max > 0 ? (b.score / b.max) * 100 : 0;
+    const row = document.createElement('div');
+    row.className = 'score-component';
+    row.innerHTML = `
+      <div class="score-comp-head">
+        <span>${b.name}</span>
+        <span>${b.score} / ${b.max}</span>
+      </div>
+      <div class="score-comp-bar">
+        <div class="score-comp-fill" style="width: 2%; background: ${b.color};"></div>
+      </div>
+    `;
+    list.appendChild(row);
+    setTimeout(() => {
+      row.querySelector('.score-comp-fill').style.transition = 'width 0.9s cubic-bezier(.4,0,.2,1)';
+      row.querySelector('.score-comp-fill').style.width = pct + '%';
+    }, 100);
+  });
+  
+  document.getElementById('sessionScoreVal').textContent = totalScore + ' / 100';
+  
+  // Persist score to home
+  state.baseScore = totalScore;
+  
+  // ---- UPDATE HOME TAB STATS ----
+  const sessionEnd = new Date();
+  const start = new Date(sessionData.startTime);
+  const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  
+  // Calculate estimated sleep stages based on total hours
+  const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
+  const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
+  const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
+  
+  // Calculate the percentage
+  const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
+
+  // Update baseline state
+  state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
+  state.baseline.bedtime = formatTime(start);
+  state.baseline.waketime = formatTime(sessionEnd);
+  state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
+  state.baseline.remSleep = parseFloat(remHours.toFixed(1));
+  state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
+  state.baseline.deepRatio = newDeepRatio; // Ensure this is explicitly set
+  state.baseline.awakeCount = sessionData.awakenings;
+  state.baseline.awakeTime = (sessionData.timeAwake / 3600).toFixed(1);
+  
+  const todayStr = new Date().toDateString();
+
+  // Remove any existing entry for today first (prevents duplicates)
+  state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
+
+  // CRITICAL FIX: Save the exact score that is currently displayed on the Home screen
+  // (This includes the stress/caffeine deductions so the chart matches perfectly)
+  const liveHomeScore = computeScore(); 
+
+  // NEW: Calculate and save the exact recovery score right now
+  const liveRecoveryScore = computeRecovery();
+
+  state.sleepHistory.push({
+    score: liveHomeScore, 
+    duration: parseFloat(state.baseline.totalSleep),
+    deepRatio: state.baseline.deepRatio,
+    bedtime: state.baseline.bedtime,
+    waketime: state.baseline.waketime,
+    date: todayStr,
+    recoveryScore: liveRecoveryScore // <-- SAVE THIS
+  });
+
+  // Keep only the last 30 nights
+  if (state.sleepHistory.length > 30) state.sleepHistory.shift();
+  
+  saveState(state);
+  
+  // Now that the data is saved, update everything
+  renderHomeDashboard();
+  renderLineChart('7d');
+  renderRecoveryTrendChart();
+  
+  renderRealSoundEvents(hoursSlept);
+}
 
 function renderRealSoundEvents(hoursSlept) {
   const container = document.getElementById('soundEventsList');
@@ -6910,8 +7014,7 @@ function renderRealSoundEvents(hoursSlept) {
     if (sessionData.micDenied) {
       html.push(`<div class="timeline-tag" style="color:#ef5a6f; border-color:#ef5a6f;">🎤 Mic denied — no audio analysis</div>`);
     } else if (hoursSlept < 0.05) {
-      const durText = sessionSeconds < 60 ? `${sessionSeconds}s` : `${Math.round(hoursSlept * 60)} min`;
-      html.push(`<div class="timeline-tag" style="color:#f6c453; border-color:rgba(246,196,83,0.4);">⏱️ Session too short (${durText})</div>`);
+      html.push(`<div class="timeline-tag" style="color:#9a94b8; border-color:#9a94b8;">Session too short (${Math.round(hoursSlept*60)} min)</div>`);
     } else {
       html.push(`<div class="timeline-tag" style="color:#4fd18b; border-color:#4fd18b;">✓ Quiet night — no events detected</div>`);
     }
@@ -6919,58 +7022,62 @@ function renderRealSoundEvents(hoursSlept) {
   
   html.push(`<div style="width:100%; margin-top:8px; font-size:11px; color:var(--text-faint);">
     Session: ${formatDuration(sessionSeconds)} · Awakenings: ~${sessionData.awakenings}
-    · Mic: ${sessionData.micActive ? '🎙️ recorded' : '❌ inactive'}
+    · Mic: ${sessionData.micActive ? '✅ active' : '❌ inactive'}
   </div>`);
   
   container.innerHTML = html.join('');
 }
 
 function formatDuration(seconds) {
-  const s = seconds % 60;
-  const m = Math.floor((seconds % 3600) / 60);
   const h = Math.floor(seconds / 3600);
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
+  const m = Math.floor((seconds % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
   // Wake up logic - opens the session dashboard before showing the check-in
   function wakeUp() {
-    state.loggedBedtime = false;
-    saveState(state);
-    renderCta();
-
-    // Stop tracking, loops, and reset UI state cleanly
-    document.body.classList.remove('sleep-mode');
-    ctaWrap.classList.remove('sleeping');
-    sleepOverlay.classList.remove('active');
-    sleepSliderWrap.classList.remove('active');
-    const liveMic = document.getElementById('liveMicContainer');
-    if (liveMic) liveMic.classList.remove('active');
-    stopDrifting();
-    if (spaceAnimationFrame) {
-      cancelAnimationFrame(spaceAnimationFrame);
-      spaceAnimationFrame = null;
-    }
-    if (sessionTimerInterval) {
-      clearInterval(sessionTimerInterval);
-      sessionTimerInterval = null;
-    }
-    
-    releaseWakeLock(); 
-    stopMicrophone();
-    stopMovementDetection();
-    
-    // Build real sleep score synchronously once
+  state.loggedBedtime = false;
+  saveState(state);
+  renderCta();
+  setTimeout(() => {
     renderScoreBreakdown();
-    renderRecovery();
-    
-    const sessPage = document.getElementById('sessionPage');
-    if (sessPage) sessPage.classList.add('active');
-    
-    spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
-    showToast(randomOf(wakePhrases));
-  }
+  }, 50);
+  // Stop all tracking
+  document.body.classList.remove('sleep-mode');
+  ctaWrap.classList.remove('sleeping');
+  sleepOverlay.classList.remove('active');
+  sleepSliderWrap.classList.remove('active');
+  document.getElementById('liveMicContainer').classList.remove('active');
+  stopDrifting();
+  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
+  clearInterval(sessionTimerInterval);
+    // Stop all tracking
+    document.body.classList.remove('sleep-mode');
+  ctaWrap.classList.remove('sleeping');
+  sleepOverlay.classList.remove('active');
+  sleepSliderWrap.classList.remove('active');
+  document.getElementById('liveMicContainer').classList.remove('active');
+  stopDrifting();
+  clearInterval(sessionTimerInterval);
+  
+  // RELEASE WAKE LOCK HERE
+  releaseWakeLock(); 
+
+  stopMicrophone();
+  stopMovementDetection();
+  
+  // Build real sleep score
+  // Build real sleep score
+  renderScoreBreakdown();
+  
+  // Update the Recovery Score and Sleep Debt immediately!
+  renderRecovery();
+  
+  document.getElementById('sessionPage').classList.add('active');
+  
+  spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
+  showToast(randomOf(wakePhrases));
+}
 
 const checkinOverlay = document.getElementById('checkinOverlay');
 const checkinEmojisEl = document.getElementById('checkinEmojis');
@@ -7023,43 +7130,66 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
 
   let dragging = false;
   let dragStartX = 0;
-  function trackMax() { return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; }
-  function setKnobX(x) {
+  
+  function trackMax() { 
+    return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; 
+  }
+
+  function setKnobX(x, isDragging = false) {
     const max = trackMax();
     const clamped = Math.max(4, Math.min(max + 4, x));
+    
+    // Knob styling
+    sleepKnob.style.transition = isDragging ? 'none' : 'left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
     sleepKnob.style.left = clamped + 'px';
-    const progress = max > 0 ? (clamped - 4) / max : 0;
+    
+    // Fill bar styling (Instant when dragging, smooth when snapping back)
+    sleepFill.style.transition = isDragging ? 'none' : 'width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    
+    const progress = max > 0 ? (clamped - 5) / max : 10;
     sleepFill.style.width = (progress * 100) + '%';
     sleepHint.style.opacity = Math.max(0, 1 - progress * 1.6);
     return progress;
   }
+
   sleepKnob.addEventListener('pointerdown', (e) => {
     dragging = true;
-    sleepKnob.style.transition = 'none';
     sleepKnob.setPointerCapture(e.pointerId);
     dragStartX = e.clientX - sleepKnob.offsetLeft;
+    sleepKnob.style.transition = 'none'; // Instant response when grabbing
   });
+
   sleepKnob.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    setKnobX(e.clientX - dragStartX);
+    setKnobX(e.clientX - dragStartX, true);
   });
+
   function endDrag() {
     if (!dragging) return;
     dragging = false;
+    
     const max = trackMax();
     const progress = max > 0 ? (sleepKnob.offsetLeft - 4) / max : 0;
+    
     if (progress > 0.72) {
-      sleepKnob.style.transition = 'left .2s ease';
-      setKnobX(max + 4);
-      setTimeout(wakeUp, 180);
+      // Smooth glide to the end, then trigger wake up
+      sleepKnob.style.transition = 'left 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)';
+      sleepKnob.style.left = (max + 4) + 'px';
+      sleepFill.style.width = '100%';
+      sleepHint.style.opacity = '0';
+      
+      setTimeout(wakeUp, 400); // Wait for the animation to finish before waking up
     } else {
-      sleepKnob.style.transition = 'left .35s cubic-bezier(.34,1.4,.64,1)';
-      setKnobX(4);
+      // Snap back to start with a nice spring animation
+      sleepKnob.style.transition = 'left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      sleepKnob.style.left = '4px';
+      sleepFill.style.width = '0%';
+      sleepHint.style.opacity = '1';
     }
   }
+
   sleepKnob.addEventListener('pointerup', endDrag);
   sleepKnob.addEventListener('pointercancel', endDrag);
-
   ctaBtn.addEventListener('click', () => {
     if (state.loggedBedtime) return;
     state.loggedBedtime = true;
@@ -7071,7 +7201,6 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     showToast(randomOf(sleepPhrases));
     setTimeout(enterSleepMode, 550);
   });
-
   function renderCta() {
     const icon = document.getElementById('ctaIcon');
     const label = document.getElementById('ctaLabel');
@@ -7113,7 +7242,6 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     wrap.classList.remove('pop-in');
     void wrap.offsetWidth; // restart animation
     wrap.classList.add('pop-in');
-    stage.classList.add('greeting');
     setTimeout(() => {
       // Sparkles for everyone, and eyes blink
       spawnParticles(['✨', '👋'], '#f6c453', wrap);
@@ -7130,14 +7258,6 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     appScrollEl.scrollTo({ top: 0 });
     updateCtaVisibility();
     if (name === 'profile') { playAvatarGreeting(); replayStatCards(); }
-    if (name === 'trends') {
-      const activeRangeBtn = document.querySelector('.chart-tab.active');
-      const activeRange = activeRangeBtn ? activeRangeBtn.dataset.range : '7d';
-      renderLineChart(activeRange);
-      renderRecoveryTrendChart();
-      renderMoodTrendChart();
-      renderStepsBarChart();
-    }
   }
   navItems.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
@@ -7154,39 +7274,54 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
   document.addEventListener('click', () => { Object.values(tooltipHiders).forEach(fn => fn && fn()); });
 
   function bindChartTooltips(wrapId, formatValue) {
-    const wrap = document.getElementById(wrapId);
-    if (!wrap) return;
-    const tooltip = document.createElement('div');
-    tooltip.className = 'stage-tooltip';
-    wrap.appendChild(tooltip);
-    let active = null;
-    function show(point) {
-      if (active) active.classList.remove('active');
-      active = point;
-      point.classList.add('active');
-      const dot = point.querySelector('.chart-dot');
-      const wrapRect = wrap.getBoundingClientRect();
-      const dotRect = dot.getBoundingClientRect();
-      tooltip.style.left = (dotRect.left - wrapRect.left + dotRect.width / 2) + 'px';
-      tooltip.style.top = (dotRect.top - wrapRect.top) + 'px';
-      tooltip.innerHTML = formatValue(point.dataset.value, point.dataset.label);
-      tooltip.classList.add('show');
-    }
-    function hide() {
-      if (active) active.classList.remove('active');
-      active = null;
-      tooltip.classList.remove('show');
-    }
-    wrap.querySelectorAll('.chart-point').forEach(p => {
-      p.addEventListener('mouseenter', () => show(p));
-      p.addEventListener('mouseleave', hide);
-      p.addEventListener('click', (e) => {
-        e.stopPropagation();
-        active === p ? hide() : show(p);
-      });
-    });
-    tooltipHiders[wrapId] = hide;
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const tooltip = document.createElement('div');
+  tooltip.className = 'stage-tooltip';
+  wrap.appendChild(tooltip);
+  let active = null;
+  
+  function show(point) {
+    if (active) active.classList.remove('active');
+    active = point;
+    point.classList.add('active');
+    const dot = point.querySelector('.chart-dot');
+    if (!dot) return;
+    
+    const wrapRect = wrap.getBoundingClientRect();
+    const dotRect = dot.getBoundingClientRect();
+    
+    // Position tooltip above the dot, centered
+    tooltip.style.left = (dotRect.left - wrapRect.left + dotRect.width / 2) + 'px';
+    tooltip.style.top = (dotRect.top - wrapRect.top) + 'px';
+    
+    // Render the formatted HTML
+    tooltip.innerHTML = formatValue(point.dataset.value, point.dataset.label);
+    tooltip.classList.add('show');
   }
+  
+  function hide() {
+    if (active) active.classList.remove('active');
+    active = null;
+    tooltip.classList.remove('show');
+  }
+  
+  wrap.querySelectorAll('.chart-point').forEach(p => {
+    p.addEventListener('mouseenter', () => show(p));
+    p.addEventListener('mouseleave', hide);
+    p.addEventListener('click', (e) => {
+      e.stopPropagation();
+      active === p ? hide() : show(p);
+    });
+    // Touch support
+    p.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      active === p ? hide() : show(p);
+    }, { passive: false });
+  });
+  
+  tooltipHiders[wrapId] = hide;
+}
 
   // Generates real dates for the chart
   function getRealLabels(days) {
@@ -7207,9 +7342,10 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     const scores = [];
     const durations = [];
     const today = new Date();
-    today.setHours(23, 59, 59, 999);
+    today.setHours(23, 59, 59, 999); // Ensure we include all of today
 
     if (range === '7d') {
+      // 7D Logic: Look at the exact last 7 days
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
@@ -7219,75 +7355,83 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
         const isToday = d.toDateString() === new Date().toDateString();
 
         if (isToday) {
+          // Today always uses the live dynamic score
           scores.push(computeScore());
-          durations.push(parseFloat(state.baseline.totalSleep) || 0);
+          durations.push(state.baseline.totalSleep);
         } else if (found) {
-          scores.push(Number(found.score) || 0);
-          durations.push(parseFloat(found.duration) || 0);
+          scores.push(found.score);
+          durations.push(found.duration);
         } else {
+          // Fills in gaps for past days with the last known score
           const validPast = scores.filter(s => s > 0);
           scores.push(validPast.length > 0 ? validPast[validPast.length - 1] : 61);
-          durations.push(parseFloat(state.baseline.totalSleep) || 0);
+          durations.push(state.baseline.totalSleep);
         }
       }
     } else {
+      // 30D, 3M, 6M Logic: Group by actual weeks/months
       const isMonthly = (range === '3m' || range === '6m');
       const numGroups = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
       
+      // Setup date buckets
       for (let i = numGroups - 1; i >= 0; i--) {
-        let start, end;
+        const end = new Date(today);
+        const start = new Date(today);
+        
         if (isMonthly) {
-          const target = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          labels.push(target.toLocaleDateString('en-US', { month: 'short' }));
-          start = new Date(target.getFullYear(), target.getMonth(), 1, 0, 0, 0, 0);
-          end = new Date(target.getFullYear(), target.getMonth() + 1, 0, 23, 59, 59, 999);
+           end.setMonth(end.getMonth() - i);
+           start.setMonth(start.getMonth() - i);
+           start.setDate(1); // Start of that month
+           labels.push(end.toLocaleDateString('en-US', { month: 'short' }));
         } else {
-          labels.push('Wk ' + (numGroups - i));
-          end = new Date(today);
-          end.setDate(today.getDate() - (i * 7));
-          end.setHours(23, 59, 59, 999);
-          start = new Date(end);
-          start.setDate(end.getDate() - 6);
-          start.setHours(0, 0, 0, 0);
+           // Weeks (every 7 days going back)
+           end.setDate(end.getDate() - (i * 7));
+           start.setDate(start.getDate() - (i * 7 + 6));
+           labels.push('Wk ' + (numGroups - i));
         }
 
+        // Find all history entries that fall into this timeframe
         let bucketScores = [];
         let bucketDurs = [];
 
         history.forEach(h => {
           const d = new Date(h.date);
           if (d >= start && d <= end) {
-            const isToday = d.toDateString() === new Date().toDateString();
-            if (isToday) {
-              bucketScores.push(computeScore());
-              bucketDurs.push(parseFloat(state.baseline.totalSleep) || 0);
-            } else if (h.score > 0) {
-              bucketScores.push(Number(h.score) || 0);
-              bucketDurs.push(parseFloat(h.duration) || 0);
-            }
+             // If it's today's date, use the live score, otherwise use history
+             const isToday = d.toDateString() === new Date().toDateString();
+             if (isToday) {
+                bucketScores.push(computeScore());
+                bucketDurs.push(state.baseline.totalSleep);
+             } else if (h.score > 0) {
+                bucketScores.push(h.score);
+                bucketDurs.push(h.duration);
+             }
           }
         });
 
+        // Calculate the average for this specific bucket
         if (bucketScores.length > 0) {
           const avgS = Math.round(bucketScores.reduce((a, b) => a + b, 0) / bucketScores.length);
-          const avgD = bucketDurs.reduce((a, b) => a + Number(b), 0) / bucketDurs.length;
+          const avgD = bucketDurs.reduce((a, b) => a + b, 0) / bucketDurs.length;
           scores.push(avgS);
           durations.push(avgD);
         } else {
-          const latest = history.length > 0 ? (Number(history[history.length - 1].score) || 61) : 61;
+          // If absolutely NO data in this week/month, fallback to latest
+          const latest = history.length > 0 ? history[history.length - 1].score : 61;
           scores.push(latest);
-          durations.push(parseFloat(state.baseline.totalSleep) || 0);
+          durations.push(state.baseline.totalSleep);
         }
       }
     }
 
+    // Calculate final averages for the big text labels
     const validScores = scores.filter(s => s > 0);
     const avgScore = validScores.length > 0
       ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
       : computeScore();
     const avgDuration = durations.length > 0
-      ? (durations.reduce((a, b) => a + Number(b), 0) / durations.length).toFixed(1)
-      : (parseFloat(state.baseline.totalSleep) || 0).toFixed(1);
+      ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1)
+      : state.baseline.totalSleep.toFixed(1);
 
     return {
       labels,
@@ -7320,19 +7464,37 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
       <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="currentColor" stroke-width="2.5"/>
     </g>`).join('');
     
-    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+  
+    // Generate glowing hollow dots (matching Recovery Trend)
+    const glowingDots = pts.map((p, i) => {
+      const isLast = i === pts.length - 1;
+      const dotColor = isLast ? '#c874e8' : '#8a6ef2';
+      return `<g class="chart-point" data-value="${data.scores[i]}" data-label="${data.labels[i]}" style="color:${dotColor}">
+        <circle class="chart-dot-hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="14" fill="transparent" style="cursor:pointer;"/>
+        <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="${dotColor}" stroke-width="2.5"/>
+        ${isLast ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="7" fill="none" stroke="${dotColor}" stroke-width="1.5" class="pulse-ring" style="transform-origin: ${p[0].toFixed(1)}px ${p[1].toFixed(1)}px;"/>` : ''}
+      </g>`;
+    }).join('');
+
+    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="overflow:visible;">
       <defs>
         <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#8a6ef2" stop-opacity="0.35"/>
-          <stop offset="100%" stop-color="#8a6ef2" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#c874e8" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#c874e8" stop-opacity="0"/>
         </linearGradient>
       </defs>
       <path d="${areaD}" fill="url(#lineFill)" stroke="none"/>
-      <path d="${pathD}" fill="none" stroke="#c874e8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-      ${dots}
+      <path d="${pathD}" fill="none" stroke="#c874e8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 6px rgba(200,116,232,0.6));"/>
+      ${glowingDots}
     </svg>`;
     
     axis.innerHTML = data.labels.map(l => `<span>${l}</span>`).join('');
+    
+    // Add pulse animation to the last dot
+    const lastDot = wrap.querySelector('.chart-point:last-child .pulse-ring');
+    if (lastDot) {
+      lastDot.style.animation = 'pulseRing 2s ease-in-out infinite';
+    }
     
 // ---- Duo cards (AVG SLEEP DURATION & AVG SLEEP SCORE) ----
 const duoD = document.getElementById('duoDuration');
@@ -7360,7 +7522,10 @@ if (deltaEl) {
   deltaEl.style.color = data.score >= 70 ? 'var(--green)' : 'var(--gold-1)';
 }
     
-    bindChartTooltips('lineChartWrap', (value, label) => `${label}<span class="tt-stage">Score ${value}</span>`);
+bindChartTooltips('lineChartWrap', (value, label) => {
+      return `<div style="font-weight:800; margin-bottom:2px;">${label}</div>
+              <div style="color:#c874e8; font-size:11px;">Score: ${value}</div>`;
+    });
   }
   document.querySelectorAll('.chart-tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -7383,103 +7548,119 @@ if (deltaEl) {
 
   function getRecoveryData() {
     let history = state.sleepHistory || [];
-    if (history.length === 0) {
-      history = defaultState.sleepHistory;
-    }
-
     const labels = [];
     const values = [];
     const today = new Date();
-    const currentRec = computeRecovery();
-    // 6-day baseline durations corresponding to the 7-day pattern
-    const pastDurations = [6.8, 7.4, 5.9, 7.1, 7.6, 6.3];
+    const todayStr = today.toDateString();
+    const todayRecovery = computeRecovery(); // Live score for today
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-      
-      const found = history.find(h => h.date === d.toDateString());
-      const isToday = d.toDateString() === new Date().toDateString();
 
-      let dayRecovery;
-      if (isToday) {
-        dayRecovery = currentRec;
-      } else if (found && found.duration !== undefined) {
-        const dur = parseFloat(found.duration) || state.baseline.totalSleep;
-        const deep = parseFloat(found.deepRatio) || state.baseline.deepRatio;
-        const durationPct = Math.min(1, dur / 8);
-        dayRecovery = Math.max(5, Math.min(100, Math.round((durationPct * 70) + (Math.min(1, deep / 25) * 15) + 15)));
+      if (d.toDateString() === todayStr) {
+        values.push(todayRecovery);
       } else {
-        // Derive dynamic past recovery variance anchored to user's current baseline stats and active factor penalties
-        const dur = pastDurations[6 - i] || 6.5;
-        const durationPct = Math.min(1, dur / 8);
-        const baseRec = Math.round((durationPct * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
-        const nominalCurrent = Math.round(((state.baseline.totalSleep / 8) * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
-        const factorOffset = currentRec - nominalCurrent;
-        dayRecovery = Math.max(10, Math.min(100, baseRec + Math.round(factorOffset * 0.75)));
+        const found = history.find(h => h.date === d.toDateString());
+        
+        // ONLY use the saved score. No more recalculating past days!
+        if (found && typeof found.recoveryScore === 'number') {
+          values.push(found.recoveryScore);
+        } else {
+          // If there's no data for that day, keep the line flat
+          const fallback = values.length > 0 ? values[values.length - 1] : todayRecovery;
+          values.push(fallback);
+        }
       }
-      values.push(isNaN(dayRecovery) ? 50 : dayRecovery);
     }
-
     return { labels, values };
   }
-  function renderRecoveryTrendChart() {
-    const wrap = document.getElementById('recoveryChartWrap');
-    const axis = document.getElementById('recoveryChartAxis');
-    if (!wrap) return;
-    const recoveryData = getRecoveryData();
-    const labels = recoveryData.labels;
-    const values = recoveryData.values;
-    const w = 320, h = 110, pad = 14;
-    const n = values.length;
-    const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
-    const min = 0, max = 100;
-    const pts = values.map((v, i) => {
-      const x = pad + stepX * i;
-      const y = pad + (1 - (v - min) / (max - min)) * (h - pad * 2);
-      return [x, y];
-    });
-    const pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const areaD = pathD + ` L ${pts[pts.length - 1][0].toFixed(1)} ${h - pad} L ${pts[0][0].toFixed(1)} ${h - pad} Z`;
-    const dots = pts.map((p, i) => `<g class="chart-point" data-value="${values[i]}" data-label="${labels[i]}" style="color:${i === pts.length - 1 ? '#35c9b0' : '#4fa3f7'}">
-      <circle class="chart-dot-hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="12" fill="transparent"/>
-      <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="currentColor" stroke-width="2.5"/>
-    </g>`).join('');
-    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="recoveryFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#35c9b0" stop-opacity="0.35"/>
-          <stop offset="100%" stop-color="#35c9b0" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="recoveryStroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#35c9b0"/>
-          <stop offset="100%" stop-color="#4fa3f7"/>
-        </linearGradient>
-      </defs>
-      <path d="${areaD}" fill="url(#recoveryFill)" stroke="none"/>
-      <path d="${pathD}" fill="none" stroke="url(#recoveryStroke)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-      ${dots}
-    </svg>`;
-    axis.innerHTML = labels.map(l => `<span>${l}</span>`).join('');
-    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-    const deltaEl = document.getElementById('recoveryTrendDelta');
-    if (deltaEl) {
-      deltaEl.textContent = 'Avg: ' + avg + '%';
-      deltaEl.style.color = avg >= 65 ? 'var(--green)' : 'var(--gold-1)';
-    }
-    bindChartTooltips('recoveryChartWrap', (value, label) => `${label}<span class="tt-stage">Recovery ${value}%</span>`);
+function renderRecoveryTrendChart() {
+  const wrap = document.getElementById('recoveryChartWrap');
+  const axis = document.getElementById('recoveryChartAxis');
+  if (!wrap) return;
+  
+  const recoveryData = getRecoveryData();
+  const labels = recoveryData.labels;
+  const values = recoveryData.values;
+  
+  const w = 320, h = 120, pad = 14;
+  const n = values.length;
+  const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
+  const min = 0, max = 100;
+  
+  // Calculate points
+  const pts = values.map((v, i) => {
+    const x = pad + stepX * i;
+    const y = pad + (1 - (v - min) / (max - min)) * (h - pad * 2);
+    return [x, y];
+  });
+  
+  // Build path
+  let pathD = '';
+  let areaD = '';
+  
+  if (pts.length > 0) {
+    pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    areaD = pathD + ` L ${pts[pts.length - 1][0].toFixed(1)} ${h - pad} L ${pts[0][0].toFixed(1)} ${h - pad} Z`;
   }
+  
+  // Build dots
+  const dots = pts.map((p, i) => {
+    const isLast = i === pts.length - 1;
+    const dotColor = isLast ? '#35c9b0' : '#4fa3f7';
+    return `<g class="chart-point" data-value="${values[i]}" data-label="${labels[i]}" style="color:${dotColor}">
+      <circle class="chart-dot-hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="14" fill="transparent" style="cursor:pointer;"/>
+      <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="${dotColor}" stroke-width="2.5"/>
+      ${isLast ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="7" fill="none" stroke="${dotColor}" stroke-width="1.5" class="pulse-ring" style="transform-origin: ${p[0].toFixed(1)}px ${p[1].toFixed(1)}px;"/>` : ''}
+    </g>`;
+  }).join('');
+  
+  // Render SVG
+  wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="overflow:visible;">
+    <defs>
+      <linearGradient id="recoveryFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#35c9b0" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#35c9b0" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${areaD ? `<path d="${areaD}" fill="url(#recoveryFill)" stroke="none"/>` : ''}
+    ${pathD ? `<path d="${pathD}" fill="none" stroke="#35c9b0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 6px rgba(53,201,176,0.6));"/>` : ''}
+    ${dots}
+  </svg>`;
+  
+  // Axis
+  axis.innerHTML = labels.map(l => `<span>${l}</span>`).join('');
+  
+  // Delta label
+  const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+  const deltaEl = document.getElementById('recoveryTrendDelta');
+  if (deltaEl) {
+    deltaEl.textContent = 'Avg: ' + avg + '%';
+    deltaEl.style.color = avg >= 65 ? 'var(--green)' : 'var(--gold-1)';
+  }
+  
+  // Tooltips
+  bindChartTooltips('recoveryChartWrap', (value, label) => {
+    return `<div style="font-weight:800; margin-bottom:2px;">${label}</div>
+            <div style="color:#35c9b0; font-size:11px;">Recovery: ${value}%</div>`;
+  });
+  
+  // Add pulse animation to the last dot
+  const lastDot = wrap.querySelector('.chart-point:last-child .pulse-ring');
+  if (lastDot) {
+    lastDot.style.animation = 'pulseRing 2s ease-in-out infinite';
+  }
+}
 
+  const moodHistory = [4, 2, 5, 3, 4, 2];
   function renderMoodTrendChart() {
     const wrap = document.getElementById('moodChartWrap');
     const axis = document.getElementById('moodChartAxis');
     if (!wrap) return;
     const labels = lastNDaysLabels(7);
-    const pastMoods = Array.isArray(state.moodHistory) && state.moodHistory.length === 6
-      ? state.moodHistory
-      : [4, 2, 5, 3, 4, 2];
-    const values = [...pastMoods, state.mood];
+    const values = [...moodHistory, state.mood];
     const w = 320, h = 110, pad = 14;
     const n = values.length;
     const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
@@ -7491,25 +7672,34 @@ if (deltaEl) {
     });
     const pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     const areaD = pathD + ` L ${pts[pts.length - 1][0].toFixed(1)} ${h - pad} L ${pts[0][0].toFixed(1)} ${h - pad} Z`;
-    const dots = pts.map((p, i) => `<g class="chart-point" data-value="${values[i]}" data-label="${labels[i]}" style="color:${i === pts.length - 1 ? '#ef6fa1' : '#9d7cf5'}">
-      <circle class="chart-dot-hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="12" fill="transparent"/>
-      <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="currentColor" stroke-width="2.5"/>
-    </g>`).join('');
-    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    // Generate glowing hollow dots (matching Recovery Trend)
+    const glowingDots = pts.map((p, i) => {
+      const isLast = i === pts.length - 1;
+      const dotColor = isLast ? '#ef6fa1' : '#9d7cf5';
+      return `<g class="chart-point" data-value="${values[i]}" data-label="${labels[i]}" style="color:${dotColor}">
+        <circle class="chart-dot-hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="14" fill="transparent" style="cursor:pointer;"/>
+        <circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#0d0b1a" stroke="${dotColor}" stroke-width="2.5"/>
+        ${isLast ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="7" fill="none" stroke="${dotColor}" stroke-width="1.5" class="pulse-ring" style="transform-origin: ${p[0].toFixed(1)}px ${p[1].toFixed(1)}px;"/>` : ''}
+      </g>`;
+    }).join('');
+
+    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="overflow:visible;">
       <defs>
         <linearGradient id="moodFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#c874e8" stop-opacity="0.35"/>
+          <stop offset="0%" stop-color="#c874e8" stop-opacity="0.3"/>
           <stop offset="100%" stop-color="#c874e8" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="moodStroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#9d7cf5"/>
-          <stop offset="100%" stop-color="#ef6fa1"/>
         </linearGradient>
       </defs>
       <path d="${areaD}" fill="url(#moodFill)" stroke="none"/>
-      <path d="${pathD}" fill="none" stroke="url(#moodStroke)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-      ${dots}
+      <path d="${pathD}" fill="none" stroke="#c874e8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 6px rgba(200,116,232,0.6));"/>
+      ${glowingDots}
     </svg>`;
+    
+    // Add pulse animation to the last dot
+    const lastDot = wrap.querySelector('.chart-point:last-child .pulse-ring');
+    if (lastDot) {
+      lastDot.style.animation = 'pulseRing 2s ease-in-out infinite';
+    }
     axis.innerHTML = labels.map(l => `<span>${l}</span>`).join('');
     const delta = values[values.length - 1] - values[0];
     const deltaEl = document.getElementById('moodTrendDelta');
@@ -7517,19 +7707,20 @@ if (deltaEl) {
       deltaEl.textContent = (delta >= 0 ? '↑ +' : '↓ ') + Math.abs(delta) + ' vs ' + labels[0];
       deltaEl.style.color = delta >= 0 ? 'var(--green)' : 'var(--red)';
     }
-    bindChartTooltips('moodChartWrap', (value, label) => `${label}<span class="tt-stage">${moodLabels[value]} (${value}/5)</span>`);
+    bindChartTooltips('moodChartWrap', (value, label) => {
+      return `<div style="font-weight:800; margin-bottom:2px;">${label}</div>
+              <div style="color:#ef6fa1; font-size:11px;">Mood: ${moodLabels[value]} (${value}/5)</div>`;
+    });
   }
 
+  const stepsHistory = [state.steps, state.steps, state.steps, state.steps, state.steps, state.steps];
   function renderStepsBarChart() {
     const wrap = document.getElementById('stepsChartWrap');
     const axis = document.getElementById('stepsChartAxis');
     if (!wrap) return;
     const labels = lastNDaysLabels(7);
     const goal = state.stepsGoal || 8000;
-    const pastValues = Array.isArray(state.stepsHistory) && state.stepsHistory.length === 6
-      ? state.stepsHistory
-      : [4200, 5600, 7100, 6800, 8200, 7500];
-    const values = [...pastValues, state.steps];
+    const values = [...stepsHistory, state.steps];
     const maxVal = Math.max(goal, ...values) * 1.08;
     wrap.innerHTML = '';
 
@@ -7604,95 +7795,48 @@ if (deltaEl) {
   }
 
   ['settingReminder', 'settingNotifs'].forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('click', () => {
-      const isReminder = id === 'settingReminder';
-      const toggleId = isReminder ? 'reminderToggle' : 'notifsToggle';
+    document.getElementById(id).addEventListener('click', () => {
+      const toggleId = id === 'settingReminder' ? 'reminderToggle' : 'notifsToggle';
       const t = document.getElementById(toggleId);
-      if (isReminder) {
-        state.bedtimeReminderEnabled = !state.bedtimeReminderEnabled;
-        if (t) t.classList.toggle('on', state.bedtimeReminderEnabled);
-      } else {
-        state.notificationsEnabled = !state.notificationsEnabled;
-        if (t) t.classList.toggle('on', state.notificationsEnabled);
-      }
-      saveState(state);
-      showToast((t && t.classList.contains('on')) ? 'Enabled' : 'Disabled');
+      t.classList.toggle('on');
+      showToast(t.classList.contains('on') ? 'Enabled' : 'Disabled');
       registerInteraction();
     });
   });
 
   function renderStepsSettings() {
     const goal = state.stepsGoal || 8000;
-    const subEl = document.getElementById('stepsGoalSub');
-    if (subEl) subEl.textContent = goal.toLocaleString() + ' steps';
-    const dispEl = document.getElementById('goalValueDisplay');
-    if (dispEl) dispEl.textContent = goal.toLocaleString();
-    const trackTog = document.getElementById('stepsTrackToggle');
-    if (trackTog) trackTog.classList.toggle('on', state.stepsEnabled);
-    const remTog = document.getElementById('reminderToggle');
-    if (remTog) remTog.classList.toggle('on', state.bedtimeReminderEnabled !== false);
-    const notTog = document.getElementById('notifsToggle');
-    if (notTog) notTog.classList.toggle('on', state.notificationsEnabled !== false);
+    document.getElementById('stepsGoalSub').textContent = goal.toLocaleString() + ' steps';
+    document.getElementById('goalValueDisplay').textContent = goal.toLocaleString();
+    document.getElementById('stepsTrackToggle').classList.toggle('on', state.stepsEnabled);
   }
-  const stepsTrackEl = document.getElementById('settingStepsTrack');
-  if (stepsTrackEl) {
-    stepsTrackEl.addEventListener('click', () => {
-      state.stepsEnabled = !state.stepsEnabled;
-      saveState(state);
-      renderStepsSettings();
-      renderSteps();
-      showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
-    });
-  }
-  const stepsGoalEl = document.getElementById('settingStepsGoal');
-  if (stepsGoalEl) {
-    stepsGoalEl.addEventListener('click', () => {
-      const editor = document.getElementById('stepsGoalEditor');
-      if (editor) editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
-    });
-  }
-  const gMinus = document.getElementById('goalMinus');
-  if (gMinus) {
-    gMinus.addEventListener('click', () => {
-      state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
-      saveState(state);
-      renderStepsSettings();
-      renderSteps();
-      renderStepsBarChart();
-    });
-  }
-  const gPlus = document.getElementById('goalPlus');
-  if (gPlus) {
-    gPlus.addEventListener('click', () => {
-      state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
-      saveState(state);
-      renderStepsSettings();
-      renderSteps();
-      renderStepsBarChart();
-    });
-  }
-  const gDone = document.getElementById('goalDone');
-  if (gDone) {
-    gDone.addEventListener('click', () => {
-      const editor = document.getElementById('stepsGoalEditor');
-      if (editor) editor.style.display = 'none';
-      showToast('Step goal updated');
-    });
-  }
-
-  const resetBtn = document.getElementById('settingResetData');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      if (confirm('Reset all Restia sleep data, history, and character customization? This will restore defaults.')) {
-        try {
-          localStorage.removeItem(STORE_KEY);
-        } catch (e) {}
-        location.reload();
-      }
-    });
-  }
+  document.getElementById('settingStepsTrack').addEventListener('click', () => {
+    state.stepsEnabled = !state.stepsEnabled;
+    saveState(state);
+    renderStepsSettings();
+    renderSteps();
+    showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
+  });
+  document.getElementById('settingStepsGoal').addEventListener('click', () => {
+    const editor = document.getElementById('stepsGoalEditor');
+    editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
+  });
+  document.getElementById('goalMinus').addEventListener('click', () => {
+    state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
+    saveState(state);
+    renderStepsSettings();
+    renderSteps();
+  });
+  document.getElementById('goalPlus').addEventListener('click', () => {
+    state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
+    saveState(state);
+    renderStepsSettings();
+    renderSteps();
+  });
+  document.getElementById('goalDone').addEventListener('click', () => {
+    document.getElementById('stepsGoalEditor').style.display = 'none';
+    showToast('Step goal updated');
+  });
 
   const aiMessages = document.getElementById('aiMessages');
   const aiInput = document.getElementById('aiInput');
@@ -7802,8 +7946,9 @@ if (deltaEl) {
     const score = computeScore();
     const rec = computeRecovery();
 
-    // 1. Check for Greetings (only when the whole message is a greeting)
-    if (/^(hi|hey|hello|yo|sup|hiya|howdy)[!.,\s]*$/i.test(q)) {
+
+    // 1. Check for Greetings
+    if (/^(hi|hey|hello|yo|sup|hiya|howdy)\b/.test(q)) {
       return `Hey! 👋 Your sleep score is ${score}/100 and recovery is ${rec}%. What's on your mind? Ask me anything about sleep.`;
     }
     if (q === 'thanks' || q === 'thank you' || q === 'thx') {
@@ -7817,14 +7962,15 @@ if (deltaEl) {
     aiDatabase.forEach(item => {
       let matchCount = 0;
       
+      // Check how many keywords from this item are in the user's question
       item.keywords.forEach(kw => {
-        if (new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(q)) {
-          matchCount += 2;
-        } else if (new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(q)) {
-          matchCount += 1;
+        // We use a simple regex to match the keyword anywhere in the text
+        if (new RegExp(kw, 'i').test(q)) {
+          matchCount++;
         }
       });
 
+      // If this item has more matches than the previous best, make it the new best
       if (matchCount > highestScore) {
         highestScore = matchCount;
         bestMatch = item;
@@ -7871,10 +8017,8 @@ if (deltaEl) {
 
     if (!sample) {
       setTimeout(() => {
-        const response = offlineSleepCoach(text);
-        thinkingEl.textContent = response;
+        thinkingEl.textContent = offlineSleepCoach(text);
         thinkingEl.classList.remove('thinking');
-        chatTurns.push({ role: 'assistant', content: response });
         aiMessages.scrollTop = aiMessages.scrollHeight;
         aiBusy = false;
         aiSend.disabled = false;
@@ -7883,14 +8027,7 @@ if (deltaEl) {
     }
 
     try {
-      const systemContext = AI_RULES + '\n\nCurrent app data:\n' + currentAppContext();
-      // Ensure roles strictly alternate: merge system context into the first user turn
-      const turns = chatTurns.map((turn, idx) => {
-        if (idx === 0 && turn.role === 'user') {
-          return { role: 'user', content: systemContext + '\n\n' + turn.content };
-        }
-        return turn;
-      });
+      const turns = [{ role: 'user', content: AI_RULES + '\n\nCurrent app data:\n' + currentAppContext() }, ...chatTurns];
       const { text: answer } = await sample(turns, {
         cache: false,
         onText: ({ text: t }) => {
@@ -7902,9 +8039,7 @@ if (deltaEl) {
       chatTurns.push({ role: 'assistant', content: answer });
     } catch (e) {
       thinkingEl.classList.remove('thinking');
-      const fallbackAns = e.text || offlineSleepCoach(text);
-      thinkingEl.textContent = fallbackAns;
-      chatTurns.push({ role: 'assistant', content: fallbackAns });
+      thinkingEl.textContent = e.text || offlineSleepCoach(text);
       if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) {
         sample = null;
         aiInput.placeholder = 'Ask about your sleep… (offline tips)';
@@ -7970,7 +8105,7 @@ if (deltaEl) {
   function hypeForBest(best, current) {
     if (current >= best && current > 0) return '🎉 New personal record!';
     const gap = best - current;
-    return gap <= 5 ? `Only ${Math.max(gap, 1)} pts from your best` : `Best score: ${best}`;
+    return gap <= 5 ? `Only ${Math.max(gap,1)} pts from your best` : 'Personal record';
   }
   function hypeForNights(n) {
     if (n < 3) return 'Just getting started';
@@ -8161,12 +8296,9 @@ if (deltaEl) {
       });
     });
 
-    let completed = false;
-    function finalizeReel() {
-      if (completed) return;
-      completed = true;
+    function onSpinEnd(e) {
+      if (e.propertyName !== 'transform') return;
       chestReelTrack.removeEventListener('transitionend', onSpinEnd);
-      clearTimeout(safetyTimeout);
       const landedEl = chestReelTrack.children[REEL_TARGET_INDEX];
       if (landedEl) landedEl.classList.add('landed');
       chestReelResult.innerHTML = `<div class="result-xp">+${reward} XP</div><div class="result-label">${rarityForXp[reward].toUpperCase()} REWARD</div>`;
@@ -8175,13 +8307,7 @@ if (deltaEl) {
       spawnParticles(['✨', '🎉', '+' + reward], '#f6c453', landedEl || chestReelOverlay);
       addXp(reward, {});
     }
-
-    function onSpinEnd(e) {
-      if (e && e.propertyName && e.propertyName !== 'transform') return;
-      finalizeReel();
-    }
     chestReelTrack.addEventListener('transitionend', onSpinEnd);
-    const safetyTimeout = setTimeout(finalizeReel, 5200);
   }
 
   chestReelContinue.addEventListener('click', () => {
@@ -8450,7 +8576,6 @@ if (deltaEl) {
 }
 
 if (style === 'long') {
-      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
@@ -8491,7 +8616,6 @@ if (style === 'long') {
     }
 
     if (style === 'curly') {
-      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
@@ -8795,7 +8919,12 @@ if (style === 'long') {
     patternOverlay.classList.remove('active');
   }
   if (patternCard) {
-    patternCard.addEventListener('click', () => {
+    patternCard.addEventListener('click', (e) => {
+      // If you clicked directly on the text inside the stat boxes, ignore the main card click
+      if (e.target.classList.contains('val') || e.target.classList.contains('sub') || e.target.closest('.pattern-stat-icon')) {
+        return;
+      }
+      
       patternOverlay.classList.add('active');
       document.querySelectorAll('.pattern-modal-tab').forEach(t => {
         t.classList.toggle('active', t.dataset.range === '7d');
@@ -8816,6 +8945,287 @@ if (style === 'long') {
       renderPatternModal(tab.dataset.range);
     });
   });
+
+  // ==========================================
+  // NEW: SLEEP PATTERN DETAILS LOGIC (STEP 4)
+  // ==========================================
+  
+  function formatTime(decimalHours) {
+    if (isNaN(decimalHours)) return '—';
+    let h = Math.floor(decimalHours);
+    let m = Math.round((decimalHours - h) * 60);
+    if (m === 60) { h += 1; m = 0; }
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12; 
+    return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
+  }
+
+  function getDecimalTime(timeStr) {
+    if (!timeStr) return 0;
+    const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return 0;
+    let h = parseInt(match[1]) % 12;
+    if (match[3].toUpperCase() === 'PM') h += 12;
+    const m = parseInt(match[2]);
+    return h + (m / 60);
+  }
+
+  function updatePatternCardStats() {
+    let history = state.sleepHistory || [];
+    const today = new Date();
+    
+    let last7 = [];
+    let bedTimes = [];
+    let wakeTimes = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const isToday = d.toDateString() === today.toDateString();
+      
+      const found = history.find(h => h.date === d.toDateString());
+      
+      let bTime, wTime;
+      if (isToday) {
+        bTime = state.baseline.bedtime;
+        wTime = state.baseline.waketime;
+      } else if (found) {
+        bTime = found.bedtime;
+        wTime = found.waketime;
+      }
+
+      if (bTime && wTime) {
+        let bDec = getDecimalTime(bTime);
+        let wDec = getDecimalTime(wTime);
+        
+        if (bDec < 12) bDec += 24;
+        if (wDec < 5) wDec += 24;
+
+        bedTimes.push(bDec);
+        wakeTimes.push(wDec);
+        
+        last7.push({ date: d, bedtime: bTime, waketime: wTime, tracked: true, rawBed: bDec, rawWake: wDec });
+      } else {
+        last7.push({ date: d, tracked: false });
+      }
+    }
+
+    const avgBed = bedTimes.length > 0 ? bedTimes.reduce((a,b)=>a+b,0) / bedTimes.length : 0;
+    const avgWake = wakeTimes.length > 0 ? wakeTimes.reduce((a,b)=>a+b,0) / wakeTimes.length : 0;
+
+    let bedVar = 0, wakeVar = 0;
+    if (bedTimes.length > 0) {
+      bedVar = Math.sqrt(bedTimes.reduce((a,b)=> a + Math.pow(b - avgBed, 2), 0) / bedTimes.length);
+      wakeVar = Math.sqrt(wakeTimes.reduce((a,b)=> a + Math.pow(b - avgWake, 2), 0) / wakeTimes.length);
+    }
+
+    const displayAvgBed = avgBed > 0 ? formatTime(avgBed % 24) : '—';
+    const displayAvgWake = avgWake > 0 ? formatTime(avgWake % 24) : '—';
+    const displayBedVar = Math.round(bedVar * 60) + 'm';
+    const displayWakeVar = Math.round(wakeVar * 60) + 'm';
+    const consistencyCount = last7.filter(d => d.tracked).length;
+    const consistencyPct = Math.round((consistencyCount / 7) * 100);
+
+    document.getElementById('displayAvgBedtime').textContent = displayAvgBed;
+    document.getElementById('displayAvgBedtimeSub').textContent = `±${displayBedVar} variation`;
+    
+    document.getElementById('displayAvgWake').textContent = displayAvgWake;
+    document.getElementById('displayAvgWakeSub').textContent = `±${displayWakeVar} variation`;
+    
+    document.getElementById('displayConsistency').textContent = consistencyPct + '%';
+    document.getElementById('displayConsistencySub').textContent = `(${consistencyCount}/7 nights)`;
+
+    return { last7, avgBed: displayAvgBed, avgWake: displayAvgWake, consistencyPct, consistencyCount };
+  }
+
+  const patternDetailsOverlay = document.getElementById('patternDetailsOverlay');
+  const patternDetailsTitle = document.getElementById('patternDetailsTitle');
+  const patternDetailsChartView = document.getElementById('patternDetailsChartView');
+  const patternDetailsCalendarView = document.getElementById('patternDetailsCalendarView');
+  const patternDetailsChart = document.getElementById('patternDetailsChart');
+  const patternDetailsAxis = document.getElementById('patternDetailsAxis');
+  const patternDetailsChartSubtitle = document.getElementById('patternDetailsChartSubtitle');
+  const patternDetailsCalendar = document.getElementById('patternDetailsCalendar');
+
+  function renderDetailsChart(type, data) {
+    patternDetailsChartView.style.display = 'block';
+    patternDetailsCalendarView.style.display = 'none';
+    
+    const isBed = type === 'bed';
+    patternDetailsChartSubtitle.textContent = isBed ? 'BEDTIME - LAST 7 DAYS' : 'WAKE TIME - LAST 7 DAYS';
+    patternDetailsChart.innerHTML = '';
+    patternDetailsAxis.innerHTML = '';
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'pattern-bar-tooltip';
+    patternDetailsChart.appendChild(tooltip);
+
+    let activeBar = null;
+    function showBarTooltip(bar) {
+      if (activeBar) activeBar.classList.remove('active');
+      activeBar = bar;
+      bar.classList.add('active');
+      tooltip.innerHTML = `${bar.dataset.label}<span class="tt-sub">${bar.dataset.value}</span>`;
+      const chartRect = patternDetailsChart.getBoundingClientRect();
+      const barRect = bar.getBoundingClientRect();
+      tooltip.style.left = (barRect.left - chartRect.left + barRect.width / 2) + 'px';
+      tooltip.style.top = (barRect.top - chartRect.top) + 'px';
+      tooltip.classList.add('show');
+    }
+    function hideBarTooltip() {
+      if (activeBar) activeBar.classList.remove('active');
+      activeBar = null;
+      tooltip.classList.remove('show');
+    }
+
+    const validTimes = data.last7.filter(d => d.tracked).map(d => isBed ? d.rawBed : d.rawWake);
+    if (validTimes.length === 0) {
+      patternDetailsChart.innerHTML = '<div style="color:var(--text-faint); font-size:12px; margin:auto;">No data tracked yet.</div>';
+      return;
+    }
+
+    const minTime = Math.floor(Math.min(...validTimes));
+    const maxTime = Math.ceil(Math.max(...validTimes));
+    const range = Math.max(1, maxTime - minTime);
+
+    data.last7.forEach((day, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'pattern-modal-bar';
+      
+      const shortDay = day.date.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      if (day.tracked) {
+        const val = isBed ? day.rawBed : day.rawWake;
+        const pct = 20 + ((val - minTime) / range) * 80;
+        bar.style.height = pct + '%';
+        bar.style.background = isBed ? 'linear-gradient(180deg, #4fa3f7, #9d7cf5)' : 'linear-gradient(180deg, #f6c453, #f0a63e)';
+        bar.dataset.label = shortDay;
+        bar.dataset.value = isBed ? day.bedtime : day.waketime;
+      } else {
+        bar.style.height = '10%';
+        bar.style.background = 'rgba(255,255,255,0.05)';
+        bar.dataset.label = shortDay;
+        bar.dataset.value = 'Not tracked';
+        bar.style.cursor = 'default';
+      }
+
+      bar.addEventListener('mouseenter', () => showBarTooltip(bar));
+      bar.addEventListener('mouseleave', hideBarTooltip);
+      bar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (day.tracked) activeBar === bar ? hideBarTooltip() : showBarTooltip(bar);
+      });
+
+      patternDetailsChart.appendChild(bar);
+    });
+
+    patternDetailsAxis.innerHTML = `
+      <span>${data.last7[0].date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+      <span>${data.last7[3].date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+      <span>${data.last7[6].date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+    `;
+  }
+
+  function renderCalendar(data) {
+    patternDetailsChartView.style.display = 'none';
+    patternDetailsCalendarView.style.display = 'block';
+    patternDetailsTitle.textContent = 'Sleep Consistency';
+    patternDetailsCalendar.innerHTML = '';
+
+    ['S','M','T','W','T','F','S'].forEach(d => {
+      const head = document.createElement('div');
+      head.textContent = d;
+      head.style.textAlign = 'center';
+      head.style.fontSize = '9px';
+      head.style.color = 'var(--text-faint)';
+      head.style.fontWeight = '700';
+      patternDetailsCalendar.appendChild(head);
+    });
+
+    const history = state.sleepHistory || [];
+    const today = new Date();
+    const todayStr = today.toDateString();
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay() - 21); 
+
+    for (let i = 0; i < 28; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const dStr = d.toDateString();
+      
+      const isToday = dStr === todayStr;
+      const found = history.find(h => h.date === dStr);
+      
+      let isTracked = false;
+      if (isToday && state.baseline.totalSleep > 0) isTracked = true; 
+      else if (found) isTracked = true;
+
+      const dayEl = document.createElement('div');
+      dayEl.style.aspectRatio = '1';
+      dayEl.style.borderRadius = '6px';
+      dayEl.style.display = 'flex';
+      dayEl.style.alignItems = 'center';
+      dayEl.style.justifyContent = 'center';
+      dayEl.style.fontSize = '11px';
+      dayEl.style.fontWeight = '700';
+      
+      if (isTracked) {
+        dayEl.style.background = 'rgba(79,209,139,0.2)';
+        dayEl.style.border = '1px solid rgba(79,209,139,0.5)';
+        dayEl.style.color = '#4fd18b';
+      } else {
+        dayEl.style.background = 'rgba(239,90,111,0.1)';
+        dayEl.style.border = '1px solid rgba(239,90,111,0.3)';
+        dayEl.style.color = '#ef5a6f';
+      }
+
+      if (isToday) {
+        dayEl.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.5) inset';
+      }
+
+      dayEl.textContent = d.getDate();
+      patternDetailsCalendar.appendChild(dayEl);
+    }
+  }
+
+  document.getElementById('statAvgBedtime').addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    updatePatternCardStats(); // Calculate the data
+    patternDetailsTitle.textContent = 'Avg Bedtime';
+    renderDetailsChart('bed', updatePatternCardStats()); 
+    patternDetailsOverlay.classList.add('active');
+  });
+
+  document.getElementById('statAvgWake').addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    updatePatternCardStats(); 
+    patternDetailsTitle.textContent = 'Avg Wake Time';
+    renderDetailsChart('wake', updatePatternCardStats()); 
+    patternDetailsOverlay.classList.add('active');
+  });
+
+  document.getElementById('statConsistency').addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    updatePatternCardStats(); 
+    renderCalendar(updatePatternCardStats());
+    patternDetailsOverlay.classList.add('active');
+  });
+
+  document.getElementById('patternDetailsClose').addEventListener('click', () => patternDetailsOverlay.classList.remove('active'));
+  document.getElementById('patternDetailsDone').addEventListener('click', () => patternDetailsOverlay.classList.remove('active'));
+  patternDetailsOverlay.addEventListener('click', (e) => {
+    if (e.target.classList.contains('details-overlay')) {
+        patternDetailsOverlay.classList.remove('active');
+    }
+  });
+
+  // ==========================================
+  // END OF STEP 4
+  // ==========================================
+
+  // Initial renders
 
   renderFactors();
   renderStress();
