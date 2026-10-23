@@ -4182,10 +4182,10 @@
 
   <div class="card-title" style="margin: 4px 0 10px 4px;">TODAY'S FACTORS</div>
 
-  <div class="stress-card" style="margin-bottom: 14px;">
+  <div class="stress-card" id="stressCard" style="margin-bottom: 14px;">
     <div class="stress-top">
       <div class="stress-left">
-        <div class="factor-icon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
+        <div class="factor-icon" id="stressIcon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
         <div>
           <div class="factor-name">Stress level</div>
         </div>
@@ -4701,16 +4701,24 @@
     <div class="factor-left">
       <div class="factor-icon" style="background:rgba(255,255,255,0.08); color:var(--text-dim);">ℹ️</div>
       <div>
-      <div class="factor-name">About Restia</div>
-      <div class="factor-sub">Version 1.0</div>
+        <div class="factor-name">About Restia</div>
+        <div class="factor-sub">Version 1.0</div>
+      </div>
     </div>
+  </div>
+  <div class="factor-card" id="settingResetData" style="cursor:pointer; border-color:rgba(239,90,111,0.25); background:rgba(239,90,111,0.06);">
+    <div class="factor-left">
+      <div class="factor-icon" style="background:rgba(239,90,111,0.18); color:var(--red);">🗑️</div>
+      <div>
+        <div class="factor-name" style="color:var(--red);">Reset all data</div>
+        <div class="factor-sub">Clear history &amp; restore defaults</div>
+      </div>
     </div>
   </div>
 
 </div>
 
 </div>
-<button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:100px; left:20px; z-index:9999; padding:15px; background:red; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">RESET APP</button>
 
 <div class="app-footer" id="appFooter">
   <div class="cta-wrap" id="ctaWrap">
@@ -5067,6 +5075,10 @@
     steps: 0,
     stepsEnabled: true,
     redlightOn: false,
+    bedtimeReminderEnabled: true,
+    notificationsEnabled: true,
+    stepsHistory: [4200, 5600, 7100, 6800, 8200, 7500],
+    moodHistory: [4, 2, 5, 3, 4, 2],
     baseline: {
       totalSleep: 6.1,
       deepRatio: 22,
@@ -5074,7 +5086,6 @@
       waketime: '5:49 AM',
       hr: 78,
       bp: '129/85',
-      // ADD THESE:
       awakeCount: 3,
       awakeTime: 0.4,
       deepSleep: 1.3,
@@ -5088,11 +5099,11 @@
         deepRatio: 22, 
         bedtime: '11:42 PM', 
         waketime: '5:49 AM',
-        date: new Date().toDateString() // <-- ADDED THIS
+        date: new Date().toDateString()
       }
     ],
     xp: 0,
-    xpAwardedForDate: null,
+    xpAwardedForDate: new Date().toDateString(),
     stepsGoalXpAwardedDate: null,
     interactionClicks: 0,
     lastChestOpenedAt: 0,
@@ -5116,23 +5127,44 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return { ...defaultState };
       const parsed = JSON.parse(raw);
-      if (parsed.date !== new Date().toDateString()) {
+      const mergedBaseline = { ...defaultState.baseline, ...(parsed.baseline || {}) };
+      const mergedAvatar = { ...defaultState.avatar, ...(parsed.avatar || {}) };
+      const mergedStats = { ...defaultState.stats, ...(parsed.stats || {}) };
+      const isNewDay = parsed.date !== new Date().toDateString();
+
+      if (isNewDay) {
         return {
           ...defaultState,
           stepsGoal: parsed.stepsGoal || defaultState.stepsGoal,
           stepsEnabled: parsed.stepsEnabled !== undefined ? parsed.stepsEnabled : true,
           redlightOn: parsed.redlightOn || false,
+          bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
+          notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
           xp: parsed.xp || 0,
           xpAwardedForDate: parsed.xpAwardedForDate || null,
           stepsGoalXpAwardedDate: parsed.stepsGoalXpAwardedDate || null,
           interactionClicks: parsed.interactionClicks || 0,
           lastChestOpenedAt: parsed.lastChestOpenedAt || 0,
-          stats: parsed.stats || defaultState.stats,
-          avatar: parsed.avatar || defaultState.avatar,
-          sleepHistory: parsed.sleepHistory || defaultState.sleepHistory
+          baseline: mergedBaseline,
+          stats: mergedStats,
+          avatar: mergedAvatar,
+          sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
+          stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
+          moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
         };
       }
-      return { ...defaultState, ...parsed, avatar: { ...defaultState.avatar, ...(parsed.avatar || {}) }, stats: { ...defaultState.stats, ...(parsed.stats || {}) } };
+      return {
+        ...defaultState,
+        ...parsed,
+        baseline: mergedBaseline,
+        avatar: mergedAvatar,
+        stats: mergedStats,
+        bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
+        notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
+        sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
+        stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
+        moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
+      };
     } catch (e) {
       return { ...defaultState };
     }
@@ -5323,18 +5355,6 @@
   });
   document.addEventListener('click', hideStageTooltip);
 
-  function updateUI() {
-    saveState(state);
-    
-    // Recalculate and redraw everything in order
-    renderFactors();
-    renderHomeDashboard(); // Updates Home Ring, Home Breakdown, Recovery
-    renderLineChart(currentRange || '7d'); // <-- Crucial: Refreshes the Trends chart
-    renderRecoveryTrendChart();
-    
-    if (typeof renderStress === 'function') renderStress();
-  }
-
   function renderInsight() {
     const diff = (7 - state.baseline.totalSleep).toFixed(1);
     document.getElementById('insightText').innerHTML =
@@ -5377,18 +5397,6 @@
   const timeOptionsEl = document.getElementById('timeOptions');
   let activeTimePickerType = null; // 'caffeine' or 'screen'
 
-  function updateUI() {
-    saveState(state);
-    
-    // Recalculate and redraw everything in order
-    renderFactors();
-    renderHomeDashboard(); // Updates Home Ring & Breakdown
-    renderLineChart('7d'); // Updates the Trend line & Duo cards
-    renderRecoveryTrendChart();
-    
-    if (typeof renderStress === 'function') renderStress();
-  }
-
   function openTimePicker(type) {
     activeTimePickerType = type;
     timePickerTitle.textContent = type === 'caffeine' ? 'Caffeine' : 'Screen Time';
@@ -5427,7 +5435,13 @@
         }
         
         timePickerOverlay.classList.remove('active');
-        updateUI(); // <-- Updates everything perfectly without the glitch
+        saveState(state);
+        renderFactors();
+        renderScore();
+        renderRecovery();
+        renderHomeBreakdown();
+        renderLineChart('7d');
+        renderRecoveryTrendChart();
         showToast(type === 'caffeine' ? 'Caffeine logged' : 'Screen time logged');
         registerInteraction();
       });
@@ -5449,7 +5463,8 @@
     saveState(state);
     renderFactors();
     renderScore();
-    renderLineChart('7d')
+    renderLineChart('7d');
+    renderRecoveryTrendChart();
     renderRecovery();
     renderHomeBreakdown();
     showToast('Cleared');
@@ -5467,7 +5482,8 @@
       saveState(state);
       renderFactors();
       renderScore();
-      renderLineChart('7d')
+      renderLineChart('7d');
+      renderRecoveryTrendChart();
       renderRecovery();
       renderHomeBreakdown();
       showToast('Caffeine removed');
@@ -5482,6 +5498,8 @@
       saveState(state);
       renderFactors();
       renderScore();
+      renderLineChart('7d');
+      renderRecoveryTrendChart();
       renderRecovery();
       renderHomeBreakdown();
       showToast('Screen time removed');
@@ -5703,8 +5721,13 @@
       window.addEventListener('devicemotion', handleMotion);
       isStepCounterActive = true;
       showToast('Step counter activated!');
-      updateStepsUI();
+      renderSteps();
     }
+  }
+
+  const stepsClickArea = document.getElementById('stepsClickArea');
+  if (stepsClickArea) {
+    stepsClickArea.addEventListener('click', enableStepCounter);
   }
 
 
@@ -5792,29 +5815,24 @@
     sleepOverlay.appendChild(el);
   }
   function startDrifting() {
+    stopDrifting();
     for (let i = 0; i < 3; i++) setTimeout(spawnDriftItem, i * 400);
     driftInterval = setInterval(spawnDriftItem, 1150);
   }
   function stopDrifting() {
-    clearInterval(driftInterval);
-    driftInterval = null;
+    if (driftInterval) {
+      clearInterval(driftInterval);
+      driftInterval = null;
+    }
+    document.querySelectorAll('.drift-item').forEach(el => el.remove());
   }
 
   function resetSlider(instant) {
-    if (instant) {
-      sleepKnob.style.transition = 'none';
-      sleepFill.style.transition = 'none';
-    }
+    if (instant) sleepKnob.style.transition = 'none';
     sleepKnob.style.left = '4px';
     sleepFill.style.width = '0%';
     sleepHint.style.opacity = '1';
-    
-    if (instant) {
-      requestAnimationFrame(() => { 
-        sleepKnob.style.transition = ''; 
-        sleepFill.style.transition = 'width 0.1s ease-out'; // Restore smooth fill
-      });
-    }
+    if (instant) requestAnimationFrame(() => { sleepKnob.style.transition = ''; });
   }
 
   let sessionTimerInterval = null;
@@ -5857,6 +5875,7 @@ let motionHandler = null;
 let lastMotion = { x: 0, y: 0, z: 0 };
 
 async function startMicrophone() {
+  stopMicrophone(); // Clean up any existing stream/context first
   sessionData.startTime = Date.now();
   sessionData.micActive = false;
   sessionData.micDenied = false;
@@ -5871,6 +5890,9 @@ async function startMicrophone() {
     });
     
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') {
+      try { await audioContext.resume(); } catch (e) {}
+    }
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.3;
@@ -5879,7 +5901,8 @@ async function startMicrophone() {
     microphone.connect(analyser);
     
     sessionData.micActive = true;
-    document.getElementById('radarCenterIcon').textContent = '🎙️';
+    const radarIcon = document.getElementById('radarCenterIcon');
+    if (radarIcon) radarIcon.textContent = '🎙️';
     document.querySelectorAll('.radar-ring').forEach(r => r.style.borderColor = 'rgba(157,124,245,0.6)');
     
     startAudioAnalysis();
@@ -6003,6 +6026,7 @@ function recordAudioEvent(type, confidence) {
     const bars = document.querySelectorAll('.audio-wave span');
     
     function draw() {
+      if (!analyser) return; // Prevent null pointer exception on teardown
       analyser.getByteFrequencyData(dataArray);
       
       // Calculate average volume
@@ -6015,15 +6039,14 @@ function recordAudioEvent(type, confidence) {
       // Animate the 7 visualizer bars based on real audio data
       if (bars.length > 0) {
         bars.forEach((bar, index) => {
-          // Map different frequency bands to different bars for a dynamic look
           const freqValue = dataArray[index * 4] || average; 
           const height = Math.max(10, (freqValue / 255) * 100);
           bar.style.height = height + '%';
-          bar.style.animation = 'none'; // Turn off CSS animation to use real-time JS
+          bar.style.animation = 'none';
         });
       }
       
-      // Make the radar pulse faster or slower based on sound
+      // Make the radar pulse based on sound
       const radar = document.querySelector('.radar-center');
       if (radar) {
         const scale = 1 + (average / 255) * 0.2;
@@ -6037,33 +6060,49 @@ function recordAudioEvent(type, confidence) {
   }
 
   function startFakeAudio() {
-  const bars = document.querySelectorAll('.audio-wave span');
-  bars.forEach((bar, index) => {
-    bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
-  });
-  document.getElementById('radarCenterIcon').textContent = '🚫';
-}
+    const bars = document.querySelectorAll('.audio-wave span');
+    bars.forEach((bar, index) => {
+      bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
+    });
+    const icon = document.getElementById('radarCenterIcon');
+    if (icon) icon.textContent = '🚫';
+  }
 
   function stopMicrophone() {
-  if (audioAnalysisInterval) {
-    clearInterval(audioAnalysisInterval);
-    audioAnalysisInterval = null;
+    if (audioAnalysisInterval) {
+      clearInterval(audioAnalysisInterval);
+      audioAnalysisInterval = null;
+    }
+    if (micStream) {
+      try {
+        micStream.getTracks().forEach(track => track.stop());
+      } catch (e) {}
+      micStream = null;
+    }
+    if (audioContext && audioContext.state !== 'closed') {
+      try {
+        audioContext.close();
+      } catch (e) {}
+      audioContext = null;
+    }
+    if (audioAnimationFrame) {
+      cancelAnimationFrame(audioAnimationFrame);
+      audioAnimationFrame = null;
+    }
+    analyser = null;
+    microphone = null;
+
+    // Reset visualizer bars and radar center smoothly
+    const bars = document.querySelectorAll('.audio-wave span');
+    bars.forEach(bar => {
+      bar.style.height = '';
+      bar.style.animation = '';
+    });
+    const radar = document.querySelector('.radar-center');
+    if (radar) {
+      radar.style.transform = '';
+    }
   }
-  if (micStream) {
-    micStream.getTracks().forEach(track => track.stop());
-  }
-  if (audioContext) {
-    audioContext.close();
-    audioContext = null;
-  }
-  if (audioAnimationFrame) {
-    cancelAnimationFrame(audioAnimationFrame);
-    audioAnimationFrame = null;
-  }
-  analyser = null;
-  microphone = null;
-  micStream = null;
-}
 
 // ---- MOVEMENT DETECTION ----
 function startMovementDetection() {
@@ -6107,33 +6146,36 @@ function stopMovementDetection() {
 async function requestWakeLock() {
   try {
     if ('wakeLock' in navigator) {
+      if (wakeLock !== null) return;
       wakeLock = await navigator.wakeLock.request('screen');
       console.log('Wake Lock is active');
       
-      // If the user switches apps and comes back, the lock is dropped. 
-      // This listener re-requests it.
       wakeLock.addEventListener('release', () => {
         console.log('Wake Lock was released');
+        wakeLock = null;
       });
     } else {
       console.warn('Wake Lock API not supported on this browser.');
     }
   } catch (err) {
-    console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
+    console.warn(`Wake Lock Error: ${err.name}, ${err.message}`);
+    wakeLock = null;
   }
 }
 
 function releaseWakeLock() {
   if (wakeLock !== null) {
-    wakeLock.release();
+    try {
+      wakeLock.release();
+    } catch (e) {}
     wakeLock = null;
     console.log('Wake Lock released manually');
   }
 }
 
-// Re-acquire the wake lock if the user returns to the app
+// Re-acquire the wake lock ONLY if sleep mode is still active
 document.addEventListener('visibilitychange', async () => {
-  if (wakeLock !== null && document.visibilityState === 'visible') {
+  if (document.body.classList.contains('sleep-mode') && document.visibilityState === 'visible') {
     await requestWakeLock();
   }
 });
@@ -6191,6 +6233,10 @@ function createSpaceParticle(randomizeOpacity = false) {
 }
 
 function animateSpace() {
+  if (!document.body.classList.contains('sleep-mode')) {
+    spaceAnimationFrame = null;
+    return;
+  }
   if (!canvasCtx) return;
   const ctx = canvasCtx;
   
@@ -6373,10 +6419,9 @@ window.addEventListener('resize', () => {
 });
 
   function enterSleepMode() {
-    
-     // ---- RESET SESSION DATA ----
-     sessionData = {
-      startTime: null,
+    // ---- RESET SESSION DATA ----
+    sessionData = {
+      startTime: Date.now(),
       endTime: null,
       totalSeconds: 0,
       audioEvents: {
@@ -6402,58 +6447,59 @@ window.addEventListener('resize', () => {
     document.body.classList.add('sleep-mode');
     ctaWrap.classList.add('sleeping');
     
-    // Start the new space engine
+    // Start the space engine
     initSpaceEngine(); 
     
     sleepOverlay.classList.add('active');
     sleepSliderWrap.classList.add('active');
     
     // Show the floating live mic widget
-    document.getElementById('liveMicContainer').classList.add('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.add('active');
     
     resetSlider(true);
     startDrifting();
     
-    // Start the session timer
+    // Start the session timer ONCE cleanly
     sessionSeconds = 0;
-    document.getElementById('liveTimer').textContent = '00:00:00';
-    clearInterval(sessionTimerInterval);
+    const liveTimerEl = document.getElementById('liveTimer');
+    if (liveTimerEl) liveTimerEl.textContent = '00:00:00';
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
     sessionTimerInterval = setInterval(() => {
       sessionSeconds++;
       const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(sessionSeconds % 60).padStart(2, '0');
-      document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
+      if (liveTimerEl) liveTimerEl.textContent = `${h}:${m}:${s}`;
     }, 1000);
-
-    // START WAKE LOCK HERE
-    requestWakeLock();
-
-    // Start the mic
-    startMicrophone();
-
-    // Start movement tracking
-    startMovementDetection();
     
-    // Start the mic
+    requestWakeLock();
     startMicrophone();
-    // Start movement tracking
     startMovementDetection();
   }
 
   function exitSleepMode() {
-  document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('sessionPage').classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
-  clearInterval(sessionTimerInterval);
-  stopMicrophone();
-  stopMovementDetection();
-}
+    document.body.classList.remove('sleep-mode');
+    ctaWrap.classList.remove('sleeping');
+    sleepOverlay.classList.remove('active');
+    sleepSliderWrap.classList.remove('active');
+    const sessionPage = document.getElementById('sessionPage');
+    if (sessionPage) sessionPage.classList.remove('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.remove('active');
+    stopDrifting();
+    if (spaceAnimationFrame) {
+      cancelAnimationFrame(spaceAnimationFrame);
+      spaceAnimationFrame = null;
+    }
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    releaseWakeLock();
+    stopMicrophone();
+    stopMovementDetection();
+  }
 function qualityTag(pct) {
   if (pct >= 75) return { label: 'Excellent', color: 'var(--green)' };
   if (pct >= 55) return { label: 'Good', color: 'var(--gold-1)' };
@@ -6469,15 +6515,15 @@ function renderHomeBreakdown() {
   const totalPenalty = cPenalty + sPenalty + stPenalty;
 
   // 2. Duration (Caps at 100, drops by the exact penalty points)
-  const baseDurationPct = Math.min(100, Math.round((state.baseline.totalSleep / 8) * 100));
+  const baseDurationPct = Math.min(100, Math.round(((parseFloat(state.baseline.totalSleep) || 6.1) / 8) * 100));
   const durationPct = Math.max(0, Math.round(baseDurationPct - totalPenalty));
 
   // 3. Deep Sleep (Drops by half the penalty)
-  const baseDeepPct = Math.min(100, Math.round((state.baseline.deepSleep / 2) * 100));
+  const baseDeepPct = Math.min(100, Math.round(((parseFloat(state.baseline.deepSleep) || 1.3) / 2) * 100));
   const deepPct = Math.max(0, Math.round(baseDeepPct - (totalPenalty * 0.5)));
 
   // 4. REM (Drops by half the penalty)
-  const baseRemPct = Math.min(100, Math.round((state.baseline.remSleep / 2) * 100));
+  const baseRemPct = Math.min(100, Math.round(((parseFloat(state.baseline.remSleep) || 1.5) / 2) * 100));
   const remPct = Math.max(0, Math.round(baseRemPct - (totalPenalty * 0.5)));
   
   // 5. Consistency (Drops by the full penalty)
@@ -6548,8 +6594,8 @@ function renderHomeDashboard() {
   const circ = 2 * Math.PI * 92;
   const scoreArc = document.getElementById('scoreArc');
 scoreArc.style.strokeDashoffset = circ - (score / 100) * circ;
-// Hide the arc completely if the score is 0 to prevent the glowing dot glitch
-scoreArc.style.opacity = score <= 10 ? '0' : '1';
+// Hide the arc completely only if the score is 0 to prevent the glowing dot glitch
+scoreArc.style.opacity = score <= 0 ? '0' : '1';
   
   document.getElementById('totalSleepVal').textContent = state.baseline.totalSleep + 'h';
   document.getElementById('deepRatioVal').textContent = state.baseline.deepRatio + '%';
@@ -6638,21 +6684,32 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
         <span>${tip.text}</span>
       </div>
     `).join('');
+    wireIconWiggles();
   }
   
   if (state.sleepHistory.length > 1) {
-    const avgHistory = state.sleepHistory.reduce((sum, n) => sum + n.duration, 0) / state.sleepHistory.length;
+    const avgHistory = state.sleepHistory.reduce((sum, n) => sum + (parseFloat(n.duration) || 0), 0) / state.sleepHistory.length;
     const diff = Math.abs(avgHistory - state.baseline.totalSleep).toFixed(1);
     const isLess = state.baseline.totalSleep < avgHistory;
     document.getElementById('insightText').innerHTML = `You slept <b>${diff} hrs ${isLess ? 'less' : 'more'}</b> than your recent average.`;
   }
+  wireIconWiggles();
 }
   // Render the 100-point breakdown based on actual time slept
   function renderScoreBreakdown() {
-  sessionData.endTime = Date.now();
-  sessionData.totalSeconds = sessionSeconds;
-  
-  const hoursSlept = sessionSeconds / 3600;
+    sessionData.endTime = Date.now();
+    sessionData.totalSeconds = sessionSeconds;
+    
+    const hoursSlept = sessionSeconds / 3600;
+
+    // Guard against accidental sub-minute tests wiping baseline metrics
+    if (sessionSeconds < 60 && state.baseline.totalSleep > 0) {
+      const scoreValEl = document.getElementById('sessionScoreVal');
+      if (scoreValEl) scoreValEl.textContent = computeScore() + ' / 100';
+      renderRealSoundEvents(hoursSlept);
+      showToast('Session too short (< 1 min) — baseline preserved');
+      return;
+    }
   
   // === 1. DURATION (30 pts) ===
   const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
@@ -6661,7 +6718,7 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   const eventCount = Object.values(sessionData.audioEvents)
     .reduce((sum, e) => sum + e.count, 0);
   const loudNoiseEvents = sessionData.noiseSamples.filter(
-    n => n.volume > noiseBaseline * 2.5
+    n => n.volume > (noiseBaseline || 25) * 2.5
   ).length;
   
   const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
@@ -6673,7 +6730,7 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   continuityScore = Math.max(0, Math.min(25, continuityScore));
   
   // === 3. CONSISTENCY (20 pts) ===
-  const startHour = new Date(sessionData.startTime).getHours();
+  const startHour = sessionData.startTime ? new Date(sessionData.startTime).getHours() : 23;
   const baselineHour = 23;
   const hourDiff = Math.abs(startHour - baselineHour);
   const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
@@ -6698,7 +6755,7 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   // === 5. ENVIRONMENT (10 pts) ===
   const avgNoise = sessionData.noiseSamples.length > 0
     ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
-    : 0;
+    : (noiseBaseline || 20);
   const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
   let environmentScore;
   if (noiseRatio < 1.2) environmentScore = 10;
@@ -6728,36 +6785,41 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   ];
   
   const list = document.getElementById('scoreBreakdownList');
-  list.innerHTML = '';
+  if (list) {
+    list.innerHTML = '';
+    breakdown.forEach(b => {
+      const pct = b.max > 0 ? (b.score / b.max) * 100 : 0;
+      const row = document.createElement('div');
+      row.className = 'score-component';
+      row.innerHTML = `
+        <div class="score-comp-head">
+          <span>${b.name}</span>
+          <span>${b.score} / ${b.max}</span>
+        </div>
+        <div class="score-comp-bar">
+          <div class="score-comp-fill" style="width: 2%; background: ${b.color};"></div>
+        </div>
+      `;
+      list.appendChild(row);
+      setTimeout(() => {
+        const fill = row.querySelector('.score-comp-fill');
+        if (fill) {
+          fill.style.transition = 'width 0.9s cubic-bezier(.4,0,.2,1)';
+          fill.style.width = pct + '%';
+        }
+      }, 100);
+    });
+  }
   
-  breakdown.forEach(b => {
-    const pct = b.max > 0 ? (b.score / b.max) * 100 : 0;
-    const row = document.createElement('div');
-    row.className = 'score-component';
-    row.innerHTML = `
-      <div class="score-comp-head">
-        <span>${b.name}</span>
-        <span>${b.score} / ${b.max}</span>
-      </div>
-      <div class="score-comp-bar">
-        <div class="score-comp-fill" style="width: 2%; background: ${b.color};"></div>
-      </div>
-    `;
-    list.appendChild(row);
-    setTimeout(() => {
-      row.querySelector('.score-comp-fill').style.transition = 'width 0.9s cubic-bezier(.4,0,.2,1)';
-      row.querySelector('.score-comp-fill').style.width = pct + '%';
-    }, 100);
-  });
-  
-  document.getElementById('sessionScoreVal').textContent = totalScore + ' / 100';
+  const sessVal = document.getElementById('sessionScoreVal');
+  if (sessVal) sessVal.textContent = totalScore + ' / 100';
   
   // Persist score to home
   state.baseScore = totalScore;
   
   // ---- UPDATE HOME TAB STATS ----
   const sessionEnd = new Date();
-  const start = new Date(sessionData.startTime);
+  const start = sessionData.startTime ? new Date(sessionData.startTime) : new Date(Date.now() - sessionSeconds * 1000);
   const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   
   // Calculate estimated sleep stages based on total hours
@@ -6775,21 +6837,19 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
   state.baseline.remSleep = parseFloat(remHours.toFixed(1));
   state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
-  state.baseline.deepRatio = newDeepRatio; // Ensure this is explicitly set
+  state.baseline.deepRatio = newDeepRatio;
   state.baseline.awakeCount = sessionData.awakenings;
-  state.baseline.awakeTime = (sessionData.timeAwake / 3600).toFixed(1);
+  state.baseline.awakeTime = parseFloat((sessionData.timeAwake / 3600).toFixed(1));
   
   const todayStr = new Date().toDateString();
 
   // Remove any existing entry for today first (prevents duplicates)
   state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
 
-  // CRITICAL FIX: Save the exact score that is currently displayed on the Home screen
-  // (This includes the stress/caffeine deductions so the chart matches perfectly)
   const liveHomeScore = computeScore(); 
 
   state.sleepHistory.push({
-    score: liveHomeScore, // <-- Use the live score instead of totalScore
+    score: liveHomeScore,
     duration: parseFloat(state.baseline.totalSleep),
     deepRatio: state.baseline.deepRatio,
     bedtime: state.baseline.bedtime,
@@ -6800,12 +6860,15 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   // Keep only the last 30 nights
   if (state.sleepHistory.length > 30) state.sleepHistory.shift();
   
+  state.stats.bestScore = Math.max(state.stats.bestScore, liveHomeScore);
+
   saveState(state);
   
   renderHomeBreakdown();
   renderHomeDashboard();
-  renderLineChart('7d')
-  renderRecoveryTrendChart()
+  renderLineChart('7d');
+  renderRecoveryTrendChart();
+  wireIconWiggles();
   
   renderRealSoundEvents(hoursSlept);
 }
@@ -6864,48 +6927,41 @@ function formatDuration(seconds) {
 
   // Wake up logic - opens the session dashboard before showing the check-in
   function wakeUp() {
-  state.loggedBedtime = false;
-  saveState(state);
-  renderCta();
-  setTimeout(() => {
-    renderScoreBreakdown();
-  }, 50);
-  // Stop all tracking
-  document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
-  clearInterval(sessionTimerInterval);
-    // Stop all tracking
-    document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  clearInterval(sessionTimerInterval);
-  
-  // RELEASE WAKE LOCK HERE
-  releaseWakeLock(); 
+    state.loggedBedtime = false;
+    saveState(state);
+    renderCta();
 
-  stopMicrophone();
-  stopMovementDetection();
-  
-  // Build real sleep score
-  // Build real sleep score
-  renderScoreBreakdown();
-  
-  // Update the Recovery Score and Sleep Debt immediately!
-  renderRecovery();
-  
-  document.getElementById('sessionPage').classList.add('active');
-  
-  spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
-  showToast(randomOf(wakePhrases));
-}
+    // Stop tracking, loops, and reset UI state cleanly
+    document.body.classList.remove('sleep-mode');
+    ctaWrap.classList.remove('sleeping');
+    sleepOverlay.classList.remove('active');
+    sleepSliderWrap.classList.remove('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.remove('active');
+    stopDrifting();
+    if (spaceAnimationFrame) {
+      cancelAnimationFrame(spaceAnimationFrame);
+      spaceAnimationFrame = null;
+    }
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    
+    releaseWakeLock(); 
+    stopMicrophone();
+    stopMovementDetection();
+    
+    // Build real sleep score synchronously once
+    renderScoreBreakdown();
+    renderRecovery();
+    
+    const sessPage = document.getElementById('sessionPage');
+    if (sessPage) sessPage.classList.add('active');
+    
+    spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
+    showToast(randomOf(wakePhrases));
+  }
 
 const checkinOverlay = document.getElementById('checkinOverlay');
 const checkinEmojisEl = document.getElementById('checkinEmojis');
@@ -6958,66 +7014,43 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
 
   let dragging = false;
   let dragStartX = 0;
-  
-  function trackMax() { 
-    return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; 
-  }
-
-  function setKnobX(x, isDragging = false) {
+  function trackMax() { return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; }
+  function setKnobX(x) {
     const max = trackMax();
     const clamped = Math.max(4, Math.min(max + 4, x));
-    
-    // Knob styling
-    sleepKnob.style.transition = isDragging ? 'none' : 'left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
     sleepKnob.style.left = clamped + 'px';
-    
-    // Fill bar styling (Instant when dragging, smooth when snapping back)
-    sleepFill.style.transition = isDragging ? 'none' : 'width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
-    
-    const progress = max > 0 ? (clamped - 5) / max : 10;
+    const progress = max > 0 ? (clamped - 4) / max : 0;
     sleepFill.style.width = (progress * 100) + '%';
     sleepHint.style.opacity = Math.max(0, 1 - progress * 1.6);
     return progress;
   }
-
   sleepKnob.addEventListener('pointerdown', (e) => {
     dragging = true;
+    sleepKnob.style.transition = 'none';
     sleepKnob.setPointerCapture(e.pointerId);
     dragStartX = e.clientX - sleepKnob.offsetLeft;
-    sleepKnob.style.transition = 'none'; // Instant response when grabbing
   });
-
   sleepKnob.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    setKnobX(e.clientX - dragStartX, true);
+    setKnobX(e.clientX - dragStartX);
   });
-
   function endDrag() {
     if (!dragging) return;
     dragging = false;
-    
     const max = trackMax();
     const progress = max > 0 ? (sleepKnob.offsetLeft - 4) / max : 0;
-    
     if (progress > 0.72) {
-      // Smooth glide to the end, then trigger wake up
-      sleepKnob.style.transition = 'left 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)';
-      sleepKnob.style.left = (max + 4) + 'px';
-      sleepFill.style.width = '100%';
-      sleepHint.style.opacity = '0';
-      
-      setTimeout(wakeUp, 400); // Wait for the animation to finish before waking up
+      sleepKnob.style.transition = 'left .2s ease';
+      setKnobX(max + 4);
+      setTimeout(wakeUp, 180);
     } else {
-      // Snap back to start with a nice spring animation
-      sleepKnob.style.transition = 'left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-      sleepKnob.style.left = '4px';
-      sleepFill.style.width = '0%';
-      sleepHint.style.opacity = '1';
+      sleepKnob.style.transition = 'left .35s cubic-bezier(.34,1.4,.64,1)';
+      setKnobX(4);
     }
   }
-
   sleepKnob.addEventListener('pointerup', endDrag);
   sleepKnob.addEventListener('pointercancel', endDrag);
+
   ctaBtn.addEventListener('click', () => {
     if (state.loggedBedtime) return;
     state.loggedBedtime = true;
@@ -7029,6 +7062,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     showToast(randomOf(sleepPhrases));
     setTimeout(enterSleepMode, 550);
   });
+
   function renderCta() {
     const icon = document.getElementById('ctaIcon');
     const label = document.getElementById('ctaLabel');
@@ -7070,6 +7104,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     wrap.classList.remove('pop-in');
     void wrap.offsetWidth; // restart animation
     wrap.classList.add('pop-in');
+    stage.classList.add('greeting');
     setTimeout(() => {
       // Sparkles for everyone, and eyes blink
       spawnParticles(['✨', '👋'], '#f6c453', wrap);
@@ -7086,6 +7121,14 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     appScrollEl.scrollTo({ top: 0 });
     updateCtaVisibility();
     if (name === 'profile') { playAvatarGreeting(); replayStatCards(); }
+    if (name === 'trends') {
+      const activeRangeBtn = document.querySelector('.chart-tab.active');
+      const activeRange = activeRangeBtn ? activeRangeBtn.dataset.range : '7d';
+      renderLineChart(activeRange);
+      renderRecoveryTrendChart();
+      renderMoodTrendChart();
+      renderStepsBarChart();
+    }
   }
   navItems.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
@@ -7155,10 +7198,9 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     const scores = [];
     const durations = [];
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Ensure we include all of today
+    today.setHours(23, 59, 59, 999);
 
     if (range === '7d') {
-      // 7D Logic: Look at the exact last 7 days
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
@@ -7168,83 +7210,75 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
         const isToday = d.toDateString() === new Date().toDateString();
 
         if (isToday) {
-          // Today always uses the live dynamic score
           scores.push(computeScore());
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         } else if (found) {
-          scores.push(found.score);
-          durations.push(found.duration);
+          scores.push(Number(found.score) || 0);
+          durations.push(parseFloat(found.duration) || 0);
         } else {
-          // Fills in gaps for past days with the last known score
           const validPast = scores.filter(s => s > 0);
           scores.push(validPast.length > 0 ? validPast[validPast.length - 1] : 61);
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         }
       }
     } else {
-      // 30D, 3M, 6M Logic: Group by actual weeks/months
       const isMonthly = (range === '3m' || range === '6m');
       const numGroups = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
       
-      // Setup date buckets
       for (let i = numGroups - 1; i >= 0; i--) {
-        const end = new Date(today);
-        const start = new Date(today);
-        
+        let start, end;
         if (isMonthly) {
-           end.setMonth(end.getMonth() - i);
-           start.setMonth(start.getMonth() - i);
-           start.setDate(1); // Start of that month
-           labels.push(end.toLocaleDateString('en-US', { month: 'short' }));
+          const target = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          labels.push(target.toLocaleDateString('en-US', { month: 'short' }));
+          start = new Date(target.getFullYear(), target.getMonth(), 1, 0, 0, 0, 0);
+          end = new Date(target.getFullYear(), target.getMonth() + 1, 0, 23, 59, 59, 999);
         } else {
-           // Weeks (every 7 days going back)
-           end.setDate(end.getDate() - (i * 7));
-           start.setDate(start.getDate() - (i * 7 + 6));
-           labels.push('Wk ' + (numGroups - i));
+          labels.push('Wk ' + (numGroups - i));
+          end = new Date(today);
+          end.setDate(today.getDate() - (i * 7));
+          end.setHours(23, 59, 59, 999);
+          start = new Date(end);
+          start.setDate(end.getDate() - 6);
+          start.setHours(0, 0, 0, 0);
         }
 
-        // Find all history entries that fall into this timeframe
         let bucketScores = [];
         let bucketDurs = [];
 
         history.forEach(h => {
           const d = new Date(h.date);
           if (d >= start && d <= end) {
-             // If it's today's date, use the live score, otherwise use history
-             const isToday = d.toDateString() === new Date().toDateString();
-             if (isToday) {
-                bucketScores.push(computeScore());
-                bucketDurs.push(state.baseline.totalSleep);
-             } else if (h.score > 0) {
-                bucketScores.push(h.score);
-                bucketDurs.push(h.duration);
-             }
+            const isToday = d.toDateString() === new Date().toDateString();
+            if (isToday) {
+              bucketScores.push(computeScore());
+              bucketDurs.push(parseFloat(state.baseline.totalSleep) || 0);
+            } else if (h.score > 0) {
+              bucketScores.push(Number(h.score) || 0);
+              bucketDurs.push(parseFloat(h.duration) || 0);
+            }
           }
         });
 
-        // Calculate the average for this specific bucket
         if (bucketScores.length > 0) {
           const avgS = Math.round(bucketScores.reduce((a, b) => a + b, 0) / bucketScores.length);
-          const avgD = bucketDurs.reduce((a, b) => a + b, 0) / bucketDurs.length;
+          const avgD = bucketDurs.reduce((a, b) => a + Number(b), 0) / bucketDurs.length;
           scores.push(avgS);
           durations.push(avgD);
         } else {
-          // If absolutely NO data in this week/month, fallback to latest
-          const latest = history.length > 0 ? history[history.length - 1].score : 61;
+          const latest = history.length > 0 ? (Number(history[history.length - 1].score) || 61) : 61;
           scores.push(latest);
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         }
       }
     }
 
-    // Calculate final averages for the big text labels
     const validScores = scores.filter(s => s > 0);
     const avgScore = validScores.length > 0
       ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
       : computeScore();
     const avgDuration = durations.length > 0
-      ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1)
-      : state.baseline.totalSleep.toFixed(1);
+      ? (durations.reduce((a, b) => a + Number(b), 0) / durations.length).toFixed(1)
+      : (parseFloat(state.baseline.totalSleep) || 0).toFixed(1);
 
     return {
       labels,
@@ -7340,32 +7374,34 @@ if (deltaEl) {
 
   function getRecoveryData() {
     let history = state.sleepHistory || [];
-    
-    // If we don't have history, just use today's recovery
     if (history.length === 0) {
-      history = [{ score: computeRecovery(), duration: state.baseline.totalSleep }];
+      history = [{ score: computeRecovery(), duration: state.baseline.totalSleep, deepRatio: state.baseline.deepRatio }];
     }
 
     const labels = [];
     const values = [];
     const today = new Date();
 
-    // Generate the last 7 days of labels
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
       
-      let dayRecovery = computeRecovery();
-      
-      // If there's real history for this day, calculate what their recovery would have been
-      if (i > 0 && history.length > i) {
-         const pastNight = history[history.length - 1 - i];
-         // We roughly estimate past recovery based on their past sleep duration
-         const durationPct = Math.min(1, pastNight.duration / 8);
-         dayRecovery = Math.round((durationPct * 70) + (Math.min(1, pastNight.deepRatio / 25) * 15) + 15);
+      const found = history.find(h => h.date === d.toDateString());
+      const isToday = d.toDateString() === new Date().toDateString();
+
+      let dayRecovery;
+      if (isToday) {
+        dayRecovery = computeRecovery();
+      } else if (found) {
+        const dur = parseFloat(found.duration) || state.baseline.totalSleep;
+        const deep = parseFloat(found.deepRatio) || 20;
+        const durationPct = Math.min(1, dur / 8);
+        dayRecovery = Math.max(5, Math.min(100, Math.round((durationPct * 70) + (Math.min(1, deep / 25) * 15) + 15)));
+      } else {
+        dayRecovery = computeRecovery();
       }
-      values.push(dayRecovery);
+      values.push(isNaN(dayRecovery) ? 50 : dayRecovery);
     }
 
     return { labels, values };
@@ -7417,13 +7453,15 @@ if (deltaEl) {
     bindChartTooltips('recoveryChartWrap', (value, label) => `${label}<span class="tt-stage">Recovery ${value}%</span>`);
   }
 
-  const moodHistory = [4, 2, 5, 3, 4, 2];
   function renderMoodTrendChart() {
     const wrap = document.getElementById('moodChartWrap');
     const axis = document.getElementById('moodChartAxis');
     if (!wrap) return;
     const labels = lastNDaysLabels(7);
-    const values = [...moodHistory, state.mood];
+    const pastMoods = Array.isArray(state.moodHistory) && state.moodHistory.length === 6
+      ? state.moodHistory
+      : [4, 2, 5, 3, 4, 2];
+    const values = [...pastMoods, state.mood];
     const w = 320, h = 110, pad = 14;
     const n = values.length;
     const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
@@ -7464,14 +7502,16 @@ if (deltaEl) {
     bindChartTooltips('moodChartWrap', (value, label) => `${label}<span class="tt-stage">${moodLabels[value]} (${value}/5)</span>`);
   }
 
-  const stepsHistory = [state.steps, state.steps, state.steps, state.steps, state.steps, state.steps];
   function renderStepsBarChart() {
     const wrap = document.getElementById('stepsChartWrap');
     const axis = document.getElementById('stepsChartAxis');
     if (!wrap) return;
     const labels = lastNDaysLabels(7);
     const goal = state.stepsGoal || 8000;
-    const values = [...stepsHistory, state.steps];
+    const pastValues = Array.isArray(state.stepsHistory) && state.stepsHistory.length === 6
+      ? state.stepsHistory
+      : [4200, 5600, 7100, 6800, 8200, 7500];
+    const values = [...pastValues, state.steps];
     const maxVal = Math.max(goal, ...values) * 1.08;
     wrap.innerHTML = '';
 
@@ -7546,48 +7586,95 @@ if (deltaEl) {
   }
 
   ['settingReminder', 'settingNotifs'].forEach((id) => {
-    document.getElementById(id).addEventListener('click', () => {
-      const toggleId = id === 'settingReminder' ? 'reminderToggle' : 'notifsToggle';
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      const isReminder = id === 'settingReminder';
+      const toggleId = isReminder ? 'reminderToggle' : 'notifsToggle';
       const t = document.getElementById(toggleId);
-      t.classList.toggle('on');
-      showToast(t.classList.contains('on') ? 'Enabled' : 'Disabled');
+      if (isReminder) {
+        state.bedtimeReminderEnabled = !state.bedtimeReminderEnabled;
+        if (t) t.classList.toggle('on', state.bedtimeReminderEnabled);
+      } else {
+        state.notificationsEnabled = !state.notificationsEnabled;
+        if (t) t.classList.toggle('on', state.notificationsEnabled);
+      }
+      saveState(state);
+      showToast((t && t.classList.contains('on')) ? 'Enabled' : 'Disabled');
       registerInteraction();
     });
   });
 
   function renderStepsSettings() {
     const goal = state.stepsGoal || 8000;
-    document.getElementById('stepsGoalSub').textContent = goal.toLocaleString() + ' steps';
-    document.getElementById('goalValueDisplay').textContent = goal.toLocaleString();
-    document.getElementById('stepsTrackToggle').classList.toggle('on', state.stepsEnabled);
+    const subEl = document.getElementById('stepsGoalSub');
+    if (subEl) subEl.textContent = goal.toLocaleString() + ' steps';
+    const dispEl = document.getElementById('goalValueDisplay');
+    if (dispEl) dispEl.textContent = goal.toLocaleString();
+    const trackTog = document.getElementById('stepsTrackToggle');
+    if (trackTog) trackTog.classList.toggle('on', state.stepsEnabled);
+    const remTog = document.getElementById('reminderToggle');
+    if (remTog) remTog.classList.toggle('on', state.bedtimeReminderEnabled !== false);
+    const notTog = document.getElementById('notifsToggle');
+    if (notTog) notTog.classList.toggle('on', state.notificationsEnabled !== false);
   }
-  document.getElementById('settingStepsTrack').addEventListener('click', () => {
-    state.stepsEnabled = !state.stepsEnabled;
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-    showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
-  });
-  document.getElementById('settingStepsGoal').addEventListener('click', () => {
-    const editor = document.getElementById('stepsGoalEditor');
-    editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
-  });
-  document.getElementById('goalMinus').addEventListener('click', () => {
-    state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-  });
-  document.getElementById('goalPlus').addEventListener('click', () => {
-    state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-  });
-  document.getElementById('goalDone').addEventListener('click', () => {
-    document.getElementById('stepsGoalEditor').style.display = 'none';
-    showToast('Step goal updated');
-  });
+  const stepsTrackEl = document.getElementById('settingStepsTrack');
+  if (stepsTrackEl) {
+    stepsTrackEl.addEventListener('click', () => {
+      state.stepsEnabled = !state.stepsEnabled;
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
+    });
+  }
+  const stepsGoalEl = document.getElementById('settingStepsGoal');
+  if (stepsGoalEl) {
+    stepsGoalEl.addEventListener('click', () => {
+      const editor = document.getElementById('stepsGoalEditor');
+      if (editor) editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
+    });
+  }
+  const gMinus = document.getElementById('goalMinus');
+  if (gMinus) {
+    gMinus.addEventListener('click', () => {
+      state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      renderStepsBarChart();
+    });
+  }
+  const gPlus = document.getElementById('goalPlus');
+  if (gPlus) {
+    gPlus.addEventListener('click', () => {
+      state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      renderStepsBarChart();
+    });
+  }
+  const gDone = document.getElementById('goalDone');
+  if (gDone) {
+    gDone.addEventListener('click', () => {
+      const editor = document.getElementById('stepsGoalEditor');
+      if (editor) editor.style.display = 'none';
+      showToast('Step goal updated');
+    });
+  }
+
+  const resetBtn = document.getElementById('settingResetData');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Reset all Restia sleep data, history, and character customization? This will restore defaults.')) {
+        try {
+          localStorage.removeItem(STORE_KEY);
+        } catch (e) {}
+        location.reload();
+      }
+    });
+  }
 
   const aiMessages = document.getElementById('aiMessages');
   const aiInput = document.getElementById('aiInput');
@@ -7697,9 +7784,8 @@ if (deltaEl) {
     const score = computeScore();
     const rec = computeRecovery();
 
-
-    // 1. Check for Greetings
-    if (/^(hi|hey|hello|yo|sup|hiya|howdy)\b/.test(q)) {
+    // 1. Check for Greetings (only when the whole message is a greeting)
+    if (/^(hi|hey|hello|yo|sup|hiya|howdy)[!.,\s]*$/i.test(q)) {
       return `Hey! 👋 Your sleep score is ${score}/100 and recovery is ${rec}%. What's on your mind? Ask me anything about sleep.`;
     }
     if (q === 'thanks' || q === 'thank you' || q === 'thx') {
@@ -7713,15 +7799,14 @@ if (deltaEl) {
     aiDatabase.forEach(item => {
       let matchCount = 0;
       
-      // Check how many keywords from this item are in the user's question
       item.keywords.forEach(kw => {
-        // We use a simple regex to match the keyword anywhere in the text
-        if (new RegExp(kw, 'i').test(q)) {
-          matchCount++;
+        if (new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(q)) {
+          matchCount += 2;
+        } else if (new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(q)) {
+          matchCount += 1;
         }
       });
 
-      // If this item has more matches than the previous best, make it the new best
       if (matchCount > highestScore) {
         highestScore = matchCount;
         bestMatch = item;
@@ -7768,8 +7853,10 @@ if (deltaEl) {
 
     if (!sample) {
       setTimeout(() => {
-        thinkingEl.textContent = offlineSleepCoach(text);
+        const response = offlineSleepCoach(text);
+        thinkingEl.textContent = response;
         thinkingEl.classList.remove('thinking');
+        chatTurns.push({ role: 'assistant', content: response });
         aiMessages.scrollTop = aiMessages.scrollHeight;
         aiBusy = false;
         aiSend.disabled = false;
@@ -7778,7 +7865,14 @@ if (deltaEl) {
     }
 
     try {
-      const turns = [{ role: 'user', content: AI_RULES + '\n\nCurrent app data:\n' + currentAppContext() }, ...chatTurns];
+      const systemContext = AI_RULES + '\n\nCurrent app data:\n' + currentAppContext();
+      // Ensure roles strictly alternate: merge system context into the first user turn
+      const turns = chatTurns.map((turn, idx) => {
+        if (idx === 0 && turn.role === 'user') {
+          return { role: 'user', content: systemContext + '\n\n' + turn.content };
+        }
+        return turn;
+      });
       const { text: answer } = await sample(turns, {
         cache: false,
         onText: ({ text: t }) => {
@@ -7790,7 +7884,9 @@ if (deltaEl) {
       chatTurns.push({ role: 'assistant', content: answer });
     } catch (e) {
       thinkingEl.classList.remove('thinking');
-      thinkingEl.textContent = e.text || offlineSleepCoach(text);
+      const fallbackAns = e.text || offlineSleepCoach(text);
+      thinkingEl.textContent = fallbackAns;
+      chatTurns.push({ role: 'assistant', content: fallbackAns });
       if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) {
         sample = null;
         aiInput.placeholder = 'Ask about your sleep… (offline tips)';
@@ -7856,7 +7952,7 @@ if (deltaEl) {
   function hypeForBest(best, current) {
     if (current >= best && current > 0) return '🎉 New personal record!';
     const gap = best - current;
-    return gap <= 5 ? `Only ${Math.max(gap,1)} pts from your best` : 'Personal record';
+    return gap <= 5 ? `Only ${Math.max(gap, 1)} pts from your best` : `Best score: ${best}`;
   }
   function hypeForNights(n) {
     if (n < 3) return 'Just getting started';
@@ -8047,9 +8143,12 @@ if (deltaEl) {
       });
     });
 
-    function onSpinEnd(e) {
-      if (e.propertyName !== 'transform') return;
+    let completed = false;
+    function finalizeReel() {
+      if (completed) return;
+      completed = true;
       chestReelTrack.removeEventListener('transitionend', onSpinEnd);
+      clearTimeout(safetyTimeout);
       const landedEl = chestReelTrack.children[REEL_TARGET_INDEX];
       if (landedEl) landedEl.classList.add('landed');
       chestReelResult.innerHTML = `<div class="result-xp">+${reward} XP</div><div class="result-label">${rarityForXp[reward].toUpperCase()} REWARD</div>`;
@@ -8058,7 +8157,13 @@ if (deltaEl) {
       spawnParticles(['✨', '🎉', '+' + reward], '#f6c453', landedEl || chestReelOverlay);
       addXp(reward, {});
     }
+
+    function onSpinEnd(e) {
+      if (e && e.propertyName && e.propertyName !== 'transform') return;
+      finalizeReel();
+    }
     chestReelTrack.addEventListener('transitionend', onSpinEnd);
+    const safetyTimeout = setTimeout(finalizeReel, 5200);
   }
 
   chestReelContinue.addEventListener('click', () => {
@@ -8327,6 +8432,7 @@ if (deltaEl) {
 }
 
 if (style === 'long') {
+      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
@@ -8367,6 +8473,7 @@ if (style === 'long') {
     }
 
     if (style === 'curly') {
+      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
