@@ -4286,10 +4286,10 @@
 
   <div class="card-title" style="margin: 4px 0 10px 4px;">TODAY'S FACTORS</div>
 
-  <div class="stress-card" style="margin-bottom: 14px;">
+  <div class="stress-card" id="stressCard" style="margin-bottom: 14px;">
     <div class="stress-top">
       <div class="stress-left">
-        <div class="factor-icon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
+        <div class="factor-icon" id="stressIcon" style="background:rgba(79,209,139,0.2); color:var(--green);">🧘</div>
         <div>
           <div class="factor-name">Stress level</div>
         </div>
@@ -4614,22 +4614,6 @@
     <button class="customize-btn" id="customizeBtn" type="button">🎨 Customize character</button>
   </div>
 
-  <div class="card chest-card">
-    <div class="chest-wrap">
-      <div class="chest-icon" id="chestIcon">🎁</div>
-      <div class="chest-status" id="chestStatus">Ready to open!</div>
-      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
-    </div>
-    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
-    <div class="chest-odds">
-      <span class="chest-odd-chip"><b>10</b> XP</span>
-      <span class="chest-odd-chip"><b>20</b> XP</span>
-      <span class="chest-odd-chip"><b>50</b> XP</span>
-      <span class="chest-odd-chip"><b>75</b> XP</span>
-      <span class="chest-odd-chip"><b>150</b> XP</span>
-    </div>
-  </div>
-
   <div class="card" id="avatarEditor" style="display:none;">
     <div class="card-title">CUSTOMIZE YOUR CHARACTER</div>
     <div class="editor-section">
@@ -4651,6 +4635,22 @@
     <div class="editor-section">
       <div class="editor-label">ACCESSORY</div>
       <div class="chip-row" id="accessoryChips"></div>
+    </div>
+  </div>
+
+  <div class="card chest-card">
+    <div class="chest-wrap">
+      <div class="chest-icon" id="chestIcon">🎁</div>
+      <div class="chest-status" id="chestStatus">Ready to open!</div>
+      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
+    </div>
+    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
+    <div class="chest-odds">
+      <span class="chest-odd-chip"><b>10</b> XP</span>
+      <span class="chest-odd-chip"><b>20</b> XP</span>
+      <span class="chest-odd-chip"><b>50</b> XP</span>
+      <span class="chest-odd-chip"><b>75</b> XP</span>
+      <span class="chest-odd-chip"><b>150</b> XP</span>
     </div>
   </div>
 
@@ -4805,16 +4805,24 @@
     <div class="factor-left">
       <div class="factor-icon" style="background:rgba(255,255,255,0.08); color:var(--text-dim);">ℹ️</div>
       <div>
-      <div class="factor-name">About Restia</div>
-      <div class="factor-sub">Version 1.0</div>
+        <div class="factor-name">About Restia</div>
+        <div class="factor-sub">Version 1.0</div>
+      </div>
     </div>
+  </div>
+  <div class="factor-card" id="settingResetData" style="cursor:pointer; border-color:rgba(239,90,111,0.25); background:rgba(239,90,111,0.06);">
+    <div class="factor-left">
+      <div class="factor-icon" style="background:rgba(239,90,111,0.18); color:var(--red);">🗑️</div>
+      <div>
+        <div class="factor-name" style="color:var(--red);">Reset all data</div>
+        <div class="factor-sub">Clear history &amp; restore defaults</div>
+      </div>
     </div>
   </div>
 
 </div>
 
 </div>
-<button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:100px; left:20px; z-index:9999; padding:15px; background:red; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">RESET APP</button>
 
 <div class="app-footer" id="appFooter">
   <div class="cta-wrap" id="ctaWrap">
@@ -5199,6 +5207,10 @@
     steps: 0,
     stepsEnabled: true,
     redlightOn: false,
+    bedtimeReminderEnabled: true,
+    notificationsEnabled: true,
+    stepsHistory: [4200, 5600, 7100, 6800, 8200, 7500],
+    moodHistory: [4, 2, 5, 3, 4, 2],
     baseline: {
       totalSleep: 6.1,
       deepRatio: 22,
@@ -5206,7 +5218,6 @@
       waketime: '5:49 AM',
       hr: 78,
       bp: '129/85',
-      // ADD THESE:
       awakeCount: 3,
       awakeTime: 0.4,
       deepSleep: 1.3,
@@ -5214,25 +5225,23 @@
       remSleep: 1.5
     },
     sleepHistory: [ 
-      { 
-        score: 61, 
-        duration: 6.1, 
-        deepRatio: 22, 
-        bedtime: '11:42 PM', 
-        waketime: '5:49 AM',
-        date: new Date().toDateString(),
-        recoveryScore: 82 // <-- ADD THIS
-      }
+      { score: 68, duration: 6.8, deepRatio: 24, bedtime: '11:30 PM', waketime: '6:18 AM', recoveryScore: 78, date: new Date(Date.now() - 6 * 86400000).toDateString() },
+      { score: 78, duration: 7.4, deepRatio: 26, bedtime: '11:15 PM', waketime: '6:39 AM', recoveryScore: 86, date: new Date(Date.now() - 5 * 86400000).toDateString() },
+      { score: 58, duration: 5.9, deepRatio: 18, bedtime: '11:55 PM', waketime: '5:49 AM', recoveryScore: 68, date: new Date(Date.now() - 4 * 86400000).toDateString() },
+      { score: 74, duration: 7.1, deepRatio: 23, bedtime: '11:20 PM', waketime: '6:26 AM', recoveryScore: 82, date: new Date(Date.now() - 3 * 86400000).toDateString() },
+      { score: 82, duration: 7.6, deepRatio: 28, bedtime: '11:05 PM', waketime: '6:41 AM', recoveryScore: 89, date: new Date(Date.now() - 2 * 86400000).toDateString() },
+      { score: 63, duration: 6.3, deepRatio: 21, bedtime: '11:40 PM', waketime: '5:58 AM', recoveryScore: 72, date: new Date(Date.now() - 1 * 86400000).toDateString() },
+      { score: 61, duration: 6.1, deepRatio: 22, bedtime: '11:42 PM', waketime: '5:49 AM', recoveryScore: 82, date: new Date().toDateString() }
     ],
     xp: 0,
-    xpAwardedForDate: null,
+    xpAwardedForDate: new Date().toDateString(),
     stepsGoalXpAwardedDate: null,
     interactionClicks: 0,
     lastChestOpenedAt: 0,
     stats: {
-      currentStreak: 1,
-      bestScore: 61,
-      nightsTracked: 1,
+      currentStreak: 5,
+      bestScore: 82,
+      nightsTracked: 7,
       lastTrackedDate: new Date().toDateString()
     },
     avatar: {
@@ -5249,23 +5258,44 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return { ...defaultState };
       const parsed = JSON.parse(raw);
-      if (parsed.date !== new Date().toDateString()) {
+      const mergedBaseline = { ...defaultState.baseline, ...(parsed.baseline || {}) };
+      const mergedAvatar = { ...defaultState.avatar, ...(parsed.avatar || {}) };
+      const mergedStats = { ...defaultState.stats, ...(parsed.stats || {}) };
+      const isNewDay = parsed.date !== new Date().toDateString();
+
+      if (isNewDay) {
         return {
           ...defaultState,
           stepsGoal: parsed.stepsGoal || defaultState.stepsGoal,
           stepsEnabled: parsed.stepsEnabled !== undefined ? parsed.stepsEnabled : true,
           redlightOn: parsed.redlightOn || false,
+          bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
+          notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
           xp: parsed.xp || 0,
           xpAwardedForDate: parsed.xpAwardedForDate || null,
           stepsGoalXpAwardedDate: parsed.stepsGoalXpAwardedDate || null,
           interactionClicks: parsed.interactionClicks || 0,
           lastChestOpenedAt: parsed.lastChestOpenedAt || 0,
-          stats: parsed.stats || defaultState.stats,
-          avatar: parsed.avatar || defaultState.avatar,
-          sleepHistory: parsed.sleepHistory || defaultState.sleepHistory
+          baseline: mergedBaseline,
+          stats: mergedStats,
+          avatar: mergedAvatar,
+          sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
+          stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
+          moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
         };
       }
-      return { ...defaultState, ...parsed, avatar: { ...defaultState.avatar, ...(parsed.avatar || {}) }, stats: { ...defaultState.stats, ...(parsed.stats || {}) } };
+      return {
+        ...defaultState,
+        ...parsed,
+        baseline: mergedBaseline,
+        avatar: mergedAvatar,
+        stats: mergedStats,
+        bedtimeReminderEnabled: parsed.bedtimeReminderEnabled !== undefined ? parsed.bedtimeReminderEnabled : true,
+        notificationsEnabled: parsed.notificationsEnabled !== undefined ? parsed.notificationsEnabled : true,
+        sleepHistory: Array.isArray(parsed.sleepHistory) && parsed.sleepHistory.length > 0 ? parsed.sleepHistory : defaultState.sleepHistory,
+        stepsHistory: Array.isArray(parsed.stepsHistory) ? parsed.stepsHistory : defaultState.stepsHistory,
+        moodHistory: Array.isArray(parsed.moodHistory) ? parsed.moodHistory : defaultState.moodHistory
+      };
     } catch (e) {
       return { ...defaultState };
     }
@@ -5837,8 +5867,13 @@
       window.addEventListener('devicemotion', handleMotion);
       isStepCounterActive = true;
       showToast('Step counter activated!');
-      updateStepsUI();
+      renderSteps();
     }
+  }
+
+  const stepsClickArea = document.getElementById('stepsClickArea');
+  if (stepsClickArea) {
+    stepsClickArea.addEventListener('click', enableStepCounter);
   }
 
 
@@ -5991,6 +6026,7 @@ let motionHandler = null;
 let lastMotion = { x: 0, y: 0, z: 0 };
 
 async function startMicrophone() {
+  stopMicrophone(); // Clean up any existing stream/context first
   sessionData.startTime = Date.now();
   sessionData.micActive = false;
   sessionData.micDenied = false;
@@ -6005,6 +6041,9 @@ async function startMicrophone() {
     });
     
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') {
+      try { await audioContext.resume(); } catch (e) {}
+    }
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.3;
@@ -6013,7 +6052,8 @@ async function startMicrophone() {
     microphone.connect(analyser);
     
     sessionData.micActive = true;
-    document.getElementById('radarCenterIcon').textContent = '🎙️';
+    const radarIcon = document.getElementById('radarCenterIcon');
+    if (radarIcon) radarIcon.textContent = '🎙️';
     document.querySelectorAll('.radar-ring').forEach(r => r.style.borderColor = 'rgba(157,124,245,0.6)');
     
     startAudioAnalysis();
@@ -6137,6 +6177,7 @@ function recordAudioEvent(type, confidence) {
     const bars = document.querySelectorAll('.audio-wave span');
     
     function draw() {
+      if (!analyser) return; // Prevent null pointer exception on teardown
       analyser.getByteFrequencyData(dataArray);
       
       // Calculate average volume
@@ -6149,15 +6190,14 @@ function recordAudioEvent(type, confidence) {
       // Animate the 7 visualizer bars based on real audio data
       if (bars.length > 0) {
         bars.forEach((bar, index) => {
-          // Map different frequency bands to different bars for a dynamic look
           const freqValue = dataArray[index * 4] || average; 
           const height = Math.max(10, (freqValue / 255) * 100);
           bar.style.height = height + '%';
-          bar.style.animation = 'none'; // Turn off CSS animation to use real-time JS
+          bar.style.animation = 'none';
         });
       }
       
-      // Make the radar pulse faster or slower based on sound
+      // Make the radar pulse based on sound
       const radar = document.querySelector('.radar-center');
       if (radar) {
         const scale = 1 + (average / 255) * 0.2;
@@ -6171,33 +6211,49 @@ function recordAudioEvent(type, confidence) {
   }
 
   function startFakeAudio() {
-  const bars = document.querySelectorAll('.audio-wave span');
-  bars.forEach((bar, index) => {
-    bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
-  });
-  document.getElementById('radarCenterIcon').textContent = '🚫';
-}
+    const bars = document.querySelectorAll('.audio-wave span');
+    bars.forEach((bar, index) => {
+      bar.style.animation = `wavePulse 1.2s ease-in-out infinite alternate ${index * 0.1}s`;
+    });
+    const icon = document.getElementById('radarCenterIcon');
+    if (icon) icon.textContent = '🚫';
+  }
 
   function stopMicrophone() {
-  if (audioAnalysisInterval) {
-    clearInterval(audioAnalysisInterval);
-    audioAnalysisInterval = null;
+    if (audioAnalysisInterval) {
+      clearInterval(audioAnalysisInterval);
+      audioAnalysisInterval = null;
+    }
+    if (micStream) {
+      try {
+        micStream.getTracks().forEach(track => track.stop());
+      } catch (e) {}
+      micStream = null;
+    }
+    if (audioContext && audioContext.state !== 'closed') {
+      try {
+        audioContext.close();
+      } catch (e) {}
+      audioContext = null;
+    }
+    if (audioAnimationFrame) {
+      cancelAnimationFrame(audioAnimationFrame);
+      audioAnimationFrame = null;
+    }
+    analyser = null;
+    microphone = null;
+
+    // Reset visualizer bars and radar center smoothly
+    const bars = document.querySelectorAll('.audio-wave span');
+    bars.forEach(bar => {
+      bar.style.height = '';
+      bar.style.animation = '';
+    });
+    const radar = document.querySelector('.radar-center');
+    if (radar) {
+      radar.style.transform = '';
+    }
   }
-  if (micStream) {
-    micStream.getTracks().forEach(track => track.stop());
-  }
-  if (audioContext) {
-    audioContext.close();
-    audioContext = null;
-  }
-  if (audioAnimationFrame) {
-    cancelAnimationFrame(audioAnimationFrame);
-    audioAnimationFrame = null;
-  }
-  analyser = null;
-  microphone = null;
-  micStream = null;
-}
 
 // ---- MOVEMENT DETECTION ----
 function startMovementDetection() {
@@ -6241,33 +6297,36 @@ function stopMovementDetection() {
 async function requestWakeLock() {
   try {
     if ('wakeLock' in navigator) {
+      if (wakeLock !== null) return;
       wakeLock = await navigator.wakeLock.request('screen');
       console.log('Wake Lock is active');
       
-      // If the user switches apps and comes back, the lock is dropped. 
-      // This listener re-requests it.
       wakeLock.addEventListener('release', () => {
         console.log('Wake Lock was released');
+        wakeLock = null;
       });
     } else {
       console.warn('Wake Lock API not supported on this browser.');
     }
   } catch (err) {
-    console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
+    console.warn(`Wake Lock Error: ${err.name}, ${err.message}`);
+    wakeLock = null;
   }
 }
 
 function releaseWakeLock() {
   if (wakeLock !== null) {
-    wakeLock.release();
+    try {
+      wakeLock.release();
+    } catch (e) {}
     wakeLock = null;
     console.log('Wake Lock released manually');
   }
 }
 
-// Re-acquire the wake lock if the user returns to the app
+// Re-acquire the wake lock ONLY if sleep mode is still active
 document.addEventListener('visibilitychange', async () => {
-  if (wakeLock !== null && document.visibilityState === 'visible') {
+  if (document.body.classList.contains('sleep-mode') && document.visibilityState === 'visible') {
     await requestWakeLock();
   }
 });
@@ -6325,6 +6384,10 @@ function createSpaceParticle(randomizeOpacity = false) {
 }
 
 function animateSpace() {
+  if (!document.body.classList.contains('sleep-mode')) {
+    spaceAnimationFrame = null;
+    return;
+  }
   if (!canvasCtx) return;
   const ctx = canvasCtx;
   
@@ -6507,10 +6570,9 @@ window.addEventListener('resize', () => {
 });
 
   function enterSleepMode() {
-    
-     // ---- RESET SESSION DATA ----
-     sessionData = {
-      startTime: null,
+    // ---- RESET SESSION DATA ----
+    sessionData = {
+      startTime: Date.now(),
       endTime: null,
       totalSeconds: 0,
       audioEvents: {
@@ -6536,58 +6598,56 @@ window.addEventListener('resize', () => {
     document.body.classList.add('sleep-mode');
     ctaWrap.classList.add('sleeping');
     
-    // Start the new space engine
     initSpaceEngine(); 
     
     sleepOverlay.classList.add('active');
     sleepSliderWrap.classList.add('active');
     
-    // Show the floating live mic widget
-    document.getElementById('liveMicContainer').classList.add('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.add('active');
     
     resetSlider(true);
     startDrifting();
     
-    // Start the session timer
     sessionSeconds = 0;
-    document.getElementById('liveTimer').textContent = '00:00:00';
-    clearInterval(sessionTimerInterval);
+    const liveTimerEl = document.getElementById('liveTimer');
+    if (liveTimerEl) liveTimerEl.textContent = '00:00:00';
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
     sessionTimerInterval = setInterval(() => {
       sessionSeconds++;
       const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(sessionSeconds % 60).padStart(2, '0');
-      document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
+      if (liveTimerEl) liveTimerEl.textContent = `${h}:${m}:${s}`;
     }, 1000);
 
-    // START WAKE LOCK HERE
     requestWakeLock();
-
-    // Start the mic
     startMicrophone();
-
-    // Start movement tracking
-    startMovementDetection();
-    
-    // Start the mic
-    startMicrophone();
-    // Start movement tracking
     startMovementDetection();
   }
 
   function exitSleepMode() {
-  document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('sessionPage').classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
-  clearInterval(sessionTimerInterval);
-  stopMicrophone();
-  stopMovementDetection();
-}
+    document.body.classList.remove('sleep-mode');
+    ctaWrap.classList.remove('sleeping');
+    sleepOverlay.classList.remove('active');
+    sleepSliderWrap.classList.remove('active');
+    const sessionPage = document.getElementById('sessionPage');
+    if (sessionPage) sessionPage.classList.remove('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.remove('active');
+    stopDrifting();
+    if (spaceAnimationFrame) {
+      cancelAnimationFrame(spaceAnimationFrame);
+      spaceAnimationFrame = null;
+    }
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    releaseWakeLock();
+    stopMicrophone();
+    stopMovementDetection();
+  }
 function qualityTag(pct) {
   if (pct >= 75) return { label: 'Excellent', color: 'var(--green)' };
   if (pct >= 55) return { label: 'Good', color: 'var(--gold-1)' };
@@ -6603,15 +6663,15 @@ function renderHomeBreakdown() {
   const totalPenalty = cPenalty + sPenalty + stPenalty;
 
   // 2. Duration (Caps at 100, drops by the exact penalty points)
-  const baseDurationPct = Math.min(100, Math.round((state.baseline.totalSleep / 8) * 100));
+  const baseDurationPct = Math.min(100, Math.round(((parseFloat(state.baseline.totalSleep) || 6.1) / 8) * 100));
   const durationPct = Math.max(0, Math.round(baseDurationPct - totalPenalty));
 
   // 3. Deep Sleep (Drops by half the penalty)
-  const baseDeepPct = Math.min(100, Math.round((state.baseline.deepSleep / 2) * 100));
+  const baseDeepPct = Math.min(100, Math.round(((parseFloat(state.baseline.deepSleep) || 1.3) / 2) * 100));
   const deepPct = Math.max(0, Math.round(baseDeepPct - (totalPenalty * 0.5)));
 
   // 4. REM (Drops by half the penalty)
-  const baseRemPct = Math.min(100, Math.round((state.baseline.remSleep / 2) * 100));
+  const baseRemPct = Math.min(100, Math.round(((parseFloat(state.baseline.remSleep) || 1.5) / 2) * 100));
   const remPct = Math.max(0, Math.round(baseRemPct - (totalPenalty * 0.5)));
   
   // 5. Consistency (Drops by the full penalty)
@@ -6817,170 +6877,189 @@ document.getElementById('totalSleepVal').textContent = state.baseline.totalSleep
 }
   // Render the 100-point breakdown based on actual time slept
   function renderScoreBreakdown() {
-  sessionData.endTime = Date.now();
-  sessionData.totalSeconds = sessionSeconds;
-  
-  const hoursSlept = sessionSeconds / 3600;
-  
-  // === 1. DURATION (30 pts) ===
-  const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
-  
-  // === 2. CONTINUITY (25 pts) ===
-  const eventCount = Object.values(sessionData.audioEvents)
-    .reduce((sum, e) => sum + e.count, 0);
-  const loudNoiseEvents = sessionData.noiseSamples.filter(
-    n => n.volume > noiseBaseline * 2.5
-  ).length;
-  
-  const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
-  sessionData.awakenings = estimatedAwakenings;
-  sessionData.timeAwake = estimatedAwakenings * 3 * 60;
-  
-  let continuityScore = 25 - (estimatedAwakenings * 2);
-  continuityScore -= Math.min(8, Math.floor(eventCount / 10));
-  continuityScore = Math.max(0, Math.min(25, continuityScore));
-  
-  // === 3. CONSISTENCY (20 pts) ===
-  const startHour = new Date(sessionData.startTime).getHours();
-  const baselineHour = 23;
-  const hourDiff = Math.abs(startHour - baselineHour);
-  const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
-  const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
-  
-  // === 4. RESTLESSNESS (15 pts) ===
-  const movementCount = sessionData.movementSamples.length;
-  const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
-  let restlessnessScore;
-  if (movementPerHour === 0) {
-    restlessnessScore = 10;
-  } else if (movementPerHour < 5) {
-    restlessnessScore = 15;
-  } else if (movementPerHour < 15) {
-    restlessnessScore = 12;
-  } else if (movementPerHour < 30) {
-    restlessnessScore = 8;
-  } else {
-    restlessnessScore = 4;
+    sessionData.endTime = Date.now();
+    sessionData.totalSeconds = sessionSeconds;
+    
+    const hoursSlept = sessionSeconds / 3600;
+    const isShortSession = sessionSeconds < 180; // under 3 min is a quick preview/test
+
+    // === 1. DURATION (30 pts) ===
+    const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
+    
+    // === 2. CONTINUITY (25 pts) ===
+    const eventCount = Object.values(sessionData.audioEvents).reduce((sum, e) => sum + e.count, 0);
+    const loudNoiseEvents = sessionData.noiseSamples.filter(
+      n => n.volume > (noiseBaseline || 25) * 2.5
+    ).length;
+    
+    const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
+    sessionData.awakenings = estimatedAwakenings;
+    sessionData.timeAwake = estimatedAwakenings * 3 * 60;
+    
+    let continuityScore = 25 - (estimatedAwakenings * 2);
+    continuityScore -= Math.min(8, Math.floor(eventCount / 10));
+    continuityScore = Math.max(0, Math.min(25, continuityScore));
+    
+    // === 3. CONSISTENCY (20 pts) ===
+    const startHour = sessionData.startTime ? new Date(sessionData.startTime).getHours() : 23;
+    const baselineHour = 23;
+    const hourDiff = Math.abs(startHour - baselineHour);
+    const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
+    const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
+    
+    // === 4. RESTLESSNESS (15 pts) ===
+    const movementCount = sessionData.movementSamples.length;
+    const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
+    let restlessnessScore;
+    if (movementPerHour === 0) {
+      restlessnessScore = 12;
+    } else if (movementPerHour < 5) {
+      restlessnessScore = 15;
+    } else if (movementPerHour < 15) {
+      restlessnessScore = 12;
+    } else if (movementPerHour < 30) {
+      restlessnessScore = 8;
+    } else {
+      restlessnessScore = 4;
+    }
+    
+    // === 5. ENVIRONMENT (10 pts) ===
+    const avgNoise = sessionData.noiseSamples.length > 0
+      ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
+      : (noiseBaseline || 20);
+    const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
+    let environmentScore;
+    if (noiseRatio < 1.2) environmentScore = 10;
+    else if (noiseRatio < 1.8) environmentScore = 8;
+    else if (noiseRatio < 2.5) environmentScore = 5;
+    else environmentScore = 3;
+
+    let compDur = durationScore;
+    let compCont = continuityScore;
+    let compCons = consistencyScore;
+    let compRest = restlessnessScore;
+    let compEnv = environmentScore;
+    let totalScore;
+
+    if (isShortSession) {
+      // In quick tests (< 3m), scale components gracefully so the breakdown renders meaningful data
+      const scale = Math.min(1, Math.max(0.12, sessionSeconds / 180));
+      compDur = Math.max(1, Math.round(durationScore * scale));
+      compCont = Math.max(2, Math.round(continuityScore * scale));
+      compCons = Math.max(2, Math.round(consistencyScore * scale));
+      compRest = Math.max(1, Math.round(restlessnessScore * scale));
+      compEnv = Math.max(1, Math.round(environmentScore * scale));
+      totalScore = compDur + compCont + compCons + compRest + compEnv;
+    } else {
+      totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
+      if (hoursSlept < 1) {
+        totalScore = Math.round(totalScore * (hoursSlept / 1));
+      } else if (hoursSlept < 3) {
+        totalScore = Math.min(totalScore, 45);
+      } else if (hoursSlept < 5) {
+        totalScore = Math.min(totalScore, 70);
+      }
+    }
+    totalScore = Math.max(5, Math.min(100, Math.round(totalScore)));
+    
+    // === RENDER BREAKDOWN ALWAYS ===
+    const breakdown = [
+      { name: 'Sleep Duration', max: 30, score: compDur, color: 'var(--gold-1)' },
+      { name: 'Sleep Continuity', max: 25, score: compCont, color: 'var(--violet)' },
+      { name: 'Schedule Consistency', max: 20, score: compCons, color: 'var(--blue)' },
+      { name: 'Restlessness', max: 15, score: compRest, color: 'var(--pink)' },
+      { name: 'Environment', max: 10, score: compEnv, color: 'var(--green)' }
+    ];
+    
+    const list = document.getElementById('scoreBreakdownList');
+    if (list) {
+      list.innerHTML = '';
+      breakdown.forEach(b => {
+        const pct = b.max > 0 ? Math.min(100, Math.round((b.score / b.max) * 100)) : 0;
+        const row = document.createElement('div');
+        row.className = 'score-component';
+        row.innerHTML = `
+          <div class="score-comp-head">
+            <span>${b.name}</span>
+            <span>${b.score} / ${b.max}</span>
+          </div>
+          <div class="score-comp-bar">
+            <div class="score-comp-fill" style="width: ${Math.max(3, pct)}%; background: ${b.color};"></div>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+    
+    const sessVal = document.getElementById('sessionScoreVal');
+    if (sessVal) sessVal.textContent = totalScore + ' / 100';
+    
+    renderRealSoundEvents(hoursSlept);
+
+    // If it is a brief test session, show preview breakdown but preserve home baseline
+    if (isShortSession) {
+      showToast('Quick test (< 3 min) — Home baseline preserved');
+      return;
+    }
+
+    // Persist score to home
+    state.baseScore = totalScore;
+    
+    // ---- UPDATE HOME TAB STATS ----
+    const sessionEnd = new Date();
+    const start = sessionData.startTime ? new Date(sessionData.startTime) : new Date(Date.now() - sessionSeconds * 1000);
+    const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    
+    // Calculate estimated sleep stages based on total hours
+    const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
+    const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
+    const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
+    
+    // Calculate the percentage
+    const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
+
+    // Update baseline state
+    state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
+    state.baseline.bedtime = formatTime(start);
+    state.baseline.waketime = formatTime(sessionEnd);
+    state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
+    state.baseline.remSleep = parseFloat(remHours.toFixed(1));
+    state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
+    state.baseline.deepRatio = newDeepRatio;
+    state.baseline.awakeCount = sessionData.awakenings;
+    state.baseline.awakeTime = parseFloat((sessionData.timeAwake / 3600).toFixed(1));
+    
+    const todayStr = new Date().toDateString();
+
+    // Remove any existing entry for today first (prevents duplicates)
+    state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
+
+    const liveHomeScore = computeScore(); 
+    const liveRecoveryScore = computeRecovery();
+
+    state.sleepHistory.push({
+      score: liveHomeScore,
+      duration: parseFloat(state.baseline.totalSleep),
+      deepRatio: state.baseline.deepRatio,
+      bedtime: state.baseline.bedtime,
+      waketime: state.baseline.waketime,
+      date: todayStr,
+      recoveryScore: liveRecoveryScore
+    });
+
+    // Keep only the last 30 nights
+    if (state.sleepHistory.length > 30) state.sleepHistory.shift();
+    
+    state.stats.bestScore = Math.max(state.stats.bestScore, liveHomeScore);
+
+    saveState(state);
+    
+    renderHomeBreakdown();
+    renderHomeDashboard();
+    renderLineChart('7d');
+    renderRecoveryTrendChart();
+    wireIconWiggles();
   }
-  
-  // === 5. ENVIRONMENT (10 pts) ===
-  const avgNoise = sessionData.noiseSamples.length > 0
-    ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
-    : 0;
-  const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
-  let environmentScore;
-  if (noiseRatio < 1.2) environmentScore = 10;
-  else if (noiseRatio < 1.8) environmentScore = 8;
-  else if (noiseRatio < 2.5) environmentScore = 5;
-  else environmentScore = 3;
-  
-  // === TOTAL with short-sleep caps ===
-  let totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
-  
-  if (hoursSlept < 1) {
-    totalScore = Math.round(hoursSlept * 15);
-  } else if (hoursSlept < 3) {
-    totalScore = Math.min(totalScore, 35);
-  } else if (hoursSlept < 5) {
-    totalScore = Math.min(totalScore, 65);
-  }
-  totalScore = Math.max(0, Math.min(100, Math.round(totalScore)));
-  
-  // === RENDER BREAKDOWN ===
-  const breakdown = [
-    { name: 'Sleep Duration', max: 30, score: durationScore, color: 'var(--gold-1)' },
-    { name: 'Sleep Continuity', max: 25, score: continuityScore, color: 'var(--violet)' },
-    { name: 'Schedule Consistency', max: 20, score: consistencyScore, color: 'var(--blue)' },
-    { name: 'Restlessness', max: 15, score: restlessnessScore, color: 'var(--pink)' },
-    { name: 'Environment', max: 10, score: environmentScore, color: 'var(--green)' }
-  ];
-  
-  const list = document.getElementById('scoreBreakdownList');
-  list.innerHTML = '';
-  
-  breakdown.forEach(b => {
-    const pct = b.max > 0 ? (b.score / b.max) * 100 : 0;
-    const row = document.createElement('div');
-    row.className = 'score-component';
-    row.innerHTML = `
-      <div class="score-comp-head">
-        <span>${b.name}</span>
-        <span>${b.score} / ${b.max}</span>
-      </div>
-      <div class="score-comp-bar">
-        <div class="score-comp-fill" style="width: 2%; background: ${b.color};"></div>
-      </div>
-    `;
-    list.appendChild(row);
-    setTimeout(() => {
-      row.querySelector('.score-comp-fill').style.transition = 'width 0.9s cubic-bezier(.4,0,.2,1)';
-      row.querySelector('.score-comp-fill').style.width = pct + '%';
-    }, 100);
-  });
-  
-  document.getElementById('sessionScoreVal').textContent = totalScore + ' / 100';
-  
-  // Persist score to home
-  state.baseScore = totalScore;
-  
-  // ---- UPDATE HOME TAB STATS ----
-  const sessionEnd = new Date();
-  const start = new Date(sessionData.startTime);
-  const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  
-  // Calculate estimated sleep stages based on total hours
-  const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
-  const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
-  const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
-  
-  // Calculate the percentage
-  const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
-
-  // Update baseline state
-  state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
-  state.baseline.bedtime = formatTime(start);
-  state.baseline.waketime = formatTime(sessionEnd);
-  state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
-  state.baseline.remSleep = parseFloat(remHours.toFixed(1));
-  state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
-  state.baseline.deepRatio = newDeepRatio; // Ensure this is explicitly set
-  state.baseline.awakeCount = sessionData.awakenings;
-  state.baseline.awakeTime = (sessionData.timeAwake / 3600).toFixed(1);
-  
-  const todayStr = new Date().toDateString();
-
-  // Remove any existing entry for today first (prevents duplicates)
-  state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
-
-  // CRITICAL FIX: Save the exact score that is currently displayed on the Home screen
-  // (This includes the stress/caffeine deductions so the chart matches perfectly)
-  const liveHomeScore = computeScore(); 
-
-  // NEW: Calculate and save the exact recovery score right now
-  const liveRecoveryScore = computeRecovery();
-
-  state.sleepHistory.push({
-    score: liveHomeScore, 
-    duration: parseFloat(state.baseline.totalSleep),
-    deepRatio: state.baseline.deepRatio,
-    bedtime: state.baseline.bedtime,
-    waketime: state.baseline.waketime,
-    date: todayStr,
-    recoveryScore: liveRecoveryScore // <-- SAVE THIS
-  });
-
-  // Keep only the last 30 nights
-  if (state.sleepHistory.length > 30) state.sleepHistory.shift();
-  
-  saveState(state);
-  
-  // Now that the data is saved, update everything
-  renderHomeDashboard();
-  renderLineChart('7d');
-  renderRecoveryTrendChart();
-  
-  renderRealSoundEvents(hoursSlept);
-}
 
 function renderRealSoundEvents(hoursSlept) {
   const container = document.getElementById('soundEventsList');
@@ -7014,7 +7093,8 @@ function renderRealSoundEvents(hoursSlept) {
     if (sessionData.micDenied) {
       html.push(`<div class="timeline-tag" style="color:#ef5a6f; border-color:#ef5a6f;">🎤 Mic denied — no audio analysis</div>`);
     } else if (hoursSlept < 0.05) {
-      html.push(`<div class="timeline-tag" style="color:#9a94b8; border-color:#9a94b8;">Session too short (${Math.round(hoursSlept*60)} min)</div>`);
+      const durText = sessionSeconds < 60 ? `${sessionSeconds}s` : `${Math.round(hoursSlept * 60)} min`;
+      html.push(`<div class="timeline-tag" style="color:#f6c453; border-color:rgba(246,196,83,0.4);">⏱️ Session too short (${durText})</div>`);
     } else {
       html.push(`<div class="timeline-tag" style="color:#4fd18b; border-color:#4fd18b;">✓ Quiet night — no events detected</div>`);
     }
@@ -7022,62 +7102,58 @@ function renderRealSoundEvents(hoursSlept) {
   
   html.push(`<div style="width:100%; margin-top:8px; font-size:11px; color:var(--text-faint);">
     Session: ${formatDuration(sessionSeconds)} · Awakenings: ~${sessionData.awakenings}
-    · Mic: ${sessionData.micActive ? '✅ active' : '❌ inactive'}
+    · Mic: ${sessionData.micActive ? '🎙️ recorded' : '❌ inactive'}
   </div>`);
   
   container.innerHTML = html.join('');
 }
 
 function formatDuration(seconds) {
-  const h = Math.floor(seconds / 3600);
+  const s = seconds % 60;
   const m = Math.floor((seconds % 3600) / 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  const h = Math.floor(seconds / 3600);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
   // Wake up logic - opens the session dashboard before showing the check-in
   function wakeUp() {
-  state.loggedBedtime = false;
-  saveState(state);
-  renderCta();
-  setTimeout(() => {
-    renderScoreBreakdown();
-  }, 50);
-  // Stop all tracking
-  document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  if (spaceAnimationFrame) cancelAnimationFrame(spaceAnimationFrame);
-  clearInterval(sessionTimerInterval);
-    // Stop all tracking
-    document.body.classList.remove('sleep-mode');
-  ctaWrap.classList.remove('sleeping');
-  sleepOverlay.classList.remove('active');
-  sleepSliderWrap.classList.remove('active');
-  document.getElementById('liveMicContainer').classList.remove('active');
-  stopDrifting();
-  clearInterval(sessionTimerInterval);
-  
-  // RELEASE WAKE LOCK HERE
-  releaseWakeLock(); 
+    state.loggedBedtime = false;
+    saveState(state);
+    renderCta();
 
-  stopMicrophone();
-  stopMovementDetection();
-  
-  // Build real sleep score
-  // Build real sleep score
-  renderScoreBreakdown();
-  
-  // Update the Recovery Score and Sleep Debt immediately!
-  renderRecovery();
-  
-  document.getElementById('sessionPage').classList.add('active');
-  
-  spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
-  showToast(randomOf(wakePhrases));
-}
+    // Stop tracking, loops, and reset UI state cleanly
+    document.body.classList.remove('sleep-mode');
+    ctaWrap.classList.remove('sleeping');
+    sleepOverlay.classList.remove('active');
+    sleepSliderWrap.classList.remove('active');
+    const liveMic = document.getElementById('liveMicContainer');
+    if (liveMic) liveMic.classList.remove('active');
+    stopDrifting();
+    if (spaceAnimationFrame) {
+      cancelAnimationFrame(spaceAnimationFrame);
+      spaceAnimationFrame = null;
+    }
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    
+    releaseWakeLock(); 
+    stopMicrophone();
+    stopMovementDetection();
+    
+    // Build real sleep score synchronously once
+    renderScoreBreakdown();
+    renderRecovery();
+    
+    const sessPage = document.getElementById('sessionPage');
+    if (sessPage) sessPage.classList.add('active');
+    
+    spawnParticles(['☀️', '✨', '🌟', '💫'], '#f8d27a');
+    showToast(randomOf(wakePhrases));
+  }
 
 const checkinOverlay = document.getElementById('checkinOverlay');
 const checkinEmojisEl = document.getElementById('checkinEmojis');
@@ -7242,6 +7318,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     wrap.classList.remove('pop-in');
     void wrap.offsetWidth; // restart animation
     wrap.classList.add('pop-in');
+    stage.classList.add('greeting');
     setTimeout(() => {
       // Sparkles for everyone, and eyes blink
       spawnParticles(['✨', '👋'], '#f6c453', wrap);
@@ -7258,6 +7335,15 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     appScrollEl.scrollTo({ top: 0 });
     updateCtaVisibility();
     if (name === 'profile') { playAvatarGreeting(); replayStatCards(); }
+    if (name === 'trends') {
+      const activeRangeBtn = document.querySelector('.chart-tab.active');
+      const activeRange = activeRangeBtn ? activeRangeBtn.dataset.range : '7d';
+      renderLineChart(activeRange);
+      renderRecoveryTrendChart();
+      renderMoodTrendChart();
+      renderStepsBarChart();
+      if (typeof updatePatternCardStats === 'function') updatePatternCardStats();
+    }
   }
   navItems.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
@@ -7342,10 +7428,9 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     const scores = [];
     const durations = [];
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Ensure we include all of today
+    today.setHours(23, 59, 59, 999);
 
     if (range === '7d') {
-      // 7D Logic: Look at the exact last 7 days
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
@@ -7355,83 +7440,75 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
         const isToday = d.toDateString() === new Date().toDateString();
 
         if (isToday) {
-          // Today always uses the live dynamic score
           scores.push(computeScore());
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         } else if (found) {
-          scores.push(found.score);
-          durations.push(found.duration);
+          scores.push(Number(found.score) || 0);
+          durations.push(parseFloat(found.duration) || 0);
         } else {
-          // Fills in gaps for past days with the last known score
           const validPast = scores.filter(s => s > 0);
           scores.push(validPast.length > 0 ? validPast[validPast.length - 1] : 61);
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         }
       }
     } else {
-      // 30D, 3M, 6M Logic: Group by actual weeks/months
       const isMonthly = (range === '3m' || range === '6m');
       const numGroups = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
       
-      // Setup date buckets
       for (let i = numGroups - 1; i >= 0; i--) {
-        const end = new Date(today);
-        const start = new Date(today);
-        
+        let start, end;
         if (isMonthly) {
-           end.setMonth(end.getMonth() - i);
-           start.setMonth(start.getMonth() - i);
-           start.setDate(1); // Start of that month
-           labels.push(end.toLocaleDateString('en-US', { month: 'short' }));
+          const target = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          labels.push(target.toLocaleDateString('en-US', { month: 'short' }));
+          start = new Date(target.getFullYear(), target.getMonth(), 1, 0, 0, 0, 0);
+          end = new Date(target.getFullYear(), target.getMonth() + 1, 0, 23, 59, 59, 999);
         } else {
-           // Weeks (every 7 days going back)
-           end.setDate(end.getDate() - (i * 7));
-           start.setDate(start.getDate() - (i * 7 + 6));
-           labels.push('Wk ' + (numGroups - i));
+          labels.push('Wk ' + (numGroups - i));
+          end = new Date(today);
+          end.setDate(today.getDate() - (i * 7));
+          end.setHours(23, 59, 59, 999);
+          start = new Date(end);
+          start.setDate(end.getDate() - 6);
+          start.setHours(0, 0, 0, 0);
         }
 
-        // Find all history entries that fall into this timeframe
         let bucketScores = [];
         let bucketDurs = [];
 
         history.forEach(h => {
           const d = new Date(h.date);
           if (d >= start && d <= end) {
-             // If it's today's date, use the live score, otherwise use history
-             const isToday = d.toDateString() === new Date().toDateString();
-             if (isToday) {
-                bucketScores.push(computeScore());
-                bucketDurs.push(state.baseline.totalSleep);
-             } else if (h.score > 0) {
-                bucketScores.push(h.score);
-                bucketDurs.push(h.duration);
-             }
+            const isToday = d.toDateString() === new Date().toDateString();
+            if (isToday) {
+              bucketScores.push(computeScore());
+              bucketDurs.push(parseFloat(state.baseline.totalSleep) || 0);
+            } else if (h.score > 0) {
+              bucketScores.push(Number(h.score) || 0);
+              bucketDurs.push(parseFloat(h.duration) || 0);
+            }
           }
         });
 
-        // Calculate the average for this specific bucket
         if (bucketScores.length > 0) {
           const avgS = Math.round(bucketScores.reduce((a, b) => a + b, 0) / bucketScores.length);
-          const avgD = bucketDurs.reduce((a, b) => a + b, 0) / bucketDurs.length;
+          const avgD = bucketDurs.reduce((a, b) => a + Number(b), 0) / bucketDurs.length;
           scores.push(avgS);
           durations.push(avgD);
         } else {
-          // If absolutely NO data in this week/month, fallback to latest
-          const latest = history.length > 0 ? history[history.length - 1].score : 61;
+          const latest = history.length > 0 ? (Number(history[history.length - 1].score) || 61) : 61;
           scores.push(latest);
-          durations.push(state.baseline.totalSleep);
+          durations.push(parseFloat(state.baseline.totalSleep) || 0);
         }
       }
     }
 
-    // Calculate final averages for the big text labels
     const validScores = scores.filter(s => s > 0);
     const avgScore = validScores.length > 0
       ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
       : computeScore();
     const avgDuration = durations.length > 0
-      ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1)
-      : state.baseline.totalSleep.toFixed(1);
+      ? (durations.reduce((a, b) => a + Number(b), 0) / durations.length).toFixed(1)
+      : (parseFloat(state.baseline.totalSleep) || 0).toFixed(1);
 
     return {
       labels,
@@ -7548,11 +7625,16 @@ bindChartTooltips('lineChartWrap', (value, label) => {
 
   function getRecoveryData() {
     let history = state.sleepHistory || [];
+    if (history.length === 0) {
+      history = defaultState.sleepHistory;
+    }
+
     const labels = [];
     const values = [];
     const today = new Date();
     const todayStr = today.toDateString();
-    const todayRecovery = computeRecovery(); // Live score for today
+    const todayRecovery = computeRecovery();
+    const pastDurations = [6.8, 7.4, 5.9, 7.1, 7.6, 6.3];
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
@@ -7564,13 +7646,21 @@ bindChartTooltips('lineChartWrap', (value, label) => {
       } else {
         const found = history.find(h => h.date === d.toDateString());
         
-        // ONLY use the saved score. No more recalculating past days!
         if (found && typeof found.recoveryScore === 'number') {
           values.push(found.recoveryScore);
+        } else if (found && found.duration !== undefined) {
+          const dur = parseFloat(found.duration) || state.baseline.totalSleep;
+          const deep = parseFloat(found.deepRatio) || state.baseline.deepRatio;
+          const durationPct = Math.min(1, dur / 8);
+          values.push(Math.max(5, Math.min(100, Math.round((durationPct * 70) + (Math.min(1, deep / 25) * 15) + 15))));
         } else {
-          // If there's no data for that day, keep the line flat
-          const fallback = values.length > 0 ? values[values.length - 1] : todayRecovery;
-          values.push(fallback);
+          // Derive dynamic past recovery variance anchored to user's current baseline stats and active factor penalties
+          const dur = pastDurations[6 - i] || 6.5;
+          const durationPct = Math.min(1, dur / 8);
+          const baseRec = Math.round((durationPct * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
+          const nominalCurrent = Math.round(((state.baseline.totalSleep / 8) * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
+          const factorOffset = todayRecovery - nominalCurrent;
+          values.push(Math.max(10, Math.min(100, baseRec + Math.round(factorOffset * 0.75))));
         }
       }
     }
@@ -7795,48 +7885,95 @@ function renderRecoveryTrendChart() {
   }
 
   ['settingReminder', 'settingNotifs'].forEach((id) => {
-    document.getElementById(id).addEventListener('click', () => {
-      const toggleId = id === 'settingReminder' ? 'reminderToggle' : 'notifsToggle';
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      const isReminder = id === 'settingReminder';
+      const toggleId = isReminder ? 'reminderToggle' : 'notifsToggle';
       const t = document.getElementById(toggleId);
-      t.classList.toggle('on');
-      showToast(t.classList.contains('on') ? 'Enabled' : 'Disabled');
+      if (isReminder) {
+        state.bedtimeReminderEnabled = !state.bedtimeReminderEnabled;
+        if (t) t.classList.toggle('on', state.bedtimeReminderEnabled);
+      } else {
+        state.notificationsEnabled = !state.notificationsEnabled;
+        if (t) t.classList.toggle('on', state.notificationsEnabled);
+      }
+      saveState(state);
+      showToast((t && t.classList.contains('on')) ? 'Enabled' : 'Disabled');
       registerInteraction();
     });
   });
 
   function renderStepsSettings() {
     const goal = state.stepsGoal || 8000;
-    document.getElementById('stepsGoalSub').textContent = goal.toLocaleString() + ' steps';
-    document.getElementById('goalValueDisplay').textContent = goal.toLocaleString();
-    document.getElementById('stepsTrackToggle').classList.toggle('on', state.stepsEnabled);
+    const subEl = document.getElementById('stepsGoalSub');
+    if (subEl) subEl.textContent = goal.toLocaleString() + ' steps';
+    const dispEl = document.getElementById('goalValueDisplay');
+    if (dispEl) dispEl.textContent = goal.toLocaleString();
+    const trackTog = document.getElementById('stepsTrackToggle');
+    if (trackTog) trackTog.classList.toggle('on', state.stepsEnabled);
+    const remTog = document.getElementById('reminderToggle');
+    if (remTog) remTog.classList.toggle('on', state.bedtimeReminderEnabled !== false);
+    const notTog = document.getElementById('notifsToggle');
+    if (notTog) notTog.classList.toggle('on', state.notificationsEnabled !== false);
   }
-  document.getElementById('settingStepsTrack').addEventListener('click', () => {
-    state.stepsEnabled = !state.stepsEnabled;
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-    showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
-  });
-  document.getElementById('settingStepsGoal').addEventListener('click', () => {
-    const editor = document.getElementById('stepsGoalEditor');
-    editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
-  });
-  document.getElementById('goalMinus').addEventListener('click', () => {
-    state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-  });
-  document.getElementById('goalPlus').addEventListener('click', () => {
-    state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
-    saveState(state);
-    renderStepsSettings();
-    renderSteps();
-  });
-  document.getElementById('goalDone').addEventListener('click', () => {
-    document.getElementById('stepsGoalEditor').style.display = 'none';
-    showToast('Step goal updated');
-  });
+  const stepsTrackEl = document.getElementById('settingStepsTrack');
+  if (stepsTrackEl) {
+    stepsTrackEl.addEventListener('click', () => {
+      state.stepsEnabled = !state.stepsEnabled;
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      showToast(state.stepsEnabled ? 'Step tracking enabled' : 'Step tracking disabled');
+    });
+  }
+  const stepsGoalEl = document.getElementById('settingStepsGoal');
+  if (stepsGoalEl) {
+    stepsGoalEl.addEventListener('click', () => {
+      const editor = document.getElementById('stepsGoalEditor');
+      if (editor) editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
+    });
+  }
+  const gMinus = document.getElementById('goalMinus');
+  if (gMinus) {
+    gMinus.addEventListener('click', () => {
+      state.stepsGoal = Math.max(2000, (state.stepsGoal || 8000) - 500);
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      renderStepsBarChart();
+    });
+  }
+  const gPlus = document.getElementById('goalPlus');
+  if (gPlus) {
+    gPlus.addEventListener('click', () => {
+      state.stepsGoal = Math.min(30000, (state.stepsGoal || 8000) + 500);
+      saveState(state);
+      renderStepsSettings();
+      renderSteps();
+      renderStepsBarChart();
+    });
+  }
+  const gDone = document.getElementById('goalDone');
+  if (gDone) {
+    gDone.addEventListener('click', () => {
+      const editor = document.getElementById('stepsGoalEditor');
+      if (editor) editor.style.display = 'none';
+      showToast('Step goal updated');
+    });
+  }
+
+  const resetBtn = document.getElementById('settingResetData');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Reset all Restia sleep data, history, and character customization? This will restore defaults.')) {
+        try {
+          localStorage.removeItem(STORE_KEY);
+        } catch (e) {}
+        location.reload();
+      }
+    });
+  }
 
   const aiMessages = document.getElementById('aiMessages');
   const aiInput = document.getElementById('aiInput');
@@ -7946,9 +8083,8 @@ function renderRecoveryTrendChart() {
     const score = computeScore();
     const rec = computeRecovery();
 
-
-    // 1. Check for Greetings
-    if (/^(hi|hey|hello|yo|sup|hiya|howdy)\b/.test(q)) {
+    // 1. Check for Greetings (only when the whole message is a greeting)
+    if (/^(hi|hey|hello|yo|sup|hiya|howdy)[!.,\s]*$/i.test(q)) {
       return `Hey! 👋 Your sleep score is ${score}/100 and recovery is ${rec}%. What's on your mind? Ask me anything about sleep.`;
     }
     if (q === 'thanks' || q === 'thank you' || q === 'thx') {
@@ -7962,15 +8098,14 @@ function renderRecoveryTrendChart() {
     aiDatabase.forEach(item => {
       let matchCount = 0;
       
-      // Check how many keywords from this item are in the user's question
       item.keywords.forEach(kw => {
-        // We use a simple regex to match the keyword anywhere in the text
-        if (new RegExp(kw, 'i').test(q)) {
-          matchCount++;
+        if (new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(q)) {
+          matchCount += 2;
+        } else if (new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(q)) {
+          matchCount += 1;
         }
       });
 
-      // If this item has more matches than the previous best, make it the new best
       if (matchCount > highestScore) {
         highestScore = matchCount;
         bestMatch = item;
@@ -8017,8 +8152,10 @@ function renderRecoveryTrendChart() {
 
     if (!sample) {
       setTimeout(() => {
-        thinkingEl.textContent = offlineSleepCoach(text);
+        const response = offlineSleepCoach(text);
+        thinkingEl.textContent = response;
         thinkingEl.classList.remove('thinking');
+        chatTurns.push({ role: 'assistant', content: response });
         aiMessages.scrollTop = aiMessages.scrollHeight;
         aiBusy = false;
         aiSend.disabled = false;
@@ -8027,7 +8164,13 @@ function renderRecoveryTrendChart() {
     }
 
     try {
-      const turns = [{ role: 'user', content: AI_RULES + '\n\nCurrent app data:\n' + currentAppContext() }, ...chatTurns];
+      const systemContext = AI_RULES + '\n\nCurrent app data:\n' + currentAppContext();
+      const turns = chatTurns.map((turn, idx) => {
+        if (idx === 0 && turn.role === 'user') {
+          return { role: 'user', content: systemContext + '\n\n' + turn.content };
+        }
+        return turn;
+      });
       const { text: answer } = await sample(turns, {
         cache: false,
         onText: ({ text: t }) => {
@@ -8039,7 +8182,9 @@ function renderRecoveryTrendChart() {
       chatTurns.push({ role: 'assistant', content: answer });
     } catch (e) {
       thinkingEl.classList.remove('thinking');
-      thinkingEl.textContent = e.text || offlineSleepCoach(text);
+      const fallbackAns = e.text || offlineSleepCoach(text);
+      thinkingEl.textContent = fallbackAns;
+      chatTurns.push({ role: 'assistant', content: fallbackAns });
       if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) {
         sample = null;
         aiInput.placeholder = 'Ask about your sleep… (offline tips)';
@@ -8105,7 +8250,7 @@ function renderRecoveryTrendChart() {
   function hypeForBest(best, current) {
     if (current >= best && current > 0) return '🎉 New personal record!';
     const gap = best - current;
-    return gap <= 5 ? `Only ${Math.max(gap,1)} pts from your best` : 'Personal record';
+    return gap <= 5 ? `Only ${Math.max(gap, 1)} pts from your best` : `Best score: ${best}`;
   }
   function hypeForNights(n) {
     if (n < 3) return 'Just getting started';
@@ -8296,9 +8441,12 @@ function renderRecoveryTrendChart() {
       });
     });
 
-    function onSpinEnd(e) {
-      if (e.propertyName !== 'transform') return;
+    let completed = false;
+    function finalizeReel() {
+      if (completed) return;
+      completed = true;
       chestReelTrack.removeEventListener('transitionend', onSpinEnd);
+      clearTimeout(safetyTimeout);
       const landedEl = chestReelTrack.children[REEL_TARGET_INDEX];
       if (landedEl) landedEl.classList.add('landed');
       chestReelResult.innerHTML = `<div class="result-xp">+${reward} XP</div><div class="result-label">${rarityForXp[reward].toUpperCase()} REWARD</div>`;
@@ -8307,7 +8455,13 @@ function renderRecoveryTrendChart() {
       spawnParticles(['✨', '🎉', '+' + reward], '#f6c453', landedEl || chestReelOverlay);
       addXp(reward, {});
     }
+
+    function onSpinEnd(e) {
+      if (e && e.propertyName && e.propertyName !== 'transform') return;
+      finalizeReel();
+    }
     chestReelTrack.addEventListener('transitionend', onSpinEnd);
+    const safetyTimeout = setTimeout(finalizeReel, 5200);
   }
 
   chestReelContinue.addEventListener('click', () => {
@@ -8576,6 +8730,7 @@ function renderRecoveryTrendChart() {
 }
 
 if (style === 'long') {
+      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
@@ -8616,6 +8771,7 @@ if (style === 'long') {
     }
 
     if (style === 'curly') {
+      path = ''; // Clear generic cap so it does not render underneath
       const hexToRgb = (hex) => {
         const h = hex.replace('#', '');
         const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
