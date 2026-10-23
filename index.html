@@ -1571,6 +1571,81 @@
   100% { transform: rotate(-18deg) translate(-2vw, 3vh) scale(0.98); }
 }
 
+/* --- NEW DISTANT PLANETS --- */
+.distant-planet {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0; /* Sits behind the moon and astronaut, but above the deep space background */
+  pointer-events: none;
+  /* Base blur to make them look far away */
+  filter: blur(1.5px); 
+  opacity: 0.85;
+}
+
+/* Planet 1: Soft Blue/Teal Gas Giant (Top Left) */
+.planet-1 {
+  top: 15%;
+  left: 10%;
+  width: 140px;
+  height: 140px;
+  /* Creates a soft, hazy atmosphere and a subtle shadow on the bottom right */
+  background: radial-gradient(circle at 35% 35%, #7ae8d8 0%, #35c9b0 40%, #1a4a5a 80%, #020108 100%);
+  box-shadow: 
+    inset -15px -15px 30px rgba(0,0,0,0.6), /* Inner shadow for 3D sphere effect */
+    0 0 40px rgba(53, 201, 176, 0.15); /* Outer glow */
+  animation: floatPlanet 18s ease-in-out infinite alternate;
+}
+
+/* Planet 2: Dusty Purple Ringed Planet (Right side, lower) */
+.planet-2 {
+  top: 65%;
+  right: 5%;
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle at 30% 30%, #c8a2ff 0%, #8a6ef2 40%, #3a2a7a 80%, #020108 100%);
+  box-shadow: 
+    inset -10px -10px 20px rgba(0,0,0,0.7),
+    0 0 30px rgba(138, 110, 242, 0.2);
+  animation: floatPlanet 22s ease-in-out infinite alternate-reverse;
+}
+
+/* The Ring for Planet 2 */
+.planet-2::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(200, 162, 255, 0.3);
+  /* Rotate and skew the ring to make it look like it's orbiting in 3D */
+  transform: translate(-50%, -50%) rotate(-25deg) skewX(20deg);
+  box-shadow: 0 0 15px rgba(138, 110, 242, 0.2);
+  filter: blur(0.5px);
+}
+
+/* Planet 3: Tiny, very far Orange/Mars-like planet (Bottom Left) */
+.planet-3 {
+  bottom: 20%;
+  left: 15%;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 40% 40%, #ffb07c 0%, #e8783e 50%, #5a2a1a 100%);
+  box-shadow: 
+    inset -5px -5px 10px rgba(0,0,0,0.8),
+    0 0 15px rgba(232, 120, 62, 0.15);
+  opacity: 0.6; /* Fades it into the background more */
+  filter: blur(1px); /* Extra blur because it's further away */
+  animation: floatPlanet 15s ease-in-out infinite alternate;
+}
+
+/* Very slow, gentle floating animation for the planets */
+@keyframes floatPlanet {
+  0% { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(-15px) translateX(10px); }
+}
+
 /* Roaming Floating Astronaut */
 .space-astronaut {
   position: absolute;
@@ -1788,29 +1863,141 @@
   .week-ring-wrap svg { transform: rotate(-90deg); }
   .week-ring-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
 
-  .pattern-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .pattern-head-left { display: flex; align-items: center; gap: 10px; }
+  /* ---- UPGRADED SLEEP PATTERN CARD ---- */
+  .pattern-card {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  /* Subtle ambient background glows */
+  .pattern-bg-glow {
+    position: absolute;
+    top: -50px; left: -50px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(79,163,247,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .pattern-bg-glow-2 {
+    position: absolute;
+    bottom: -50px; right: -50px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(157,124,245,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .pattern-head { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 18px; 
+    position: relative;
+    z-index: 2;
+  }
+  
+  .pattern-head-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+  }
+  
   .pattern-icon {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: rgba(157,124,245,0.2);
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(157,124,245,0.2), rgba(157,124,245,0.05));
+    border: 1px solid rgba(157,124,245,0.3);
     color: var(--violet);
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
+    font-size: 16px;
+    box-shadow: 0 0 15px rgba(157,124,245,0.15);
   }
-  .pattern-title { font-size: 13.5px; font-weight: 700; }
-  .pattern-stats { display: flex; justify-content: space-between; gap: 8px; }
-  .pattern-stat { flex: 1; }
+
+  /* Keeps the text style we fixed in the previous step */
+  .pattern-title { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 12px; 
+    letter-spacing: 0.12em; 
+    color: var(--text-faint); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+  }
+
+  .pattern-stats { 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 8px; 
+    position: relative;
+    z-index: 2;
+  }
+  
+  .pattern-stat { 
+    flex: 1; 
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 12px 10px;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  
+  .pattern-stat:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* Upgraded Icon styles */
   .pattern-stat-icon {
     width: 28px; height: 28px;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     font-size: 13px;
-    margin-bottom: 9px;
+    margin-bottom: 12px;
   }
-  .pattern-stat .lbl { font-size: 9.5px; color: var(--text-faint); font-weight: 700; margin-bottom: 4px; letter-spacing: 0.02em; }
-  .pattern-stat .val { font-size: 15.5px; font-weight: 700; }
-  .pattern-stat .sub { font-size: 9.5px; color: var(--text-faint); margin-top: 3px; }
+  
+  .pattern-stat-icon.icon-bed {
+    background: rgba(79,163,247,0.15);
+    color: var(--blue);
+    box-shadow: 0 0 10px rgba(79,163,247,0.2);
+  }
+  
+  .pattern-stat-icon.icon-sun {
+    background: rgba(246,196,83,0.15);
+    color: var(--gold-1);
+    box-shadow: 0 0 10px rgba(246,196,83,0.2);
+  }
+  
+  .pattern-stat-icon.icon-moon {
+    background: rgba(157,124,245,0.15);
+    color: var(--violet);
+    box-shadow: 0 0 10px rgba(157,124,245,0.2);
+  }
+
+  /* Typography */
+  .pattern-stat .lbl { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 9px; 
+    letter-spacing: 0.06em; 
+    color: #9a94b8; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    margin-bottom: 6px; 
+  }
+  
+  .pattern-stat .val { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 16px; 
+    font-weight: 700; 
+    color: #fff;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  
+  .pattern-stat .sub { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 10.5px; 
+    color: #6b6588; 
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
 
   .insight-list { display: flex; flex-direction: column; gap: 12px; }
   .insight-row { display: flex; align-items: center; gap: 12px; }
@@ -3065,7 +3252,6 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
-  }
     /* ---- AI Sleep Coach page ---- */
     .ai-card {
     padding: 0;
@@ -3251,8 +3437,22 @@
     font-size: 13px;
     box-shadow: 0 0 12px rgba(157,124,245,0.3);
   }
-  .insight-section-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: var(--text); }
-  .insight-section-sub { font-size: 10px; color: var(--text-faint); font-weight: 600; margin-top: 2px; }
+  .insight-section-title { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 12px; 
+    letter-spacing: 0.12em; 
+    color: var(--text-faint); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+  }
+  .insight-section-sub { 
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 11px; 
+    color: #6b6588; 
+    font-weight: 500; 
+    letter-spacing: 0.02em;
+    margin-top: 4px; 
+  }
 
   .insight-list { display: flex; flex-direction: column; gap: 11px; }
 
@@ -3785,7 +3985,6 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: background 0.2s ease, transform 0.2s ease;
   }
-  }
   .tip:hover {
     background: rgba(255,255,255,0.05);
     transform: translateX(3px);
@@ -3958,7 +4157,7 @@
       <div class="vital-val" id="bpVal">129/85 <span>mmHg</span></div>
       <div class="vital-sub">Elevated · morning</div>
     </div>
-  </div>>
+  </div>
 
   <div class="steps-card" id="stepsCard">
   <div class="steps-top" id="stepsClickArea" style="cursor: pointer;" title="Click to activate step tracking">
@@ -4138,48 +4337,6 @@
     </div>
   </div>
 
-  <div class="card week-hero">
-    <div class="week-hero-top">
-      <div class="week-hero-emoji" id="weekEmoji">🙂</div>
-      <div class="week-hero-copy">
-        <div class="week-hero-title">Solid week, sleeper.</div>
-        <div class="week-hero-sub">You're <b>+6 pts</b> above last week — keep the streak alive.</div>
-      </div>
-    </div>
-
-    <div class="week-metric-grid">
-      <div class="week-metric">
-        <div class="week-metric-icon" style="background:rgba(79,209,139,0.18); color:#4fd18b;">🛏️</div>
-        <div class="week-metric-val" style="color:#4fd18b;">6.8h</div>
-        <div class="week-metric-lbl">AVG SLEEP</div>
-      </div>
-      <div class="week-metric">
-        <div class="week-metric-icon" style="background:rgba(246,196,83,0.18); color:#f6c453;">⭐</div>
-        <div class="week-metric-val" style="color:#f6c453;">81</div>
-        <div class="week-metric-lbl">AVG SCORE</div>
-      </div>
-      <div class="week-metric">
-        <div class="week-metric-icon" style="background:rgba(157,124,245,0.18); color:#9d7cf5;">🌌</div>
-        <div class="week-metric-val" style="color:#9d7cf5;">22%</div>
-        <div class="week-metric-lbl">AVG DEEP</div>
-      </div>
-      <div class="week-hero-ring">
-        <div class="ring-mini-wrap">
-          <svg width="40" height="40" viewBox="0 0 40 40">
-            <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
-            <circle id="weekRingArc" cx="20" cy="20" r="16" fill="none" stroke="#4fd18b" stroke-width="4" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5" style="transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);"/>
-          </svg>
-          <div class="ring-mini-val">84%</div>
-        </div>
-        <div class="week-metric-lbl">GOAL RATE</div>
-      </div>
-    </div>
-
-    <div class="week-hero-foot">
-      <span>4 of 7 nights hit your goal</span>
-      <span class="pill">🔥 4-day streak</span>
-    </div>
-  </div>
 
   <div class="card">
     <div class="chart-head">
@@ -4190,28 +4347,34 @@
     <div class="stage-axis" id="stepsChartAxis"></div>
   </div>
 
-  <div class="card" id="patternCard" style="cursor:pointer;">    <div class="pattern-head">
+  <div class="card pattern-card" id="patternCard" style="cursor:pointer;">
+    <!-- Background glow effects -->
+    <div class="pattern-bg-glow"></div>
+    <div class="pattern-bg-glow-2"></div>
+    
+    <div class="pattern-head">
       <div class="pattern-head-left">
         <div class="pattern-icon">🌙</div>
         <div class="pattern-title">Your Sleep Pattern</div>
       </div>
-      <div style="color:var(--text-faint); font-size:16px;">›</div>
+      <div style="color:var(--text-faint); font-size:16px; font-weight:700;">›</div>
     </div>
+    
     <div class="pattern-stats">
       <div class="pattern-stat">
-        <div class="pattern-stat-icon" style="background:rgba(79,163,247,0.18); color:var(--blue);">🛏️</div>
+        <div class="pattern-stat-icon icon-bed">🛏️</div>
         <div class="lbl">AVG BEDTIME</div>
         <div class="val">11:42 PM</div>
-        <div class="sub">±18 min variation</div>
+        <div class="sub">±18m variation</div>
       </div>
       <div class="pattern-stat">
-        <div class="pattern-stat-icon" style="background:rgba(246,196,83,0.18); color:var(--gold-1);">☀️</div>
+        <div class="pattern-stat-icon icon-sun">☀️</div>
         <div class="lbl">AVG WAKE TIME</div>
         <div class="val">6:48 AM</div>
-        <div class="sub">±24 min variation</div>
+        <div class="sub">±24m variation</div>
       </div>
       <div class="pattern-stat">
-        <div class="pattern-stat-icon" style="background:rgba(157,124,245,0.18); color:var(--violet);">🌙</div>
+        <div class="pattern-stat-icon icon-moon">🌙</div>
         <div class="lbl">CONSISTENCY</div>
         <div class="val">84%</div>
         <div class="sub">(5/7 nights)</div>
@@ -4626,6 +4789,11 @@
 
   <div class="small-nebula"></div>
 
+    <!-- ADD THESE NEW PLANET ELEMENTS -->
+    <div class="distant-planet planet-1"></div>
+    <div class="distant-planet planet-2"></div>
+    <div class="distant-planet planet-3"></div>
+
   <div class="space-stars-container" id="spaceStarsContainer"></div>
   <div class="space-moon-container">
     <svg viewBox="0 0 200 200" class="cute-moon-svg">
@@ -4913,8 +5081,15 @@
       lightSleep: 3.3,
       remSleep: 1.5
     },
-    sleepHistory: [ // ADD THIS ENTIRE BLOCK
-      { score: 61, duration: 6.1, deepRatio: 22, bedtime: '11:42 PM', waketime: '5:49 AM' }
+    sleepHistory: [ 
+      { 
+        score: 61, 
+        duration: 6.1, 
+        deepRatio: 22, 
+        bedtime: '11:42 PM', 
+        waketime: '5:49 AM',
+        date: new Date().toDateString() // <-- ADDED THIS
+      }
     ],
     xp: 0,
     xpAwardedForDate: null,
@@ -5148,6 +5323,18 @@
   });
   document.addEventListener('click', hideStageTooltip);
 
+  function updateUI() {
+    saveState(state);
+    
+    // Recalculate and redraw everything in order
+    renderFactors();
+    renderHomeDashboard(); // Updates Home Ring, Home Breakdown, Recovery
+    renderLineChart(currentRange || '7d'); // <-- Crucial: Refreshes the Trends chart
+    renderRecoveryTrendChart();
+    
+    if (typeof renderStress === 'function') renderStress();
+  }
+
   function renderInsight() {
     const diff = (7 - state.baseline.totalSleep).toFixed(1);
     document.getElementById('insightText').innerHTML =
@@ -5190,6 +5377,18 @@
   const timeOptionsEl = document.getElementById('timeOptions');
   let activeTimePickerType = null; // 'caffeine' or 'screen'
 
+  function updateUI() {
+    saveState(state);
+    
+    // Recalculate and redraw everything in order
+    renderFactors();
+    renderHomeDashboard(); // Updates Home Ring & Breakdown
+    renderLineChart('7d'); // Updates the Trend line & Duo cards
+    renderRecoveryTrendChart();
+    
+    if (typeof renderStress === 'function') renderStress();
+  }
+
   function openTimePicker(type) {
     activeTimePickerType = type;
     timePickerTitle.textContent = type === 'caffeine' ? 'Caffeine' : 'Screen Time';
@@ -5228,11 +5427,7 @@
         }
         
         timePickerOverlay.classList.remove('active');
-        saveState(state);
-        renderFactors();
-        renderScore();
-        renderRecovery();
-        renderHomeBreakdown();
+        updateUI(); // <-- Updates everything perfectly without the glitch
         showToast(type === 'caffeine' ? 'Caffeine logged' : 'Screen time logged');
         registerInteraction();
       });
@@ -5254,6 +5449,7 @@
     saveState(state);
     renderFactors();
     renderScore();
+    renderLineChart('7d')
     renderRecovery();
     renderHomeBreakdown();
     showToast('Cleared');
@@ -5271,6 +5467,7 @@
       saveState(state);
       renderFactors();
       renderScore();
+      renderLineChart('7d')
       renderRecovery();
       renderHomeBreakdown();
       showToast('Caffeine removed');
@@ -5332,6 +5529,7 @@
       saveState(state);
       renderStress();
       renderScore();
+      renderLineChart('7d');
       renderRecovery();
       renderHomeBreakdown();
       showToast('Stress level updated');
@@ -6580,14 +6778,25 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   state.baseline.awakeCount = sessionData.awakenings;
   state.baseline.awakeTime = (sessionData.timeAwake / 3600).toFixed(1);
   
+  const todayStr = new Date().toDateString();
+
+  // Remove any existing entry for today first (prevents duplicates)
+  state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
+
+  // CRITICAL FIX: Save the exact score that is currently displayed on the Home screen
+  // (This includes the stress/caffeine deductions so the chart matches perfectly)
+  const liveHomeScore = computeScore(); 
+
   state.sleepHistory.push({
-    score: totalScore,
-    duration: state.baseline.totalSleep,
+    score: liveHomeScore, // <-- Use the live score instead of totalScore
+    duration: parseFloat(state.baseline.totalSleep),
     deepRatio: state.baseline.deepRatio,
     bedtime: state.baseline.bedtime,
     waketime: state.baseline.waketime,
-    date: new Date().toDateString()
+    date: todayStr
   });
+
+  // Keep only the last 30 nights
   if (state.sleepHistory.length > 30) state.sleepHistory.shift();
   
   saveState(state);
@@ -6595,6 +6804,7 @@ scoreArc.style.opacity = score <= 10 ? '0' : '1';
   renderHomeBreakdown();
   renderHomeDashboard();
   renderLineChart('7d')
+  renderRecoveryTrendChart()
   
   renderRealSoundEvents(hoursSlept);
 }
@@ -6916,89 +7126,106 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
 
   function getChartData(range) {
     let history = state.sleepHistory || [];
-    
-    // If history is empty, seed it with today's data
-    if (history.length === 0) {
-      history = [{ score: computeScore(), duration: state.baseline.totalSleep, date: new Date().toDateString() }];
-    }
+    history = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const labels = [];
     const scores = [];
     const durations = [];
     const today = new Date();
+    today.setHours(23, 59, 59, 999); // Ensure we include all of today
 
     if (range === '7d') {
-      // Look back exactly 7 days
+      // 7D Logic: Look at the exact last 7 days
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
         labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-        
-        // Find this specific day in the history array
-        const foundDay = history.find(h => h.date === d.toDateString());
-        
-        if (foundDay) {
-          scores.push(foundDay.score);
-          durations.push(foundDay.duration);
-        } else if (i === 0) {
-          // If it's today and not in history yet, use current score
+
+        const found = history.find(h => h.date === d.toDateString());
+        const isToday = d.toDateString() === new Date().toDateString();
+
+        if (isToday) {
+          // Today always uses the live dynamic score
           scores.push(computeScore());
           durations.push(state.baseline.totalSleep);
+        } else if (found) {
+          scores.push(found.score);
+          durations.push(found.duration);
         } else {
-          // If this day has no data, put a 0 so the line dips
-          scores.push(0);
-          durations.push(0);
+          // Fills in gaps for past days with the last known score
+          const validPast = scores.filter(s => s > 0);
+          scores.push(validPast.length > 0 ? validPast[validPast.length - 1] : 61);
+          durations.push(state.baseline.totalSleep);
         }
       }
     } else {
-      // Grouped (Weekly or Monthly)
-      const isMonthly = range === '3m' || range === '6m';
-      const steps = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
-      const stepDays = isMonthly ? 30 : 7;
-
-      for (let i = steps - 1; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - (i * stepDays));
+      // 30D, 3M, 6M Logic: Group by actual weeks/months
+      const isMonthly = (range === '3m' || range === '6m');
+      const numGroups = range === '30d' ? 4 : (range === '3m' ? 3 : 6);
+      
+      // Setup date buckets
+      for (let i = numGroups - 1; i >= 0; i--) {
+        const end = new Date(today);
+        const start = new Date(today);
         
-        if (range === '30d') {
-          labels.push('Wk ' + (steps - i));
+        if (isMonthly) {
+           end.setMonth(end.getMonth() - i);
+           start.setMonth(start.getMonth() - i);
+           start.setDate(1); // Start of that month
+           labels.push(end.toLocaleDateString('en-US', { month: 'short' }));
         } else {
-          labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
-        }
-        
-        // Collect all valid scores for this period
-        let periodScores = [];
-        let periodDurs = [];
-        for (let j = 0; j < stepDays; j++) {
-            const checkDate = new Date(d);
-            checkDate.setDate(checkDate.getDate() - j);
-            const found = history.find(h => h.date === checkDate.toDateString());
-            if (found && found.score > 0) {
-                periodScores.push(found.score);
-                periodDurs.push(found.duration);
-            }
+           // Weeks (every 7 days going back)
+           end.setDate(end.getDate() - (i * 7));
+           start.setDate(start.getDate() - (i * 7 + 6));
+           labels.push('Wk ' + (numGroups - i));
         }
 
-        if (periodScores.length > 0) {
-            // Average the scores for that week/month
-            scores.push(Math.round(periodScores.reduce((a,b)=>a+b,0)/periodScores.length));
-            durations.push(periodDurs.reduce((a,b)=>a+b,0)/periodDurs.length);
+        // Find all history entries that fall into this timeframe
+        let bucketScores = [];
+        let bucketDurs = [];
+
+        history.forEach(h => {
+          const d = new Date(h.date);
+          if (d >= start && d <= end) {
+             // If it's today's date, use the live score, otherwise use history
+             const isToday = d.toDateString() === new Date().toDateString();
+             if (isToday) {
+                bucketScores.push(computeScore());
+                bucketDurs.push(state.baseline.totalSleep);
+             } else if (h.score > 0) {
+                bucketScores.push(h.score);
+                bucketDurs.push(h.duration);
+             }
+          }
+        });
+
+        // Calculate the average for this specific bucket
+        if (bucketScores.length > 0) {
+          const avgS = Math.round(bucketScores.reduce((a, b) => a + b, 0) / bucketScores.length);
+          const avgD = bucketDurs.reduce((a, b) => a + b, 0) / bucketDurs.length;
+          scores.push(avgS);
+          durations.push(avgD);
         } else {
-            // If no history for that period, put 0
-            scores.push(0);
-            durations.push(0);
+          // If absolutely NO data in this week/month, fallback to latest
+          const latest = history.length > 0 ? history[history.length - 1].score : 61;
+          scores.push(latest);
+          durations.push(state.baseline.totalSleep);
         }
       }
     }
 
-    // Calculate final averages for the big summary text
+    // Calculate final averages for the big text labels
     const validScores = scores.filter(s => s > 0);
-    const avgScore = validScores.length > 0 ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length) : 0;
-    const avgDuration = durations.length > 0 ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1) : '0.0';
+    const avgScore = validScores.length > 0
+      ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
+      : computeScore();
+    const avgDuration = durations.length > 0
+      ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1)
+      : state.baseline.totalSleep.toFixed(1);
 
     return {
-      labels: labels,
-      scores: scores,
+      labels,
+      scores,
       duration: avgDuration + 'h',
       score: avgScore
     };
@@ -7041,18 +7268,31 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     
     axis.innerHTML = data.labels.map(l => `<span>${l}</span>`).join('');
     
-    // Safely update the text
-    const duoD = document.getElementById('duoDuration');
-    if (duoD) duoD.textContent = data.duration;
-    
-    const duoS = document.getElementById('duoScore');
-    if (duoS) duoS.textContent = data.score;
-    
-    const deltaEl = document.getElementById('lineChartDelta');
-    if (deltaEl) {
-      deltaEl.textContent = 'Average: ' + data.score + ' pts';
-      deltaEl.style.color = data.score >= 70 ? 'var(--green)' : 'var(--gold-1)';
-    }
+// ---- Duo cards (AVG SLEEP DURATION & AVG SLEEP SCORE) ----
+const duoD = document.getElementById('duoDuration');
+if (duoD) duoD.textContent = data.duration;
+
+const duoS = document.getElementById('duoScore');
+if (duoS) duoS.textContent = data.score;
+
+// Update the delta chips below the duo values so they match the new averages
+const duoDurationDelta = document.getElementById('duoDurationDelta');
+if (duoDurationDelta) {
+  duoDurationDelta.textContent = 'Avg: ' + data.duration;
+  duoDurationDelta.style.color = 'var(--green)';
+}
+const duoScoreDelta = document.getElementById('duoScoreDelta');
+if (duoScoreDelta) {
+  duoScoreDelta.textContent = 'Avg: ' + data.score + ' pts';
+  duoScoreDelta.style.color = data.score >= 70 ? 'var(--green)' : 'var(--gold-1)';
+}
+
+// Update the delta label under the chart
+const deltaEl = document.getElementById('lineChartDelta');
+if (deltaEl) {
+  deltaEl.textContent = 'Average: ' + data.score + ' pts';
+  deltaEl.style.color = data.score >= 70 ? 'var(--green)' : 'var(--gold-1)';
+}
     
     bindChartTooltips('lineChartWrap', (value, label) => `${label}<span class="tt-stage">Score ${value}</span>`);
   }
@@ -7358,269 +7598,125 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     return el;
   }
 
-  function fallbackAnswer(raw) {
+
+  // ---- MASSIVE AI SLEEP COACH DATABASE ----
+  const aiDatabase = [
+    // 0. CATCH-ALL / GENERAL ADVICE (Must be first to catch broad questions)
+    { keywords: ['improve', 'better', 'fix', 'help', 'tips', 'advice', 'how to sleep'], response: "To improve your sleep fast, focus on these 3 things:\n1. Wake up at the exact same time every day (even weekends).\n2. No caffeine after 2 PM.\n3. Put your phone away 60 minutes before bed and keep your room completely dark and cool (65°F)." },
+    { keywords: ['fall asleep', 'faster', 'quickly', 'cant sleep', 'insomnia', 'wide awake', 'trouble sleeping'], response: "If you can't fall asleep, don't force it. If you're awake for more than 20 minutes, get out of bed. Go to another room with dim light and read a boring book until you feel sleepy. Also, try the 4-7-8 breathing technique: Inhale for 4 seconds, hold for 7, exhale for 8." },
+    { keywords: ['stay asleep', 'wake up at night', 'wake in the night', 'middle of the night'], response: "Waking up at 2-4 AM is usually caused by alcohol, caffeine, a blood sugar dip, or stress. Try cutting out alcohol and late-night snacks, and keep your bedroom slightly cool." },
+
+    // 1. CAFFEINE & STIMULANTS
+    // 1. CAFFEINE & STIMULANTS
+    { keywords: ['caffeine', 'coffee', 'espresso', 'latte', 'tea', 'matcha', 'energy drink', 'red bull'], response: "Caffeine has a half-life of about 5-6 hours. That means a 3 PM coffee is still 25% in your system at 9 PM. Try to cut off caffeine 8-10 hours before bed to protect your deep sleep." },
+    { keywords: ['caffeine', 'too late', 'drank', 'now i cant sleep'], response: "If you had caffeine too late, don't panic. Drink a large glass of water, do some light stretching, and dim the lights. You might fall asleep a bit later, but keeping the room cool will help your body process it." },
+    { keywords: ['how much caffeine', 'coffee limit', 'how many cups'], response: "For most adults, up to 400mg of caffeine a day (about 4 cups of coffee) is safe. But for sleep, the *timing* matters more than the amount. Keep it before 2 PM." },
+    { keywords: ['decaf', 'decaffeinated'], response: "Decaf still contains trace amounts of caffeine (2-15mg per cup). It's fine as an evening ritual, but don't expect it to be 100% caffeine-free." },
+    { keywords: ['nicotine', 'vape', 'smoking', 'cigarette'], response: "Nicotine is a powerful stimulant. It increases heart rate and fragments sleep. Try to avoid vaping or smoking at least 3 hours before bed." },
+
+    // 2. ALCOHOL & SUBSTANCES
+    { keywords: ['alcohol', 'wine', 'beer', 'drunk', 'vodka', 'whiskey', 'drinking'], response: "Alcohol is a sedative, but it ruins sleep quality. It suppresses REM sleep early in the night, then causes 'rebound' awakenings at 3 AM. Try to stop drinking 3-4 hours before bed and drink plenty of water." },
+    { keywords: ['weed', 'cannabis', 'marijuana', 'thc', 'edible'], response: "Cannabis can help you fall asleep faster, but it suppresses REM sleep. You might sleep 'through' the night, but you won't wake up feeling fully restored. Try to use it well before bed, or take a tolerance break." },
+    { keywords: ['cbd'], response: "CBD is great for anxiety and relaxation, but the evidence for it directly treating insomnia is mixed. A dose of 25-50mg an hour before bed might help you wind down." },
+    { keywords: ['melatonin', 'supplement', 'sleeping pill', 'benadryl', 'zzzquil'], response: "Melatonin is best for jet lag or shifting your schedule, not for staying asleep. A micro-dose (0.5mg - 1mg) is often more effective than 10mg. Over-the-counter sleep aids like Benadryl can cause grogginess and become less effective over time." },
+    { keywords: ['magnesium'], response: "Magnesium glycinate (200-400mg) about an hour before bed can help relax muscles and calm the nervous system. Avoid magnesium citrate at night, as it can upset your stomach." },
+
+    // 3. SCREENS & LIGHT
+    { keywords: ['screen', 'phone', 'blue light', 'scroll', 'scrolling', 'tv', 'television', 'instagram', 'tiktok'], response: "Blue light from screens tricks your brain into thinking it's daytime, halting melatonin production. Try to put screens away 60 minutes before bed, or at least use a blue light filter and keep the brightness low." },
+    { keywords: ['doomscroll', 'doom scrolling'], response: "Doomscrolling is a massive sleep killer. It keeps your brain in a state of high alert and anxiety. Try charging your phone across the room so you physically can't reach for it in bed." },
+    { keywords: ['dark room', 'blackout', 'curtains', 'light'], response: "Your bedroom should be as dark as a cave. Even tiny LED lights from electronics can suppress melatonin. Use blackout curtains and put electrical tape over any small lights." },
+
+    // 4. STRESS & MENTAL HEALTH
+    { keywords: ['stress', 'stressed', 'anxious', 'anxiety', 'panic', 'overwhelmed', 'worried'], response: "Stress is the #1 cause of insomnia. Try the 'brain dump' technique: write down everything worrying you on a piece of paper before bed. Once it's on paper, your brain doesn't have to hold onto it." },
+    { keywords: ['racing thoughts', 'overthinking', 'cant stop thinking', 'mind racing'], response: "Racing thoughts at night happen because your brain finally has quiet time to process the day. Try 4-7-8 breathing: Inhale for 4 seconds, hold for 7, exhale for 8. This physically slows your heart rate." },
+    { keywords: ['depressed', 'depression', 'sad', 'feeling down'], response: "Sleep and mood are deeply connected. Poor sleep makes depression worse, and depression makes sleep harder. If you're feeling down for weeks, please reach out to a professional—and try to get morning sunlight to regulate your mood." },
+    { keywords: ['panic attack at night', 'night panic', 'wake up panicking'], response: "Night panic attacks are terrifying. When you wake up panicking, don't fight it. Sit up, put your feet on the floor, and focus on naming 5 things you can see and 4 things you can touch. Remind yourself that it will pass." },
+
+    // 5. ENVIRONMENT
+    { keywords: ['temperature', 'too hot', 'too cold', 'warm room', 'cold room'], response: "The ideal sleep temperature is around 65°F to 68°F (18°C to 20°C). Your body needs to drop its core temperature to initiate sleep. A warm shower before bed actually helps, as it pulls heat to your skin and cools your core." },
+    { keywords: ['noise', 'loud', 'white noise', 'fan', 'earplugs'], response: "If you live in a noisy area, white or brown noise can mask sudden sounds like traffic or barking dogs. Earplugs are also a game-changer if you can tolerate them." },
+    { keywords: ['mattress', 'pillow', 'bed', 'uncomfortable'], response: "A bad mattress or pillow can ruin your sleep by causing micro-awakenings from discomfort. If your mattress is over 8 years old, it might be time for an upgrade. Side sleepers need a thicker pillow to support the neck." },
+
+    // 6. ROUTINES & TIMING
+    { keywords: ['bedtime', 'what time should i sleep', 'when to sleep'], response: "Consistency is key. Aim to go to bed and wake up at the exact same time every day—even on weekends. Pick a bedtime that allows you at least 7.5 to 8 hours of sleep." },
+    { keywords: ['wake up', 'wake time', 'alarm'], response: "Waking up at the same time every day is the single most effective way to fix your sleep. It anchors your circadian rhythm. Try to get outside into bright light within 30 minutes of waking up." },
+    { keywords: ['routine', 'wind down', 'wind-down', 'before bed', 'ritual', 'pre-bed'], response: "Create a boring, relaxing routine 60 minutes before bed. Dim the lights, take a warm shower, read a physical book, or do gentle stretching. Your brain needs a runway to land on sleep." },
+    { keywords: ['nap', 'napping', 'power nap'], response: "Naps are great, but they can steal from your night sleep. Keep naps under 20-30 minutes, and try to take them before 3 PM. If you struggle with insomnia, skip naps entirely." },
+
+    // 7. SPECIFIC SLEEP DISORDERS & ISSUES
+    { keywords: ['snore', 'snoring', 'apnea', 'stop breathing', 'gasping'], response: "If you snore heavily or wake up gasping for air, you might have Sleep Apnea. This is a serious medical condition. Please see a doctor and ask for a sleep study." },
+    { keywords: ['restless leg', 'rls', 'legs twitching', 'leg cramps'], response: "Restless Leg Syndrome is often linked to low iron or dopamine issues. Try taking magnesium before bed, or ask your doctor to check your ferritin (iron) levels." },
+    { keywords: ['night sweats', 'sweating', 'hot at night'], response: "Night sweats can be caused by a room that's too warm, alcohol, or hormonal changes (like menopause). Try breathable bedding, cooling pillows, and keeping the room cool." },
+    { keywords: ['sleep paralysis'], response: "Sleep paralysis happens when your mind wakes up before your body does. It's scary but completely harmless. Don't fight it—just try to wiggle a single finger or toe and focus on your breathing." },
+    { keywords: ['teeth grinding', 'bruxism', 'jaw clench'], response: "Grinding your teeth is usually a sign of stress or a narrow airway. A mouthguard can protect your teeth, but addressing stress and sleep quality is the real fix." },
+
+    // 8. VITALS & TRACKING (Ties to your app data)
+    { keywords: ['heart rate', 'hr', 'pulse'], response: "Your resting heart rate should drop while you sleep. If you notice it's unusually high, you might be stressed, sick, or you had alcohol the night before." },
+    { keywords: ['blood pressure', 'bp'], response: "Poor sleep is directly linked to higher blood pressure. Short sleep and frequent awakenings force your cardiovascular system to work harder. Consistent 7-8 hour nights can lower BP." },
+    { keywords: ['recovery', 'recovery score'], response: "Your recovery score tells you how ready your body is for the day. It's based on sleep duration, deep sleep, and stress. To improve it, focus on lowering stress before bed and getting to bed 30 minutes earlier." },
+    { keywords: ['deep sleep', 'deep', 'slow wave'], response: "Deep sleep is when your body physically repairs itself. It happens mostly in the first half of the night. Late bedtimes and alcohol drastically cut deep sleep." },
+    { keywords: ['rem', 'dream', 'rem sleep'], response: "REM sleep is for emotional processing and memory consolidation. It happens in the second half of the night. If you cut your sleep short, you lose the most REM." },
+
+    // 9. SPECIFIC LIFE SITUATIONS
+    { keywords: ['new baby', 'newborn', 'baby', 'infant'], response: "Survival mode! Don't worry about your score right now. Sleep whenever the baby sleeps. Split the night shifts with a partner if possible. Keep caffeine early in the day." },
+    { keywords: ['pregnant', 'pregnancy'], response: "Pregnancy wrecks sleep due to hormones and discomfort. Use a pregnancy pillow to support your hips. Left-side sleeping is usually best. Always check with your doctor before taking sleep supplements." },
+    { keywords: ['jet lag', 'travel', 'flight', 'time zone'], response: "Jet lag happens when your internal clock is out of sync. Get out into bright sunlight at your destination as early as possible. A tiny dose of melatonin (0.5mg) at local bedtime for 2 nights can help reset your clock." },
+    { keywords: ['shift work', 'night shift'], response: "Shift work is brutal on the body. Use blackout curtains to make your bedroom pitch black, and use white noise to block daytime sounds. Try to stick to the same sleep schedule even on your days off." },
+
+    // 10. FUN / GENERAL
+    { keywords: ['why do we sleep', 'purpose of sleep'], response: "Sleep is when your brain cleans out toxins (literally), consolidates memories, and repairs muscle tissue. It is the most powerful recovery tool you have." },
+    { keywords: ['how many hours', 'how long', 'how much sleep'], response: "Most adults need between 7 and 9 hours of sleep. Athletes need closer to 9. Under 7 hours for multiple nights in a row starts to degrade your immune system and cognitive function." }
+  ];
+
+  function offlineSleepCoach(raw) {
     const q = raw.toLowerCase().trim();
     const s = state;
     const score = computeScore();
     const rec = computeRecovery();
-    const debt = computeSleepDebt();
-    const sleep = s.baseline.totalSleep;
-    const stress = stressLabels[s.stress].toLowerCase();
-    const has = (...words) => words.some(w => q.includes(w));
-    const t = new Date().getHours();
-    const greetingTime = t < 12 ? 'Morning' : t < 18 ? 'Hey' : 'Evening';
 
-    // ============================================================
-    // SOCIAL / META
-    // ============================================================
 
-    if (/^(hi|hey|hello|yo|sup|hiya|howdy|heyy|hii|hiii)\b/.test(q) || has('hey there', 'hey coach', 'hello coach', 'hi coach')) {
-      return `${greetingTime}! 👋 Your sleep score is ${score}/100 and recovery is ${rec}%. What's on your mind?`;
+    // 1. Check for Greetings
+    if (/^(hi|hey|hello|yo|sup|hiya|howdy)\b/.test(q)) {
+      return `Hey! 👋 Your sleep score is ${score}/100 and recovery is ${rec}%. What's on your mind? Ask me anything about sleep.`;
     }
-    if (has('good morning')) return `Good morning ☀️ Score ${score}/100, recovery ${rec}%. How'd you sleep?`;
-    if (has('good evening', 'good night', 'goodnight')) return `Evening 🌙 You're at ${score}/100 today. Anything you want to prep before bed?`;
-    if (has('good afternoon')) return `Afternoon ☀️ Score ${score}/100. What can I help with?`;
-    if (has('how are you', 'how r u', 'how you doing', "how's it going", 'hows it going', 'you ok', 'you good', 'how do you feel', 'how you feeling', 'you alright', 'you alright?')) {
-      return `Running smooth — no nightmares in my code 😄 More to the point, how are *you*? You logged stress as "${stress}" and recovery is ${rec}%.`;
-    }
-    if (has('who are you', 'what are you', 'your name', 'introduce yourself', 'whats your name', "what's your name", 'tell me about yourself')) {
-      return "I'm Sleep Coach — Restia's built-in assistant. I see your sleep score, recovery, debt, and today's caffeine, screens, and stress. Ask me anything about sleep and I'll keep it short and practical.";
-    }
-    if (has('thank', 'thanks', 'thx', ' ty', 'appreciate')) return "Anytime 🌙 Come back whenever something shifts.";
-    if (has('bye', 'see you', 'see ya', 'later', 'talk later', 'cya')) return "Rest well. Screens down, lights low. I'll be here.";
-    if (has('what can you do', 'what do you do', 'help me', 'what do you know', 'your features', 'how do you work', 'what topics', 'what can i ask')) {
-      return "I can help with:\n• Falling asleep / staying asleep / waking early\n• Deep sleep, REM, light sleep\n• Caffeine, alcohol, screens, stress\n• Naps, routines, jet lag, shift work\n• Your score, recovery, and sleep debt\n• Environment, temperature, noise\nAsk in plain words and I'll keep it short.";
-    }
-    if (has('joke', 'funny', 'make me laugh', 'cheer me up')) return "Why did the sleeper bring a pencil to bed? To draw the curtains 😴 Okay, terrible. But want help with actual sleep?";
-    if (has('love you', "you're cool", 'youre cool', 'you rock', 'you are cool', 'nice bot', 'good bot')) return "Aw, thanks 🌙 Now let's get you proper sleep. Anything specific?";
-    if (has('are you real', 'are you ai', 'are you human', 'are you a bot', 'are you alive')) return "I'm a sleep-focused assistant inside Restia — not a person, not a doctor. I'm here for practical tips and reading your own data back to you.";
-    if (has('do you sleep')) return "Nope — I run 24/7 so you don't have to 😄 What's up?";
-    if (has('test', 'testing', 'you there', 'you up', 'are you there')) return "Loud and clear 👋 What do you want to dig into?";
-    if (has('ok', 'okay', 'cool', 'nice', 'alright', 'sure')) {
-      if (q.length <= 5) return "👍 Anything else you want to check on?";
+    if (q === 'thanks' || q === 'thank you' || q === 'thx') {
+      return "Anytime 🌙 Come back whenever something shifts.";
     }
 
-    // ============================================================
-    // EMOTIONAL / HOW THEY FEEL
-    // ============================================================
+    // 2. Keyword Scoring Engine
+    let bestMatch = null;
+    let highestScore = 0;
 
-    if (has("can't sleep", 'cant sleep', 'cannot sleep', 'insomnia', 'lying awake', 'wide awake', "can't fall asleep", 'cant fall asleep', 'cannot fall asleep', 'hard to fall asleep', 'trouble falling asleep')) {
-      return "That's rough. What actually helps:\n• Don't force it — after ~20 min, get up, dim light, no screens.\n• Cool room (65-68°F / 18-20°C).\n• Write down whatever's looping.\nLong-term: same bedtime, same wake time.";
-    }
-    if (has('tired but cant sleep', 'tired but cannot sleep', 'exhausted but cant sleep', 'exhausted but cannot sleep', 'tired but wide awake')) {
-      return "Classic overtired paradox — your body's worn but your nervous system is still 'on'. Try a 10-min warm shower, then dim everything and just lie still (don't chase sleep). Consistency fixes this over a week.";
-    }
-    if (has("i'm tired", "im tired", 'so tired', 'exhausted', 'drained', 'no energy', 'wiped', 'shattered', 'knackered', 'feeling tired', 'feel tired', 'very tired', 'super tired')) {
-      return `With ${sleep}h of sleep and ${rec}% recovery, no wonder. Tonight: 30 min earlier bedtime, no caffeine after lunch, no heavy meal within 2h of bed. A 20-min nap before 3pm also helps.`;
-    }
-    if (has("i'm stressed", 'im stressed', 'so stressed', 'stressed out', 'anxious', 'anxiety', 'overwhelmed', 'worried', 'worried about', 'panic', 'panic attack', 'on edge', 'tense', 'nervous')) {
-      return `You logged stress as "${stress}" today. Try a 5-10 min wind-down: slow breathing (4 in, 6 out), a brain-dump list, or a warm shower. Even one of those signals to your nervous system it's safe to power down.`;
-    }
-    if (has('sad', 'depressed', 'feeling down', 'unhappy', 'lonely', 'heartbroken', 'bummed', 'feeling low')) {
-      return "Sorry you're feeling that way. Sleep and mood feed each other — poor sleep makes hard days harder. Be gentle tonight, and if this sticks around for weeks please talk to someone you trust or a professional. 💜";
-    }
-    if (has('angry', 'frustrated', 'annoyed', 'mad', 'irritated')) return "Frustration spikes before bed are common — usually stress or screens. Try 5 min of slow breathing or write down what's got you riled. Don't chase sleep angry; let it cool first.";
-    if (has('happy', 'feeling great', 'feeling good', 'great day', 'feeling amazing', 'feeling awesome')) return "Love that 🌙 Good mood = better sleep typically. Ride the wave — keep your bedtime consistent so tomorrow starts strong too.";
-    if (has('bored')) return "Bored is a great time to prep your bedroom: cool it down, dim lights, charge your phone away from the bed. Future you will thank you at bedtime.";
-    if (has('lonely at night', 'lonely in bed', 'sleeping alone')) return "Night loneliness is real and it genuinely hurts sleep. A weighted blanket, an audiobook, or a pet can help. Try not to scroll — that amplifies the feeling.";
-    if (has('nightmare', 'bad dream', 'night terror', 'scary dream')) return "Nightmares spike with stress, late meals, alcohol, or too much REM at the end of the night. Writing the dream down the next morning and rewriting the ending actually helps over time. Keep the room cool.";
-    if (has('sleep paralysis')) return "Sleep paralysis is when your mind wakes before your body. Harmless but scary. Don't fight it — wiggle a finger or toe and slow your breathing. It's more common when sleep-deprived.";
-    if (has('weird dream', 'strange dream', 'vivid dream', 'lucid dream')) return "Vivid dreams happen in REM, which clusters before you wake. More dreams often = more total sleep. Alcohol suppresses then rebounds REM, making dreams wilder — that's why drinking nights get weird.";
-    if (has('dream about', 'dreamt about', 'dreamed about')) return "Dreams reflect whatever your brain is processing. Recurring dreams usually point to lingering stress — journaling or talking it out helps more than trying to 'control' the dream.";
-    if (has('never sleep', 'cant ever sleep', 'always tired', 'always exhausted')) return "Chronic poor sleep is worth taking seriously. Before assuming it's unfixable: no caffeine after 2pm, same wake time every day (even weekends), no alcohol, and blackout-level dark room. If 2 weeks of that doesn't help, talk to a doctor — could be apnea or thyroid.";
+    aiDatabase.forEach(item => {
+      let matchCount = 0;
+      
+      // Check how many keywords from this item are in the user's question
+      item.keywords.forEach(kw => {
+        // We use a simple regex to match the keyword anywhere in the text
+        if (new RegExp(kw, 'i').test(q)) {
+          matchCount++;
+        }
+      });
 
-    // ============================================================
-    // APP METRICS / NUMBERS
-    // ============================================================
+      // If this item has more matches than the previous best, make it the new best
+      if (matchCount > highestScore) {
+        highestScore = matchCount;
+        bestMatch = item;
+      }
+    });
 
-    if (has('recovery', 'recovered', 'ready to go')) return `Your recovery is ${rec}% right now (${sleep}h sleep, ${s.baseline.deepRatio}% deep, stress ${stress}). Fastest movers: more total sleep + lower stress before bed.`;
-    if (has('debt')) {
-      if (debt > 0) return `You're carrying about ${debt}h of sleep debt vs your 8h goal. Doesn't clear in one long lie-in — a few nights of +30-45 min is how you pay it back.`;
-      return "No sleep debt right now — you're at or above your 8h goal. Keep it steady rather than chasing one big night.";
-    }
-    if (has('score', 'rating', 'how am i doing', 'how am i', 'my number')) return `Score is ${score}/100 (${statusForScore(score).label}). It blends duration, deep sleep, REM, consistency, and restlessness, then adjusts for caffeine, screens, and stress. Biggest lever: total sleep.`;
-    if (has('why is my score low', 'why so low', 'why is it low', 'score low')) return `Your score dropped to ${score}. Common culprits: short night (${sleep}h), caffeine (${s.caffeine ? 'logged' : 'not logged'}), screens (${s.screenTime ? 'logged' : 'not logged'}), stress level ${s.stress}/5. Fix the easiest one first.`;
-    if (has('why is my score high', 'score high', 'why so high')) return `Your score is ${score}/100 — usually because sleep duration and quality are strong, and your factors (caffeine, screens, stress) are working in your favor. Keep the routine.`;
-    if (has('deep sleep', 'slow wave', 'deep sleep low', 'why is my deep sleep low', 'deep sleep percentage', 'deep sleep percent')) return `You're at ${s.baseline.deepRatio}% deep sleep. Deep clusters in the first half of the night, so late bedtimes and short nights cut it hardest. Cutting caffeine after lunch, no alcohol near bed, and consistent bedtime all protect it.`;
-    if (has('rem', 'rem sleep', 'dream sleep', 'rem percentage')) return "REM clusters in the last hours before you wake — waking early sacrifices REM first. Protecting total sleep time is the biggest lever. Alcohol suppresses REM early then rebounds it, fragmenting the night.";
-    if (has('light sleep')) return "Light sleep is most of the night — that's normal. What matters is enough deep and REM around it. Too much light sleep usually means interrupted or too-short nights.";
-    if (has('rem vs deep', 'deep vs rem', 'difference between rem and deep')) return "Deep sleep: physical recovery, happens early. REM: memory + emotional processing, happens late. Cutting sleep short hurts REM the most; going to bed late hurts deep sleep the most.";
-    if (has('awake', 'wake time', 'times awake', 'restless')) return "Awake time matters — short wake-ups are normal, but lots of them usually means alcohol, caffeine, or a too-warm room. Try cooler, darker, and later caffeine cutoff.";
-    if (has('hrv', 'heart rate', 'bpm', 'pulse')) return `Resting HR is ${s.baseline.hr} bpm. Higher HRV tracks with better recovery and sleep. It improves with sleep, exercise, and low stress — not something you train directly.`;
-    if (has('blood pressure', 'mmhg', ' bp ')) return `BP is ${s.baseline.bp} this morning. Sleep and BP are tightly linked — short sleep raises BP the next day. Consistent 7-8h nights often drops it a few points.`;
-    if (has('steps')) return `You're at ${s.steps.toLocaleString()} steps of ${s.stepsGoal.toLocaleString()}. Days with 7k+ steps correlate with ~40 min more sleep for you.`;
-    if (has('mood')) return `You logged mood as "${moodLabels[s.mood]}". Sleep and mood feed each other — a solid night usually lifts the next day's mood by a real notch.`;
-    if (has('stress level', 'my stress')) return `Today's stress is ${s.stress}/5 (${stressLabels[s.stress]}). Any 4-5 day is worth a 10-min wind-down before bed — even one slow-breathing session helps.`;
-
-    // ============================================================
-    // CAFFEINE / SCREENS / ALCOHOL / SUBSTANCES
-    // ============================================================
-
-    if (has('caffeine', 'coffee', 'espresso', 'latte', 'energy drink', 'red bull', 'monster', 'tea')) return "Caffeine half-life is ~5-6 hours. A 3pm coffee is still ~25% in your system at 9pm. Rule: last cup before 2pm, earlier if sensitive. It mainly shrinks deep sleep.";
-    if (has('how much caffeine', 'how many coffees', 'coffee limit', 'caffeine limit')) return "Roughly 400mg/day for most adults (~4 cups of coffee). But for sleep, the *timing* matters more than the amount. Nothing after 2pm.";
-    if (has('decaf')) return "Decaf still has a bit of caffeine (2-15mg per cup). Fine after dinner as a ritual, just don't expect zero.";
-    if (has('matcha', 'green tea')) return "Matcha and green tea have less caffeine than coffee but also L-theanine, which smooths the edge. Still — nothing after mid-afternoon if you're sensitive.";
-    if (has('screen', 'phone', 'blue light', 'scroll', 'scrolling', 'tv', 'television', 'instagram', 'tiktok', 'youtube')) return "Screens push melatonin later and keep your brain alert. Even night-mode + no scrolling before bed helps. If you need something, try an audiobook or podcast on a 30-min timer.";
-    if (has('doomscroll', 'doom scrolling', 'doom-scrolling')) return "Doomscrolling is a sleep killer: the light, the emotional spikes, the 'just one more'. Charge the phone outside the bedroom. That one habit change alone often fixes bedtime procrastination.";
-    if (has('alcohol', 'drink', 'wine', 'beer', 'vodka', 'whiskey', 'cocktail', 'drunk', 'drinking')) return "Alcohol helps you fall asleep but wrecks the second half — it suppresses REM early then rebounds it. Stop 3-4h before bed and match each drink with water.";
-    if (has('weed', 'cannabis', 'thc', 'marijuana', 'edible')) return "Cannabis can help you fall asleep but suppresses REM — you sleep 'through' the night but wake less restored. Regular use messes with natural sleep architecture. Occasional, hours before bed, is less disruptive.";
-    if (has('cbd')) return "CBD is mild for anxiety and may help some people settle, but evidence for sleep is mixed. Worth trying 30-60 min before bed if other things are covered — it's not a fix for bad sleep habits.";
-    if (has('melatonin', 'supplement', 'sleeping pill', 'benadryl', 'zzzquil', 'zzzquil', 'nytol')) return "Melatonin helps with *timing* more than staying asleep — dose 0.5-2mg, 1-2h before bed, short-term. Sleep aids (Benadryl, ZzzQuil) become tolerance-building and wreck sleep quality over time. Habit > pills.";
-    if (has('magnesium')) return "Magnesium glycinate (200-400mg) 1h before bed helps some people relax — safe, mild, worth trying. Magnesium citrate can upset the stomach, so stick with glycinate.";
-    if (has('ashwagandha', 'l-theanine', 'theanine', 'valerian')) return "Ashwagandha and L-theanine have decent evidence for calming without sedation. Valerian is hit-or-miss. None replace good sleep habits, but they can help during stressful weeks.";
-    if (has('nicotine', 'vape', 'vaping', 'smoke', 'smoking', 'cigarette')) return "Nicotine is a stimulant — it wakes you up and fragments sleep. Even vapes. Last use a few hours before bed at minimum; quitting entirely improves sleep depth over weeks.";
-
-    // ============================================================
-    // FOOD / DRINK / DIET
-    // ============================================================
-
-    if (has('food', 'eat', 'meal', 'dinner', 'hungry', 'snack', 'supper')) return "Big meals within 2h of bed pull blood to your gut and disrupt sleep. Finish eating 2-3h before bed. If hungry, light protein or a banana. Heavy, spicy, or sugary = rough night.";
-    if (has('sugar', 'sweet', 'dessert', 'chocolate')) return "Sugar spikes then crashes blood sugar — the crash can wake you at 2-3am. Dark chocolate after dinner is fine; a full dessert is not if you're sensitive.";
-    if (has('carbs', 'pasta', 'rice', 'bread')) return "Carbs at dinner are actually fine for sleep — they boost serotonin. Just keep portions normal and finish 2-3h before bed.";
-    if (has('protein', 'chicken', 'steak', 'meat')) return "Protein at dinner is fine — it keeps blood sugar steady overnight. Heavy, fatty cuts close to bed take longer to digest.";
-    if (has('water', 'hydrat', 'thirsty', 'drink water')) return "Hydration matters, but chugging right before bed = 3am bathroom trips. Front-load water earlier in the day, sip after dinner.";
-    if (has('dairy', 'milk')) return "Warm milk before bed is a real ritual — mostly placebo, but placebo works. If dairy upsets your stomach, skip it; the ritual is the point.";
-    if (has('cherry', 'tart cherry', 'cherry juice')) return "Tart cherry juice is one of the few foods with real sleep evidence — small melatonin boost. A glass an hour before bed helps some people.";
-    if (has('kiwi')) return "Fun fact: two kiwis an hour before bed showed sleep improvements in one small study. Worth a shot.";
-    if (has('banana')) return "Bananas have magnesium and potassium — both support muscle relaxation. Good light pre-bed snack.";
-
-    // ============================================================
-    // EXERCISE / ACTIVITY
-    // ============================================================
-
-    if (has('exercise', 'workout', 'gym', 'run', 'running', 'lift', 'lifting', 'cardio', 'training')) return "Exercise is one of the most reliable sleep improvers — but finish intense workouts 3-4h before bed so heart rate settles. Morning or early afternoon is ideal.";
-    if (has('should i workout before bed', 'late workout', 'late gym', 'night workout')) return "It can work if it's not too intense — you'll sleep deeper, but falling asleep may take longer. Give yourself 60-90 min to cool down; shower, stretch, dim lights.";
-    if (has('walk', 'walking', 'steps', 'activity', 'move', 'movement')) return "A short daytime walk — especially in morning light — is one of the most underrated sleep tools. It anchors your rhythm and builds sleep pressure for the night.";
-    if (has('yoga', 'stretch', 'stretching', 'pilates')) return "Gentle yoga or stretching 30 min before bed lowers cortisol and body tension. Great pre-sleep ritual. Skip intense vinyasa — save that for morning.";
-    if (has('outside', 'sunlight', 'sun', 'morning light', 'daylight')) return "10-15 min of outdoor light within an hour of waking is the strongest signal to your body that it's daytime. This anchors your whole 24h rhythm and helps you fall asleep at night.";
-
-    // ============================================================
-    // ENVIRONMENT
-    // ============================================================
-
-    if (has('temperature', 'too hot', 'too cold', 'warm room', 'cold room', 'thermostat')) return "Room temp matters more than people think — aim for 65-68°F / 18-20°C. A warm shower before bed actually helps: it drops your core temp afterward, which signals sleep.";
-    if (has('light', 'too bright', 'blackout', 'curtains', 'dark room')) return "Your room should be dark enough that you can't see your hand. Blackout curtains, tape over LEDs, no standby lights. Even small light sources suppress melatonin.";
-    if (has('noise', 'loud', 'quiet', 'white noise', 'fan', 'earplugs')) return "White or brown noise masks environmental sounds. Earplugs help if you can tolerate them. Music with lyrics or a beat is worse than silence.";
-    if (has('mattress', 'pillow', 'bed', 'bedding', 'sheets')) return "Mattress >8 years old or a bad pillow shows up as restlessness. Cool, dark, quiet, comfortable covers 80% of good sleep. The other 20% is consistency.";
-    if (has('partner', 'snoring partner', 'spouse', 'boyfriend', 'girlfriend', 'husband', 'wife')) return "If your partner disrupts your sleep, that's worth a real conversation. Earplugs, white noise, or (for bad snorers) a sleep study — snoring can be apnea.";
-    if (has('pet', 'dog', 'cat', 'pets in bed')) return "Pets in bed: fine if they don't move much. If they wake you, consider a pet bed on the floor. Your sleep quality affects their mood too — everyone wins if you both rest.";
-    if (has('phone in bed', 'phone next to bed', 'phone at night')) return "Charge the phone across the room. It kills the 'just one more scroll' loop and stops 4am notification checks. Small change, huge difference.";
-
-    // ============================================================
-    // ROUTINES / TIMING / SCHEDULE
-    // ============================================================
-
-    if (has('bedtime', 'when should i sleep', 'when to sleep', 'what time should i go to bed', 'what time bed', 'best time to sleep')) return "Aim for the same bedtime ±30 min nightly — consistency matters more than exact time. For 7-8h with a 7am wake, that's lights out by 10:30-11pm. Your recent average is " + s.baseline.bedtime + ".";
-    if (has('wake up time', 'when should i wake', 'what time wake', 'wake time')) return "Same wake time every day, including weekends — that's the single biggest fix for most sleep issues. Pick a time you can keep even on Sunday and stick to it for 2 weeks.";
-    if (has('how many hours', 'how long should i sleep', 'how much sleep', 'ideal sleep')) return "Most adults need 7-9h. Athletes closer to 9. Under 7 for weeks straight and you'll feel it in mood, focus, and immunity. Your target is 8h.";
-    if (has('routine', 'wind down', 'wind-down', 'before bed', 'ritual', 'pre-bed', 'pre sleep', 'pre-sleep')) return "Boring wind-downs are magic: 60 min before bed → dim lights, no screens, warm shower, calm activity (reading, stretching, journaling). Same order every night. Your brain learns the pattern.";
-    if (has('wake at night', 'wake up at night', 'waking up at night', '3am', '2am', '4am', 'middle of night', 'wake in the night')) return "Waking at 2-4am is usually alcohol, caffeine, blood-sugar dip, or stress. Try a small protein snack before bed, cut caffeine earlier, cooler room. If you're up 20+ min, get up and do something boring in dim light.";
-    if (has('wake up early', 'wake too early', "can't stay asleep", 'cant stay asleep', 'early waking', 'waking up too early')) return "Early waking is often stress or cortisol. Pitch-black room, no screens in bed. If you're going to bed too early, you'll naturally wake early — nudge bedtime 20 min later for a week.";
-    if (has('sleep in', 'sleeping in', 'sleep late', 'weekend sleep', 'lie in', 'sunday sleep')) return "Sleeping in 2+ hours on weekends is 'social jet lag' — it makes Monday feel like a mini time-zone change. Cap weekend lie-ins at +1h.";
-    if (has('nap', 'napping', 'power nap')) return "Naps: 20-30 min, before ~3pm. Longer or later naps eat tonight's sleep pressure. If you can't fall asleep at night, skip naps entirely for a week.";
-    if (has('shift work', 'night shift', 'nightshift', 'working nights')) return "Shift work is genuinely hard. Anchor: one consistent sleep window, blackout curtains + white noise, and treat your 'morning' like real morning (light, breakfast). Don't sleep in more than 1h on off days.";
-    if (has('jet lag', 'travel', 'time zone', 'timezone', 'flight', 'flying')) return "Jet lag: one day per time zone crossed. Morning light at the destination anchors you fast. Tiny melatonin (0.5mg) at local bedtime for 2-3 nights helps. Skip alcohol on the flight.";
-    if (has('weekend', 'saturday', 'sunday')) return "Weekends are where most sleep consistency dies. Cap your wake time at +1h vs weekdays — your Monday self will thank you.";
-    if (has('monday', 'monday morning')) return "Monday grogginess is usually weekend drift. Same wake time all 7 days is the fix. Give it two weeks and Mondays stop being brutal.";
-
-    // ============================================================
-    // SPECIFIC SLEEP PROBLEMS
-    // ============================================================
-
-    if (has('snor', 'snoring', 'apnea', 'sleep apnea', 'stop breathing')) return "Heavy snoring or waking up gasping can be sleep apnea — talk to a doctor. An app can't fix that. Meanwhile, side-sleeping and no alcohol before bed reduce snoring a lot.";
-    if (has('teeth grind', 'bruxism', 'grinding teeth', 'jaw clench')) return "Grinding is usually stress + a narrow airway. A night guard protects teeth but doesn't fix the cause. Try stress wind-down and, if severe, ask about sleep apnea screening.";
-    if (has('restless legs', 'rls', 'legs twitching', 'leg cramps')) return "Restless legs can be iron, magnesium, or dopamine-related. Try magnesium glycinate and a warm shower before bed. If it's frequent, get ferritin checked by a doctor.";
-    if (has('twitching', 'hypnic jerk', 'falling feeling', 'jolt awake')) return "Those falling-feeling jerks are hypnic jerks — harmless, and more common when overtired or caffeinated. Reduce both and they quiet down.";
-    if (has('sweat', 'sweating', 'night sweats', 'hot at night', 'overheating')) return "Night sweats: room too warm, too many blankets, alcohol, or hormonal. Cool the room, breathable sheets, no alcohol at night. If it's persistent or drenching, see a doctor.";
-    if (has('cold at night', 'cold bed', 'freezing at night', 'cant get warm')) return "Cold hands and feet delay sleep onset — blood needs to redistribute. Warm socks, a warm shower, or a hot water bottle at your feet actually work.";
-    if (has('bathroom', 'pee at night', 'peeing at night', 'nocturia', 'wake to pee', 'wake up to pee')) return "Waking to pee: cut fluids 2h before bed, empty your bladder right before sleep, and reduce alcohol/caffeine. If it's 2+ times nightly, mention it to a doctor.";
-    if (has('sleepwalk', 'sleepwalking', 'sleep talking', 'sleep talking', 'talking in sleep')) return "Sleepwalking and sleep talking are more common in deep sleep and get triggered by stress, sleep deprivation, and alcohol. Make the room safe and prioritize consistent sleep. Frequent episodes: see a doctor.";
-    if (has('not breathing', 'choking in sleep')) return "Waking up choking or gasping can be reflux or sleep apnea. Elevate the head of your bed and avoid big meals before bed. Get a sleep study if it happens more than once.";
-    if (has('night shift hangover', 'shift hangover')) return "Post-shift grogginess is real. Hydrate, eat something with protein, get 10 min of light, and try not to sleep longer than 4h in one chunk if it wrecks your next night.";
-
-    // ============================================================
-    // GENERAL ADVICE
-    // ============================================================
-
-    if (has('what should i do', 'what do i do', 'advice', 'tips', 'improve', 'help me sleep', 'how to sleep better', 'sleep better', 'better sleep')) return "Top 3 that move the needle fastest:\n1. Same bedtime & wake time ±30 min.\n2. No caffeine after 2pm, no alcohol within 3h of bed.\n3. Wind down 60 min before bed: dim light, no screens, calm activity.\nPick one and start tonight.";
-    if (has('best tip', 'one tip', 'single best', 'most important')) return "Single best fix: consistent wake time, every day. It anchors everything else — bedtime, hormones, appetite, mood. Boring but true.";
-    if (has('first step', 'where do i start', 'start with')) return "Start with wake time. Pick a time you can honestly keep for 7 days straight, set an alarm, get morning light when you wake. That's the foundation. Everything else builds on it.";
-    if (has('how long until', 'how long does it take', 'when will i see')) return "Sleep changes take 1-2 weeks of consistency to really feel. Week 1 is the hardest — your body is recalibrating. By day 10 most people notice a real difference.";
-    if (has('is it too late', 'too late to fix', 'have i ruined')) return "Never too late. Sleep responds fast to small fixes — first 3-4 nights back on track often feel noticeably better. Don't chase perfect, just nudge.";
-    if (has('am i normal', 'is this normal', 'normal to')) return "Most things people worry about — waking once or twice, weird dreams, 10-20 min to fall asleep — are totally normal. What's not normal: 45+ min to sleep most nights, waking 3+ times, gasping awake.";
-    if (has('doctor', 'should i see', 'see a doctor', 'medical', 'medication', 'prescription')) return "If sleep problems have lasted 3+ weeks and affect your day, see a doctor. Especially: gasping awake, snoring heavily, sudden insomnia, or feeling exhausted despite enough hours. Apps are for habits, not diagnoses.";
-    if (has('therapist', 'cbt', 'cbt-i', 'insomnia therapy')) return "CBT-I (cognitive behavioral therapy for insomnia) is the gold-standard treatment for chronic insomnia — more effective than sleeping pills long-term. Ask a doctor or search online programs. Worth it if you've struggled for months.";
-
-    // ============================================================
-    // SPECIFIC LIFE SITUATIONS
-    // ============================================================
-
-    if (has('new baby', 'newborn', 'baby', 'infant', 'toddler', 'kids', 'child', 'children')) return "New-baby sleep is survival mode — don't judge yourself by score. Rules shift: sleep whenever you can, split nights with a partner if possible, keep caffeine early and light. It does get better.";
-    if (has('pregnant', 'pregnancy', 'first trimester', 'second trimester', 'third trimester')) return "Pregnancy sleep changes are real: first trimester = extra tired, third = hard to get comfortable. Left-side sleeping, pillow between knees, and lots of naps. Talk to your doctor before any sleep supplement.";
-    if (has('menopause', 'hot flashes', 'perimenopause')) return "Menopause often disrupts sleep via hot flashes and shifting hormones. Cool room, breathable bedding, no alcohol. If it's severe, talk to a doctor — HRT helps some women significantly.";
-    if (has('period', 'periods', 'pms', 'cramps', 'menstrual')) return "PMS and period weeks often mean lighter, more fragmented sleep — it's hormones, not you. Warmth, magnesium, and earlier bedtime all help. Consistency across the month still pays off.";
-    if (has('sick', 'flu', 'fever', 'ill', 'cold', 'covid')) return "When you're sick, your body needs *more* sleep — don't fight it. Extra naps, extra hydration. Don't stress your score dipping; it rebounds.";
-    if (has('injury', 'pain', 'back pain', 'neck pain', 'sore')) return "Pain kills sleep — which makes pain worse. Best sleep position for most back/neck issues: on your side, pillow supporting the neck, another between knees. Talk to a physio if pain is chronic.";
-    if (has('anxiety before bed', 'anxious at night', 'racing thoughts', 'overthinking', 'cant stop thinking', 'mind racing')) return "Racing thoughts at night = your brain hasn't 'closed' the day. A 5-min brain-dump list before bed is weirdly effective. Also try 4-7-8 breathing: in 4, hold 7, out 8.";
-    if (has('worry about sleep', 'afraid to sleep', 'sleep anxiety', 'stress about sleep')) return "Sleep anxiety is a loop: worry about sleep → worse sleep → more worry. Break it by not chasing sleep. Set a firm wake time, no clock-watching, no napping. It resets in 1-2 weeks.";
-
-    // ============================================================
-    // CURIOUS / FUN
-    // ============================================================
-
-    if (has('why do we sleep', 'why do humans sleep', 'why do i sleep')) return "Sleep is when your brain cleans itself (literally — the glymphatic system), consolidates memories, and your body repairs tissue. Skip it and everything degrades: mood, focus, immunity, hormones.";
-    if (has('how do animals sleep', 'do animals sleep')) return "Every animal sleeps, just differently — dolphins sleep one brain half at a time, birds nap mid-flight, giraffes do it in 30-min chunks. Only humans made it this complicated.";
-    if (has('dream meaning', 'what does my dream mean')) return "I'm not a dream interpreter, but dreams mostly reflect what your brain is processing. Recurring dreams usually mean unfinished stress. Journaling them helps more than decoding them.";
-    if (has('why do i wake up tired', 'tired after sleep', 'wake up groggy', 'groggy', 'sleep inertia')) return "Grogginess on waking = sleep inertia. Usually short sleep, waking mid-cycle, dehydration, or a dark room with no morning light. Morning light + hydration + consistent wake time usually fixes it.";
-    if (has('why cant i sleep when tired', 'why cant i fall asleep when tired')) return "Overtired is a thing — your nervous system gets 'wired' instead of sleepy. Don't force it. Dim everything, do something boring, and lie still without chasing sleep.";
-    if (has('second wind', 'why am i awake at night')) return "Second wind = your body releases cortisol to keep you going past your natural sleep window. Once you get it, wait ~60-90 min for the next sleepy wave. Don't try to force sleep through it.";
-    if (has('why do i sleep more in winter', 'winter sleep', 'hibernate')) return "Winter = less light = more melatonin. It's normal to feel sleepier and want more sleep. Get morning light, take vitamin D, and don't fight the natural shift too hard.";
-    if (has('why do i sleep less in summer', 'summer sleep', 'longer days')) return "Longer days = later melatonin release. Blackout curtains, and stick to a consistent bedtime even when the sun is still up.";
-
-      // ============================================================
-    // SEX / INTIMACY — checked FIRST so "bed" in other rules can't steal it
-    // ============================================================
-    const sexWords = ['sex', 'sexual', 'masturbat', 'orgasm', 'cum', 'cumming', 'climax',
-                      'blue ball', 'blue balls', 'wet dream', 'erotic', 'libido', 'horny',
-                      'intimacy', 'intimate', 'foreplay', 'cuddle', 'cuddling', 'aftercare',
-                      'orgasmic', 'intercourse', 'make love', 'making love', 'boner', 'erection'];
-    const isSexQuery = sexWords.some(w => q.includes(w));
-
-    if (isSexQuery) {
-      if (has('blue ball', 'blue balls')) return "Blue balls (epididymal hypertension) is a real but harmless temporary ache after arousal without release — usually eases in under an hour. A warm shower helps. It won't hurt sleep quality, but the discomfort can delay falling asleep. If you're headed to bed soon, don't leave it hanging — finish or wait it out.";
-      if (has('masturbat', 'jerk off', 'jerking off', 'wank', 'solo sex')) return "Masturbation before bed is genuinely fine for sleep — same physiology as partnered sex. Orgasm releases oxytocin + prolactin + endorphins that lower cortisol and relax muscles. Best done 20-40 min before lights out so the sleepy wave hits right as you lie down. Just don't follow it with phone scrolling.";
-      if (has('does sex help sleep', 'sex help sleep', 'sex for sleep', 'is sex good for sleep', 'sex good for sleep', 'sex and sleep')) return "Yes — sex before bed is one of the most reliable natural sleep aids. Post-orgasm, oxytocin, prolactin, and endorphins drop cortisol and relax muscles. Most people fall asleep 5-15 min faster after sex than without it. No downside for sleep quality.";
-      if (has('best time for sex', 'when should i have sex', 'sex morning or night', 'morning sex vs night sex')) return "Night sex pairs better with falling asleep. Morning sex wakes you up — great for energy, wrong for sleep. If sleep is the goal, aim for 1-2h before bed.";
-      if (has('wakes me up', 'keeps me awake', 'wide awake after sex', 'cant sleep after sex', 'second wind')) return "Some people get a second-wind effect from sex — the stimulation fires you up instead of down. Fixes: dim lights the whole time, no phones after, warm shower, then 20-30 min of calm before closing your eyes. It usually settles.";
-      if (has('does orgasm help', 'orgasm help sleep', 'orgasm and sleep', 'climax help sleep', 'cumming sleep')) return "Yes — orgasm triggers a prolactin surge plus oxytocin, both sedating and anxiety-reducing. Deep sleep in the first few hours of the night tends to be slightly longer. Well-documented in both men and women.";
-      if (has('wet dream', 'sex dream', 'erotic dream')) return "Wet and erotic dreams happen more during REM, which clusters before you wake. Totally normal at any age. More frequent after a night of poor sleep, alcohol, or stress — nothing to fix.";
-      if (has('low libido', 'no libido', 'loss of libido', 'no sex drive', 'no desire')) return "Low libido often tracks with poor sleep, high stress, or low testosterone — all of which improve when sleep does. Fix the basics first (consistent wake time, no alcohol, cool room, stress down) and libido usually follows within a few weeks.";
-      if (has('sexless', 'no intimacy', 'no sex', 'never have sex')) return "Sexless stretches are common and usually fix themselves once sleep, stress, and energy stabilize. Talk to your partner honestly about it — 'I'm exhausted' hits different than silence. If it's been months and it's bothering you both, a couples therapist helps more than sleep tips.";
-      if (has('partner wants sex', 'too tired for sex', 'not in the mood', 'spouse wants sex', 'girlfriend wants', 'boyfriend wants')) return "Being too tired for sex is usually a sleep-debt signal, not a relationship signal. Talk about it directly, and try earlier in the evening when you have more energy — not at the exact moment you're desperate for bed.";
-      if (has('sex after workout', 'sex after gym', 'sex after exercise')) return "Fine, actually great for sleep. Just leave 20-30 min between workout and sex so your heart rate comes down first. Intense workout → immediate sex → immediate bed can leave you wired.";
-      if (has('sex during period', 'period sex', 'sex on period', 'sex on my period')) return "Sleep-wise, same benefits — oxytocin, relaxation, sometimes even more because it eases cramps. Just use protection and put a dark towel down. Nothing changes about the sleep quality.";
-      if (has('sex while pregnant', 'pregnant sex', 'sex and pregnancy')) return "For most pregnancies sex before bed is safe and often helps with sleep (oxytocin + relaxation). Later trimesters you may need different positions. Confirm with your OB if any complications.";
-      if (has('drunk sex', 'sex when drunk', 'sex after alcohol')) return "Alcohol + sex: often worse sex and much worse sleep after — alcohol still fragments the second half of the night even if you pass out fast. If sleep is the goal, skip the drinks or keep it to one.";
-      if (has('sex after eating', 'sex after dinner', 'sex after meal')) return "Fine, but give it 30-60 min after a big meal — full stomach + lying down = reflux risk. Light dinner if sex is on the schedule.";
-      if (has('sex positions for sleep', 'best position after sex', 'position to sleep after sex', 'post sex position')) return "Same as usual: side-sleeping, pillow between knees, left side if digestion matters. Don't fall asleep on your back if you snore.";
-      if (has('cuddle', 'cuddling', 'cuddles', 'post sex cuddling')) return "Cuddling after sex amplifies the oxytocin effect and extends the sleepy window. If better sleep is the goal, don't skip it — the hormonal afterglow is part of the benefit.";
-      if (has('safe sex', 'protection', 'condom')) return "Not a sleep question, but good instincts — sleep and sexual health both get better with honesty and planning. If anything about either is worrying you, a doctor is the right person to ask.";
-      if (has('how does sex affect sleep', 'sex effect on sleep', 'sex impact sleep', 'sex improve sleep', 'does sex improve sleep')) return `Mechanically: orgasm → oxytocin + prolactin + endorphins → lower cortisol, relaxed muscles, sleepy brain. Most people fall asleep 5-15 min faster after sex. Given your recovery is ${rec}% today, a night like that could nudge tomorrow's score up.`;
-      if (has('sex with insomnia', 'insomnia sex', 'sex help insomnia')) return "It can help — post-orgasm relaxation is a real sleep initiator. Just don't make it a crutch you can't sleep without. If insomnia is chronic, the underlying fix is still consistent wake time and daytime light.";
-      if (has('how to have better sex', 'better sex', 'improve sex life')) return "Sleep is one of the biggest levers for libido and sexual function — especially for testosterone. Better sleep = better sex, not the other way around. Get 7-8h consistently for two weeks and see what changes.";
-      if (has('testosterone', 't level', 'low t')) return "Testosterone is largely produced during deep sleep, especially the early night. Cut sleep short and T drops — sometimes 10-15% after a week of 5h nights. Fix deep sleep and T usually recovers on its own.";
-      if (has('erectile', 'ed ', 'erection problem', 'erectile dysfunction', 'cant get hard')) return "Not something to diagnose here, but the first line for most ED is sleep, exercise, and stress — all of which hit sexual function hard. If it persists, see a doctor — could be vascular, hormonal, or medication-related.";
-      if (has('pe', 'premature', 'premature ejaculation')) return "Not a sleep topic, but sleep deprivation makes it worse (anxiety + poor serotonin regulation). Getting 7-8h consistently often improves it. A doctor or sex therapist is the right next step if it's persistent.";
-      // Generic sex fallback
-      return "Sex before bed usually helps sleep — oxytocin + prolactin + endorphins are all sedating. The main sleep-killers are bright lights afterward, screens, alcohol, and rushing straight to sleep. Keep the room dim, skip the phone, and don't skip the afterglow.";
+    // 3. Return the best match if we found one
+    if (bestMatch && highestScore > 0) {
+      return bestMatch.response;
     }
 
-    // ============================================================
-    // FINAL FALLBACK
-    // ============================================================
+    // 4. Special fallback that reads their current state
+    if (q.includes('how am i doing') || q.includes('my score') || q.includes('analyze')) {
+      return `Right now, your sleep score is ${score}/100 (${statusForScore(score).label}). You got ${s.baseline.totalSleep} hours of sleep with ${s.baseline.deepRatio}% deep sleep. Your recovery is at ${rec}%. The fastest way to improve this is to get to bed 30 minutes earlier tonight and stay off your phone before bed.`;
+    }
 
-    if (has('sleep')) return `Score today is ${score}/100, ${sleep}h total, ${s.baseline.deepRatio}% deep. Ask me something more specific — deep sleep, waking at night, caffeine, stress — and I'll give you a straight answer.`;
-    return "I don't have a perfect answer for that one. Try asking about: falling asleep, staying asleep, deep sleep, REM, caffeine, screens, alcohol, naps, jet lag, shift work, stress, or your score. 🌙";
+    // 5. Generic fallback
+    return "I don't have a perfect answer for that specific question. Try asking about caffeine, alcohol, screens, stress, deep sleep, waking up in the night, or your sleep score! 🌙";
   }
 
   async function initSample() {
@@ -7649,7 +7745,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
 
     if (!sample) {
       setTimeout(() => {
-        thinkingEl.textContent = fallbackAnswer(text);
+        thinkingEl.textContent = offlineSleepCoach(text);
         thinkingEl.classList.remove('thinking');
         aiMessages.scrollTop = aiMessages.scrollHeight;
         aiBusy = false;
@@ -7671,7 +7767,7 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
       chatTurns.push({ role: 'assistant', content: answer });
     } catch (e) {
       thinkingEl.classList.remove('thinking');
-      thinkingEl.textContent = e.text || fallbackAnswer(text);
+      thinkingEl.textContent = e.text || offlineSleepCoach(text);
       if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) {
         sample = null;
         aiInput.placeholder = 'Ask about your sleep… (offline tips)';
@@ -8578,6 +8674,7 @@ if (style === 'long') {
   renderMood();
   renderCta();
   renderScore();
+  renderLineChart('7d')
   renderRecovery();
   renderSteps();
   renderStepsSettings();
