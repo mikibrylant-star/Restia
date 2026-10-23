@@ -5801,11 +5801,20 @@
   }
 
   function resetSlider(instant) {
-    if (instant) sleepKnob.style.transition = 'none';
+    if (instant) {
+      sleepKnob.style.transition = 'none';
+      sleepFill.style.transition = 'none';
+    }
     sleepKnob.style.left = '4px';
     sleepFill.style.width = '0%';
     sleepHint.style.opacity = '1';
-    if (instant) requestAnimationFrame(() => { sleepKnob.style.transition = ''; });
+    
+    if (instant) {
+      requestAnimationFrame(() => { 
+        sleepKnob.style.transition = ''; 
+        sleepFill.style.transition = 'width 0.1s ease-out'; // Restore smooth fill
+      });
+    }
   }
 
   let sessionTimerInterval = null;
@@ -6410,29 +6419,21 @@ window.addEventListener('resize', () => {
     document.getElementById('liveTimer').textContent = '00:00:00';
     clearInterval(sessionTimerInterval);
     sessionTimerInterval = setInterval(() => {
-          // Start the session timer
-    sessionSeconds = 0;
-    document.getElementById('liveTimer').textContent = '00:00:00';
-    clearInterval(sessionTimerInterval);
-    sessionTimerInterval = setInterval(() => {
       sessionSeconds++;
       const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(sessionSeconds % 60).padStart(2, '0');
       document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
     }, 1000);
-    
+
     // START WAKE LOCK HERE
-    requestWakeLock(); 
+    requestWakeLock();
 
     // Start the mic
     startMicrophone();
-      sessionSeconds++;
-      const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
-      const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
-      const s = String(sessionSeconds % 60).padStart(2, '0');
-      document.getElementById('liveTimer').textContent = `${h}:${m}:${s}`;
-    }, 1000);
+
+    // Start movement tracking
+    startMovementDetection();
     
     // Start the mic
     startMicrophone();
@@ -6957,43 +6958,66 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
 
   let dragging = false;
   let dragStartX = 0;
-  function trackMax() { return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; }
-  function setKnobX(x) {
+  
+  function trackMax() { 
+    return sleepTrack.clientWidth - sleepKnob.offsetWidth - 8; 
+  }
+
+  function setKnobX(x, isDragging = false) {
     const max = trackMax();
     const clamped = Math.max(4, Math.min(max + 4, x));
+    
+    // Knob styling
+    sleepKnob.style.transition = isDragging ? 'none' : 'left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
     sleepKnob.style.left = clamped + 'px';
-    const progress = max > 0 ? (clamped - 4) / max : 0;
+    
+    // Fill bar styling (Instant when dragging, smooth when snapping back)
+    sleepFill.style.transition = isDragging ? 'none' : 'width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    
+    const progress = max > 0 ? (clamped - 5) / max : 10;
     sleepFill.style.width = (progress * 100) + '%';
     sleepHint.style.opacity = Math.max(0, 1 - progress * 1.6);
     return progress;
   }
+
   sleepKnob.addEventListener('pointerdown', (e) => {
     dragging = true;
-    sleepKnob.style.transition = 'none';
     sleepKnob.setPointerCapture(e.pointerId);
     dragStartX = e.clientX - sleepKnob.offsetLeft;
+    sleepKnob.style.transition = 'none'; // Instant response when grabbing
   });
+
   sleepKnob.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    setKnobX(e.clientX - dragStartX);
+    setKnobX(e.clientX - dragStartX, true);
   });
+
   function endDrag() {
     if (!dragging) return;
     dragging = false;
+    
     const max = trackMax();
     const progress = max > 0 ? (sleepKnob.offsetLeft - 4) / max : 0;
+    
     if (progress > 0.72) {
-      sleepKnob.style.transition = 'left .2s ease';
-      setKnobX(max + 4);
-      setTimeout(wakeUp, 180);
+      // Smooth glide to the end, then trigger wake up
+      sleepKnob.style.transition = 'left 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)';
+      sleepKnob.style.left = (max + 4) + 'px';
+      sleepFill.style.width = '100%';
+      sleepHint.style.opacity = '0';
+      
+      setTimeout(wakeUp, 400); // Wait for the animation to finish before waking up
     } else {
-      sleepKnob.style.transition = 'left .35s cubic-bezier(.34,1.4,.64,1)';
-      setKnobX(4);
+      // Snap back to start with a nice spring animation
+      sleepKnob.style.transition = 'left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      sleepKnob.style.left = '4px';
+      sleepFill.style.width = '0%';
+      sleepHint.style.opacity = '1';
     }
   }
+
   sleepKnob.addEventListener('pointerup', endDrag);
   sleepKnob.addEventListener('pointercancel', endDrag);
-
   ctaBtn.addEventListener('click', () => {
     if (state.loggedBedtime) return;
     state.loggedBedtime = true;
@@ -7005,7 +7029,6 @@ document.getElementById('sessionCloseBtn').addEventListener('click', () => {
     showToast(randomOf(sleepPhrases));
     setTimeout(enterSleepMode, 550);
   });
-
   function renderCta() {
     const icon = document.getElementById('ctaIcon');
     const label = document.getElementById('ctaLabel');
