@@ -6701,177 +6701,183 @@ scoreArc.style.opacity = score <= 0 ? '0' : '1';
     sessionData.totalSeconds = sessionSeconds;
     
     const hoursSlept = sessionSeconds / 3600;
+    const isShortSession = sessionSeconds < 180; // under 3 min is a quick preview/test
 
-    // Guard against accidental sub-minute tests wiping baseline metrics
-    if (sessionSeconds < 60 && state.baseline.totalSleep > 0) {
-      const scoreValEl = document.getElementById('sessionScoreVal');
-      if (scoreValEl) scoreValEl.textContent = computeScore() + ' / 100';
-      renderRealSoundEvents(hoursSlept);
-      showToast('Session too short (< 1 min) — baseline preserved');
+    // === 1. DURATION (30 pts) ===
+    const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
+    
+    // === 2. CONTINUITY (25 pts) ===
+    const eventCount = Object.values(sessionData.audioEvents).reduce((sum, e) => sum + e.count, 0);
+    const loudNoiseEvents = sessionData.noiseSamples.filter(
+      n => n.volume > (noiseBaseline || 25) * 2.5
+    ).length;
+    
+    const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
+    sessionData.awakenings = estimatedAwakenings;
+    sessionData.timeAwake = estimatedAwakenings * 3 * 60;
+    
+    let continuityScore = 25 - (estimatedAwakenings * 2);
+    continuityScore -= Math.min(8, Math.floor(eventCount / 10));
+    continuityScore = Math.max(0, Math.min(25, continuityScore));
+    
+    // === 3. CONSISTENCY (20 pts) ===
+    const startHour = sessionData.startTime ? new Date(sessionData.startTime).getHours() : 23;
+    const baselineHour = 23;
+    const hourDiff = Math.abs(startHour - baselineHour);
+    const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
+    const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
+    
+    // === 4. RESTLESSNESS (15 pts) ===
+    const movementCount = sessionData.movementSamples.length;
+    const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
+    let restlessnessScore;
+    if (movementPerHour === 0) {
+      restlessnessScore = 12;
+    } else if (movementPerHour < 5) {
+      restlessnessScore = 15;
+    } else if (movementPerHour < 15) {
+      restlessnessScore = 12;
+    } else if (movementPerHour < 30) {
+      restlessnessScore = 8;
+    } else {
+      restlessnessScore = 4;
+    }
+    
+    // === 5. ENVIRONMENT (10 pts) ===
+    const avgNoise = sessionData.noiseSamples.length > 0
+      ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
+      : (noiseBaseline || 20);
+    const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
+    let environmentScore;
+    if (noiseRatio < 1.2) environmentScore = 10;
+    else if (noiseRatio < 1.8) environmentScore = 8;
+    else if (noiseRatio < 2.5) environmentScore = 5;
+    else environmentScore = 3;
+
+    let compDur = durationScore;
+    let compCont = continuityScore;
+    let compCons = consistencyScore;
+    let compRest = restlessnessScore;
+    let compEnv = environmentScore;
+    let totalScore;
+
+    if (isShortSession) {
+      // In quick tests (< 3m), scale components gracefully so the breakdown renders meaningful data
+      const scale = Math.min(1, Math.max(0.12, sessionSeconds / 180));
+      compDur = Math.max(1, Math.round(durationScore * scale));
+      compCont = Math.max(2, Math.round(continuityScore * scale));
+      compCons = Math.max(2, Math.round(consistencyScore * scale));
+      compRest = Math.max(1, Math.round(restlessnessScore * scale));
+      compEnv = Math.max(1, Math.round(environmentScore * scale));
+      totalScore = compDur + compCont + compCons + compRest + compEnv;
+    } else {
+      totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
+      if (hoursSlept < 1) {
+        totalScore = Math.round(totalScore * (hoursSlept / 1));
+      } else if (hoursSlept < 3) {
+        totalScore = Math.min(totalScore, 45);
+      } else if (hoursSlept < 5) {
+        totalScore = Math.min(totalScore, 70);
+      }
+    }
+    totalScore = Math.max(5, Math.min(100, Math.round(totalScore)));
+    
+    // === RENDER BREAKDOWN ALWAYS ===
+    const breakdown = [
+      { name: 'Sleep Duration', max: 30, score: compDur, color: 'var(--gold-1)' },
+      { name: 'Sleep Continuity', max: 25, score: compCont, color: 'var(--violet)' },
+      { name: 'Schedule Consistency', max: 20, score: compCons, color: 'var(--blue)' },
+      { name: 'Restlessness', max: 15, score: compRest, color: 'var(--pink)' },
+      { name: 'Environment', max: 10, score: compEnv, color: 'var(--green)' }
+    ];
+    
+    const list = document.getElementById('scoreBreakdownList');
+    if (list) {
+      list.innerHTML = '';
+      breakdown.forEach(b => {
+        const pct = b.max > 0 ? Math.min(100, Math.round((b.score / b.max) * 100)) : 0;
+        const row = document.createElement('div');
+        row.className = 'score-component';
+        row.innerHTML = `
+          <div class="score-comp-head">
+            <span>${b.name}</span>
+            <span>${b.score} / ${b.max}</span>
+          </div>
+          <div class="score-comp-bar">
+            <div class="score-comp-fill" style="width: ${Math.max(3, pct)}%; background: ${b.color};"></div>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+    
+    const sessVal = document.getElementById('sessionScoreVal');
+    if (sessVal) sessVal.textContent = totalScore + ' / 100';
+    
+    renderRealSoundEvents(hoursSlept);
+
+    // If it is a brief test session, show preview breakdown but preserve home baseline
+    if (isShortSession) {
+      showToast('Quick test (< 3 min) — Home baseline preserved');
       return;
     }
-  
-  // === 1. DURATION (30 pts) ===
-  const durationScore = Math.min(30, Math.round((hoursSlept / 8) * 30));
-  
-  // === 2. CONTINUITY (25 pts) ===
-  const eventCount = Object.values(sessionData.audioEvents)
-    .reduce((sum, e) => sum + e.count, 0);
-  const loudNoiseEvents = sessionData.noiseSamples.filter(
-    n => n.volume > (noiseBaseline || 25) * 2.5
-  ).length;
-  
-  const estimatedAwakenings = Math.min(8, Math.floor(loudNoiseEvents / 4));
-  sessionData.awakenings = estimatedAwakenings;
-  sessionData.timeAwake = estimatedAwakenings * 3 * 60;
-  
-  let continuityScore = 25 - (estimatedAwakenings * 2);
-  continuityScore -= Math.min(8, Math.floor(eventCount / 10));
-  continuityScore = Math.max(0, Math.min(25, continuityScore));
-  
-  // === 3. CONSISTENCY (20 pts) ===
-  const startHour = sessionData.startTime ? new Date(sessionData.startTime).getHours() : 23;
-  const baselineHour = 23;
-  const hourDiff = Math.abs(startHour - baselineHour);
-  const adjustedDiff = Math.min(hourDiff, 24 - hourDiff);
-  const consistencyScore = Math.max(0, Math.round(20 - adjustedDiff * 2.5));
-  
-  // === 4. RESTLESSNESS (15 pts) ===
-  const movementCount = sessionData.movementSamples.length;
-  const movementPerHour = hoursSlept > 0 ? movementCount / hoursSlept : 0;
-  let restlessnessScore;
-  if (movementPerHour === 0) {
-    restlessnessScore = 10;
-  } else if (movementPerHour < 5) {
-    restlessnessScore = 15;
-  } else if (movementPerHour < 15) {
-    restlessnessScore = 12;
-  } else if (movementPerHour < 30) {
-    restlessnessScore = 8;
-  } else {
-    restlessnessScore = 4;
-  }
-  
-  // === 5. ENVIRONMENT (10 pts) ===
-  const avgNoise = sessionData.noiseSamples.length > 0
-    ? sessionData.noiseSamples.reduce((s, n) => s + n.volume, 0) / sessionData.noiseSamples.length
-    : (noiseBaseline || 20);
-  const noiseRatio = noiseBaseline > 0 ? avgNoise / noiseBaseline : 1;
-  let environmentScore;
-  if (noiseRatio < 1.2) environmentScore = 10;
-  else if (noiseRatio < 1.8) environmentScore = 8;
-  else if (noiseRatio < 2.5) environmentScore = 5;
-  else environmentScore = 3;
-  
-  // === TOTAL with short-sleep caps ===
-  let totalScore = durationScore + continuityScore + consistencyScore + restlessnessScore + environmentScore;
-  
-  if (hoursSlept < 1) {
-    totalScore = Math.round(hoursSlept * 15);
-  } else if (hoursSlept < 3) {
-    totalScore = Math.min(totalScore, 35);
-  } else if (hoursSlept < 5) {
-    totalScore = Math.min(totalScore, 65);
-  }
-  totalScore = Math.max(0, Math.min(100, Math.round(totalScore)));
-  
-  // === RENDER BREAKDOWN ===
-  const breakdown = [
-    { name: 'Sleep Duration', max: 30, score: durationScore, color: 'var(--gold-1)' },
-    { name: 'Sleep Continuity', max: 25, score: continuityScore, color: 'var(--violet)' },
-    { name: 'Schedule Consistency', max: 20, score: consistencyScore, color: 'var(--blue)' },
-    { name: 'Restlessness', max: 15, score: restlessnessScore, color: 'var(--pink)' },
-    { name: 'Environment', max: 10, score: environmentScore, color: 'var(--green)' }
-  ];
-  
-  const list = document.getElementById('scoreBreakdownList');
-  if (list) {
-    list.innerHTML = '';
-    breakdown.forEach(b => {
-      const pct = b.max > 0 ? (b.score / b.max) * 100 : 0;
-      const row = document.createElement('div');
-      row.className = 'score-component';
-      row.innerHTML = `
-        <div class="score-comp-head">
-          <span>${b.name}</span>
-          <span>${b.score} / ${b.max}</span>
-        </div>
-        <div class="score-comp-bar">
-          <div class="score-comp-fill" style="width: 2%; background: ${b.color};"></div>
-        </div>
-      `;
-      list.appendChild(row);
-      setTimeout(() => {
-        const fill = row.querySelector('.score-comp-fill');
-        if (fill) {
-          fill.style.transition = 'width 0.9s cubic-bezier(.4,0,.2,1)';
-          fill.style.width = pct + '%';
-        }
-      }, 100);
+
+    // Persist score to home
+    state.baseScore = totalScore;
+    
+    // ---- UPDATE HOME TAB STATS ----
+    const sessionEnd = new Date();
+    const start = sessionData.startTime ? new Date(sessionData.startTime) : new Date(Date.now() - sessionSeconds * 1000);
+    const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    
+    // Calculate estimated sleep stages based on total hours
+    const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
+    const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
+    const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
+    
+    // Calculate the percentage
+    const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
+
+    // Update baseline state
+    state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
+    state.baseline.bedtime = formatTime(start);
+    state.baseline.waketime = formatTime(sessionEnd);
+    state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
+    state.baseline.remSleep = parseFloat(remHours.toFixed(1));
+    state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
+    state.baseline.deepRatio = newDeepRatio;
+    state.baseline.awakeCount = sessionData.awakenings;
+    state.baseline.awakeTime = parseFloat((sessionData.timeAwake / 3600).toFixed(1));
+    
+    const todayStr = new Date().toDateString();
+
+    // Remove any existing entry for today first (prevents duplicates)
+    state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
+
+    const liveHomeScore = computeScore(); 
+
+    state.sleepHistory.push({
+      score: liveHomeScore,
+      duration: parseFloat(state.baseline.totalSleep),
+      deepRatio: state.baseline.deepRatio,
+      bedtime: state.baseline.bedtime,
+      waketime: state.baseline.waketime,
+      date: todayStr
     });
+
+    // Keep only the last 30 nights
+    if (state.sleepHistory.length > 30) state.sleepHistory.shift();
+    
+    state.stats.bestScore = Math.max(state.stats.bestScore, liveHomeScore);
+
+    saveState(state);
+    
+    renderHomeBreakdown();
+    renderHomeDashboard();
+    renderLineChart('7d');
+    renderRecoveryTrendChart();
+    wireIconWiggles();
   }
-  
-  const sessVal = document.getElementById('sessionScoreVal');
-  if (sessVal) sessVal.textContent = totalScore + ' / 100';
-  
-  // Persist score to home
-  state.baseScore = totalScore;
-  
-  // ---- UPDATE HOME TAB STATS ----
-  const sessionEnd = new Date();
-  const start = sessionData.startTime ? new Date(sessionData.startTime) : new Date(Date.now() - sessionSeconds * 1000);
-  const formatTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  
-  // Calculate estimated sleep stages based on total hours
-  const deepHours = Math.min(hoursSlept, (hoursSlept * 0.22)); 
-  const remHours = Math.min(hoursSlept - deepHours, (hoursSlept * 0.25));
-  const lightHours = Math.max(0, hoursSlept - deepHours - remHours);
-  
-  // Calculate the percentage
-  const newDeepRatio = (hoursSlept >= 0.1) ? Math.round((deepHours / hoursSlept) * 100) : 0;
-
-  // Update baseline state
-  state.baseline.totalSleep = parseFloat(hoursSlept.toFixed(1));
-  state.baseline.bedtime = formatTime(start);
-  state.baseline.waketime = formatTime(sessionEnd);
-  state.baseline.deepSleep = parseFloat(deepHours.toFixed(1));
-  state.baseline.remSleep = parseFloat(remHours.toFixed(1));
-  state.baseline.lightSleep = parseFloat(lightHours.toFixed(1));
-  state.baseline.deepRatio = newDeepRatio;
-  state.baseline.awakeCount = sessionData.awakenings;
-  state.baseline.awakeTime = parseFloat((sessionData.timeAwake / 3600).toFixed(1));
-  
-  const todayStr = new Date().toDateString();
-
-  // Remove any existing entry for today first (prevents duplicates)
-  state.sleepHistory = state.sleepHistory.filter(h => h.date !== todayStr);
-
-  const liveHomeScore = computeScore(); 
-
-  state.sleepHistory.push({
-    score: liveHomeScore,
-    duration: parseFloat(state.baseline.totalSleep),
-    deepRatio: state.baseline.deepRatio,
-    bedtime: state.baseline.bedtime,
-    waketime: state.baseline.waketime,
-    date: todayStr
-  });
-
-  // Keep only the last 30 nights
-  if (state.sleepHistory.length > 30) state.sleepHistory.shift();
-  
-  state.stats.bestScore = Math.max(state.stats.bestScore, liveHomeScore);
-
-  saveState(state);
-  
-  renderHomeBreakdown();
-  renderHomeDashboard();
-  renderLineChart('7d');
-  renderRecoveryTrendChart();
-  wireIconWiggles();
-  
-  renderRealSoundEvents(hoursSlept);
-}
 
 function renderRealSoundEvents(hoursSlept) {
   const container = document.getElementById('soundEventsList');
@@ -6905,7 +6911,8 @@ function renderRealSoundEvents(hoursSlept) {
     if (sessionData.micDenied) {
       html.push(`<div class="timeline-tag" style="color:#ef5a6f; border-color:#ef5a6f;">🎤 Mic denied — no audio analysis</div>`);
     } else if (hoursSlept < 0.05) {
-      html.push(`<div class="timeline-tag" style="color:#9a94b8; border-color:#9a94b8;">Session too short (${Math.round(hoursSlept*60)} min)</div>`);
+      const durText = sessionSeconds < 60 ? `${sessionSeconds}s` : `${Math.round(hoursSlept * 60)} min`;
+      html.push(`<div class="timeline-tag" style="color:#f6c453; border-color:rgba(246,196,83,0.4);">⏱️ Session too short (${durText})</div>`);
     } else {
       html.push(`<div class="timeline-tag" style="color:#4fd18b; border-color:#4fd18b;">✓ Quiet night — no events detected</div>`);
     }
@@ -6913,16 +6920,19 @@ function renderRealSoundEvents(hoursSlept) {
   
   html.push(`<div style="width:100%; margin-top:8px; font-size:11px; color:var(--text-faint);">
     Session: ${formatDuration(sessionSeconds)} · Awakenings: ~${sessionData.awakenings}
-    · Mic: ${sessionData.micActive ? '✅ active' : '❌ inactive'}
+    · Mic: ${sessionData.micActive ? '🎙️ recorded' : '❌ inactive'}
   </div>`);
   
   container.innerHTML = html.join('');
 }
 
 function formatDuration(seconds) {
-  const h = Math.floor(seconds / 3600);
+  const s = seconds % 60;
   const m = Math.floor((seconds % 3600) / 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  const h = Math.floor(seconds / 3600);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
   // Wake up logic - opens the session dashboard before showing the check-in
