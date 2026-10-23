@@ -4510,22 +4510,6 @@
     <button class="customize-btn" id="customizeBtn" type="button">🎨 Customize character</button>
   </div>
 
-  <div class="card chest-card">
-    <div class="chest-wrap">
-      <div class="chest-icon" id="chestIcon">🎁</div>
-      <div class="chest-status" id="chestStatus">Ready to open!</div>
-      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
-    </div>
-    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
-    <div class="chest-odds">
-      <span class="chest-odd-chip"><b>10</b> XP</span>
-      <span class="chest-odd-chip"><b>20</b> XP</span>
-      <span class="chest-odd-chip"><b>50</b> XP</span>
-      <span class="chest-odd-chip"><b>75</b> XP</span>
-      <span class="chest-odd-chip"><b>150</b> XP</span>
-    </div>
-  </div>
-
   <div class="card" id="avatarEditor" style="display:none;">
     <div class="card-title">CUSTOMIZE YOUR CHARACTER</div>
     <div class="editor-section">
@@ -4547,6 +4531,22 @@
     <div class="editor-section">
       <div class="editor-label">ACCESSORY</div>
       <div class="chip-row" id="accessoryChips"></div>
+    </div>
+  </div>
+
+  <div class="card chest-card">
+    <div class="chest-wrap">
+      <div class="chest-icon" id="chestIcon">🎁</div>
+      <div class="chest-status" id="chestStatus">Ready to open!</div>
+      <div class="chest-sub" id="chestSub">Free XP once every 24 hours</div>
+    </div>
+    <button class="chest-btn" id="chestBtn" type="button">Open Chest</button>
+    <div class="chest-odds">
+      <span class="chest-odd-chip"><b>10</b> XP</span>
+      <span class="chest-odd-chip"><b>20</b> XP</span>
+      <span class="chest-odd-chip"><b>50</b> XP</span>
+      <span class="chest-odd-chip"><b>75</b> XP</span>
+      <span class="chest-odd-chip"><b>150</b> XP</span>
     </div>
   </div>
 
@@ -5093,14 +5093,13 @@
       remSleep: 1.5
     },
     sleepHistory: [ 
-      { 
-        score: 61, 
-        duration: 6.1, 
-        deepRatio: 22, 
-        bedtime: '11:42 PM', 
-        waketime: '5:49 AM',
-        date: new Date().toDateString()
-      }
+      { score: 68, duration: 6.8, deepRatio: 24, bedtime: '11:30 PM', waketime: '6:18 AM', date: new Date(Date.now() - 6 * 86400000).toDateString() },
+      { score: 78, duration: 7.4, deepRatio: 26, bedtime: '11:15 PM', waketime: '6:39 AM', date: new Date(Date.now() - 5 * 86400000).toDateString() },
+      { score: 58, duration: 5.9, deepRatio: 18, bedtime: '11:55 PM', waketime: '5:49 AM', date: new Date(Date.now() - 4 * 86400000).toDateString() },
+      { score: 74, duration: 7.1, deepRatio: 23, bedtime: '11:20 PM', waketime: '6:26 AM', date: new Date(Date.now() - 3 * 86400000).toDateString() },
+      { score: 82, duration: 7.6, deepRatio: 28, bedtime: '11:05 PM', waketime: '6:41 AM', date: new Date(Date.now() - 2 * 86400000).toDateString() },
+      { score: 63, duration: 6.3, deepRatio: 21, bedtime: '11:40 PM', waketime: '5:58 AM', date: new Date(Date.now() - 1 * 86400000).toDateString() },
+      { score: 61, duration: 6.1, deepRatio: 22, bedtime: '11:42 PM', waketime: '5:49 AM', date: new Date().toDateString() }
     ],
     xp: 0,
     xpAwardedForDate: new Date().toDateString(),
@@ -5108,9 +5107,9 @@
     interactionClicks: 0,
     lastChestOpenedAt: 0,
     stats: {
-      currentStreak: 1,
-      bestScore: 61,
-      nightsTracked: 1,
+      currentStreak: 5,
+      bestScore: 82,
+      nightsTracked: 7,
       lastTrackedDate: new Date().toDateString()
     },
     avatar: {
@@ -7385,12 +7384,15 @@ if (deltaEl) {
   function getRecoveryData() {
     let history = state.sleepHistory || [];
     if (history.length === 0) {
-      history = [{ score: computeRecovery(), duration: state.baseline.totalSleep, deepRatio: state.baseline.deepRatio }];
+      history = defaultState.sleepHistory;
     }
 
     const labels = [];
     const values = [];
     const today = new Date();
+    const currentRec = computeRecovery();
+    // 6-day baseline durations corresponding to the 7-day pattern
+    const pastDurations = [6.8, 7.4, 5.9, 7.1, 7.6, 6.3];
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
@@ -7402,14 +7404,20 @@ if (deltaEl) {
 
       let dayRecovery;
       if (isToday) {
-        dayRecovery = computeRecovery();
-      } else if (found) {
+        dayRecovery = currentRec;
+      } else if (found && found.duration !== undefined) {
         const dur = parseFloat(found.duration) || state.baseline.totalSleep;
-        const deep = parseFloat(found.deepRatio) || 20;
+        const deep = parseFloat(found.deepRatio) || state.baseline.deepRatio;
         const durationPct = Math.min(1, dur / 8);
         dayRecovery = Math.max(5, Math.min(100, Math.round((durationPct * 70) + (Math.min(1, deep / 25) * 15) + 15)));
       } else {
-        dayRecovery = computeRecovery();
+        // Derive dynamic past recovery variance anchored to user's current baseline stats and active factor penalties
+        const dur = pastDurations[6 - i] || 6.5;
+        const durationPct = Math.min(1, dur / 8);
+        const baseRec = Math.round((durationPct * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
+        const nominalCurrent = Math.round(((state.baseline.totalSleep / 8) * 70) + (Math.min(1, state.baseline.deepRatio / 25) * 15) + 15);
+        const factorOffset = currentRec - nominalCurrent;
+        dayRecovery = Math.max(10, Math.min(100, baseRec + Math.round(factorOffset * 0.75)));
       }
       values.push(isNaN(dayRecovery) ? 50 : dayRecovery);
     }
