@@ -5243,6 +5243,14 @@
   </div>
 </div>
 
+  <!-- NEW DEBUG CONSOLE -->
+  <div id="micDebugConsole" style="margin-top: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-family: monospace; font-size: 11px; color: #a8d44a; text-align: left; width: 260px; line-height: 1.5; display: none;">
+    <div style="display:flex; justify-content:space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; color: var(--text-faint);">MIC DEBUG</div>
+    <div>Floor: <span id="dbgFloor" style="float:right;">0</span></div>
+    <div>Vol: <span id="dbgVol" style="float:right;">0</span></div>
+    <div style="margin-top:4px;">Status: <span id="dbgStatus" style="float:right; color:var(--gold-1);">Calibrating...</span></div>
+  </div>
+
 <div class="sleep-slider-wrap" id="sleepSliderWrap">
   <div class="sleep-slider-label">Sleeping — swipe right to wake up</div>
   <div class="sleep-slider-track" id="sleepTrack">
@@ -6182,6 +6190,9 @@ async function startMicrophone() {
     document.getElementById('radarCenterIcon').textContent = '🎙️';
     document.querySelectorAll('.radar-ring').forEach(r => r.style.borderColor = 'rgba(157,124,245,0.6)');
     
+    // Show the debug console
+    document.getElementById('micDebugConsole').style.display = 'block';
+
     startAudioAnalysis();
     visualizeAudio();
     
@@ -6213,11 +6224,17 @@ function startAudioAnalysis() {
     const rms = Math.sqrt(sum / timeData.length);
     const volume = Math.min(255, rms * 255);
     
+    // Update the debug UI
+    document.getElementById('dbgVol').textContent = Math.round(volume);
+    document.getElementById('dbgFloor').textContent = Math.round(noiseBaseline);
+
     if (!isCalibrated) {
       noiseBaselineSamples.push(volume);
       if (Date.now() - calibrationStart > 10000 && noiseBaselineSamples.length > 20) {
         noiseBaseline = noiseBaselineSamples.reduce((a,b) => a+b, 0) / noiseBaselineSamples.length;
         isCalibrated = true;
+        document.getElementById('dbgStatus').textContent = 'Listening...';
+        document.getElementById('dbgStatus').style.color = 'var(--green)';
       }
       return;
     }
@@ -6233,9 +6250,20 @@ function startAudioAnalysis() {
     
     if (volume > threshold) {
       const classification = classifyAudio(dataArray, volume);
-if (classification && classification.evidence > 0.3) {
-  recordAudioEvent(classification.type, classification.evidence);
-}
+      if (classification && classification.evidence > 0.3) {
+        recordAudioEvent(classification.type, classification.evidence);
+        
+        // Show what it heard in the debug UI!
+        document.getElementById('dbgStatus').textContent = 'Heard: ' + classification.type.toUpperCase();
+        document.getElementById('dbgStatus').style.color = 'var(--pink)';
+        
+        // Reset it back to listening after 1.5 seconds
+        clearTimeout(window.debugResetTimer);
+        window.debugResetTimer = setTimeout(() => {
+          document.getElementById('dbgStatus').textContent = 'Listening...';
+          document.getElementById('dbgStatus').style.color = 'var(--green)';
+        }, 1500);
+      }
     }
   }, 200);
 }
